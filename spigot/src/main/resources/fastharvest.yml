@@ -1,0 +1,47 @@
+enabled: false
+seed:
+  minimum: 0
+  count: 3
+  fortune_factor: 1
+  chance: -1
+  chance_of: -1
+wheat:
+  minimum: 1
+  count: 0
+  fortune_factor: 1
+  chance: -1
+  chance_of: -1
+carrot:
+  minimum: 1
+  count: 3
+  fortune_factor: 1
+  chance: -1
+  chance_of: -1
+potato:
+  minimum: 1
+  count: 3
+  fortune_factor: 1
+  chance: -1
+  chance_of: -1
+beetroot_seed:
+  minimum: 1
+  count: 3
+  fortune_factor: 1
+  chance: -1
+  chance_of: -1
+beetroot:
+  minimum: 1
+  count: 0
+  fortune_factor: 1
+  chance: -1
+  chance_of: -1
+list:
+  enabled: false
+  is_whitelist: true
+  tools:
+    - AIR
+    - WOOD_HOE
+    - STONE_HOE
+    - IRON_HOE
+    - DIAMOND_HOE
+    - GOLD_HOE

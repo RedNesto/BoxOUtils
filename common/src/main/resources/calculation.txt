@@ -1,0 +1,23 @@
+WHEAT:
+ - 1 wheat is dropped each time we break an AGE 7 (maximum) OR MORE crop.
+
+SEEDS:
+
+Note: for carrots and potatoes, this is the same thing.
+
+1.8:
+ - there are 3 seeds plus one per fortune level
+ - each seed will have 7 chances out of 15 to drop
+
+1.9+:
+ - there are 3 seeds plus one per fortune level
+ - each seed will have 7 chances out of 14 to drop
+   - in reality, there are ([age of the crop]) out of ([maxAge] * 2) chances to drop, as of this version
+
+BEETROOT (1.9+):
+ - 1 beetroot is dropped each time we break an AGE 3 (maximum) OR MORE crop.
+
+BEETROOTS SEEDS (1.9+):
+ - there are 3 seeds plus one per fortune level
+ - each seed will have 3 chances out of 6 to drop
+   - this is the same as for the SEEDS in 1.9+

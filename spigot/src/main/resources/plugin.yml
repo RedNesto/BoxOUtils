@@ -1,0 +1,7 @@
+name: RedNestosBoxOUtils
+version: ${version}
+main: io.github.rednesto.bou.spigot.BoxOUtils
+authors: [RedNesto]
+website: https://rednesto.github.io/box-o-utils
+description: A collection of random features to customize your server
+softdepend: [FileInventories]

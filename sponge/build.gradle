@@ -1,0 +1,32 @@
+plugins {
+    id 'org.spongepowered.plugin' version '0.8.1'
+    id 'net.minecrell.licenser' version '0.3'
+}
+
+version = '0.1'
+archivesBaseName = 'RedNestosBoxOUtils'
+
+dependencies {
+    compile project(':common')
+    compile 'org.spongepowered:spongeapi:7.0.0'
+
+    compileOnly fileTree(dir: 'libs', include: '*.jar')
+}
+
+sponge.plugin.id = 'box-o-utils'
+
+shadowJar {
+    classifier = null
+
+    dependencies {
+        include(dependency(':common'))
+    }
+}
+
+license {
+    header = rootProject.file('LICENSE')
+
+    include '**/*.java'
+
+    newLine = false
+}

@@ -1,0 +1,46 @@
+plugins {
+    id 'net.minecrell.licenser' version '0.3'
+}
+
+version = '0.1'
+archivesBaseName = 'RedNestosBoxOUtils'
+
+repositories {
+    maven {
+        name = 'spigotmc-repo'
+        url = 'https://hub.spigotmc.org/nexus/content/groups/public/'
+    }
+    maven {
+        name = 'sonatype'
+        url = 'https://oss.sonatype.org/content/groups/public/'
+    }
+}
+
+dependencies {
+    compile project(':common')
+    compile 'org.spigotmc:spigot-api:1.12.2-R0.1-SNAPSHOT'
+
+    compileOnly fileTree(dir: 'libs', include: '*.jar')
+}
+
+processResources {
+    from(sourceSets.main.resources.srcDirs) {
+        expand 'version': project.version
+    }
+}
+
+shadowJar {
+    classifier = null
+
+    dependencies {
+        include(dependency(':common'))
+    }
+}
+
+license {
+    header = rootProject.file('LICENSE')
+
+    include '**/*.java'
+
+    newLine = false
+}

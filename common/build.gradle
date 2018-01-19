@@ -1,0 +1,11 @@
+plugins {
+    id 'net.minecrell.licenser' version '0.3'
+}
+
+license {
+    header = rootProject.file('LICENSE')
+
+    include '**/*.java'
+
+    newLine = false
+}

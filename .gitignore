@@ -1,0 +1,40 @@
+/*
+
+# Gradle Wrapper
+
+!gradle/
+
+# Spigot
+
+!common/
+common/*
+
+!common/src/
+!common/build.gradle
+
+# Spigot
+
+!spigot/
+spigot/*
+
+!spigot/src/
+!spigot/build.gradle
+
+# Sponge
+
+!sponge/
+sponge/*
+
+!sponge/src/
+!sponge/build.gradle
+
+# Root
+
+!.gitignore
+!build.gradle
+!gradle.properties
+!gradlew
+!gradlew.bat
+!LICENSE
+!README.md
+!settings.gradle
