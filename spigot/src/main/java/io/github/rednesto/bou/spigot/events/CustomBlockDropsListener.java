@@ -63,7 +63,7 @@ public class CustomBlockDropsListener implements Listener {
 
             if(loot.getExperience() > 0) {
                 Entity entity = event.getBlock().getWorld().spawnEntity(event.getBlock().getLocation(), EntityType.EXPERIENCE_ORB);
-                ((ExperienceOrb) entity).setExperience(loot.getExperience());
+                ((ExperienceOrb) entity).setExperience(event.getExpToDrop() + loot.getExperience());
             }
 
             Bukkit.getScheduler().runTaskLater(BoxOUtils.getInstance(), () -> {
@@ -72,7 +72,7 @@ public class CustomBlockDropsListener implements Listener {
                         case CLASSIC:
                             try {
                                 if(itemLoot.shouldLoot())
-                                    event.getBlock().getWorld().dropItem(event.getBlock().getLocation(), new ItemStack(Material.valueOf(itemLoot.getId())));
+                                    event.getBlock().getWorld().dropItem(event.getBlock().getLocation(), new ItemStack(Material.valueOf(itemLoot.getId()), itemLoot.getQuantityToLoot()));
                             } catch (IllegalArgumentException e) {
                                 BoxOUtils.getInstance().getLogger().warning("Material " + itemLoot.getId() + " does not exists");
                             }
@@ -89,8 +89,13 @@ public class CustomBlockDropsListener implements Listener {
                                 break;
                             }
 
+                            ItemStack itemStack = maybeItem.get();
+                            int quantityToLoot = itemLoot.getQuantityToLoot();
+                            if(quantityToLoot > itemStack.getAmount())
+                                itemStack.setAmount(quantityToLoot);
+
                             if(itemLoot.shouldLoot())
-                                event.getBlock().getWorld().dropItem(event.getBlock().getLocation(), maybeItem.get());
+                                event.getBlock().getWorld().dropItem(event.getBlock().getLocation(), itemStack);
 
                             break;
                     }

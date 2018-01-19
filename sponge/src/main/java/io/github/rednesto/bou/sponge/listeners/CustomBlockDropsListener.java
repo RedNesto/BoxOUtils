@@ -52,7 +52,6 @@ public class CustomBlockDropsListener {
             CustomLoot loot = Config.CUSTOM_BLOCKS_DROPS.get(transaction.getOriginal().getState().getType().getId());
 
             if(loot != null) {
-                // TODO vanilla-like experience spawning ?
                 if(loot.getExperience() > 0) {
                     Sponge.getServer().getWorld(transaction.getOriginal().getWorldUniqueId()).ifPresent(world -> {
                         Entity experienceOrb = world.createEntity(EntityTypes.EXPERIENCE_ORB, transaction.getOriginal().getLocation().orElse(player.getLocation()).getPosition());
@@ -68,7 +67,7 @@ public class CustomBlockDropsListener {
                                 Sponge.getServer().getWorld(transaction.getOriginal().getWorldUniqueId()).ifPresent(world -> {
                                     Sponge.getRegistry().getType(ItemType.class, itemLoot.getId()).ifPresent(itemType -> {
                                         Entity entity = world.createEntity(EntityTypes.ITEM, transaction.getOriginal().getLocation().orElse(player.getLocation()).getPosition());
-                                        entity.offer(Keys.REPRESENTED_ITEM, ItemStack.builder().itemType(itemType).build().createSnapshot());
+                                        entity.offer(Keys.REPRESENTED_ITEM, ItemStack.builder().itemType(itemType).quantity(itemLoot.getQuantityToLoot()).build().createSnapshot());
                                         world.spawnEntity(entity);
                                     });
                                 });
@@ -90,7 +89,13 @@ public class CustomBlockDropsListener {
 
                                 Sponge.getServer().getWorld(transaction.getOriginal().getWorldUniqueId()).ifPresent(world -> {
                                     Entity entity = world.createEntity(EntityTypes.ITEM, transaction.getOriginal().getLocation().orElse(player.getLocation()).getPosition());
-                                    entity.offer(Keys.REPRESENTED_ITEM, maybeItem.get().createSnapshot());
+
+                                    ItemStack itemStack = maybeItem.get();
+                                    int quantityToLoot = itemLoot.getQuantityToLoot();
+                                    if(quantityToLoot > itemStack.getQuantity())
+                                        itemStack.setQuantity(quantityToLoot);
+
+                                    entity.offer(Keys.REPRESENTED_ITEM, itemStack.createSnapshot());
                                     world.spawnEntity(entity);
                                 });
                             }

@@ -30,17 +30,28 @@ public class ItemLoot {
     private String id;
     private Type type;
     private int chance;
+    private int quantityFrom;
+    private int quantityTo;
 
     private static final Random random = new Random();
 
-    public ItemLoot(String id, Type type, int chance) {
+    public ItemLoot(String id, Type type, int chance, int quantityFrom, int quantityTo) {
         this.id = id;
         this.type = type;
         this.chance = chance;
+        this.quantityFrom = quantityFrom;
+        this.quantityTo = quantityTo;
     }
 
     public boolean shouldLoot() {
         return chance <= 0 || random.nextInt(100) <= chance;
+    }
+
+    public int getQuantityToLoot() {
+        if(quantityFrom == quantityTo)
+            return quantityTo;
+
+        return random.nextInt(quantityTo + 1 - quantityFrom) + quantityFrom;
     }
 
     public String getId() {
@@ -53,6 +64,10 @@ public class ItemLoot {
 
     public int getChance() {
         return chance;
+    }
+
+    public int getQuantityTo() {
+        return quantityTo;
     }
 
     public enum Type {

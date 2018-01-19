@@ -51,7 +51,6 @@ public class CustomMobDropsListener {
         CustomLoot loot = Config.CUSTOM_MOBS_DROPS.get(event.getTargetEntity().getType().getId());
 
         if(loot != null) {
-            // TODO vanilla-like experience spawning ?
             if(loot.getExperience() > 0) {
                 World world = event.getTargetEntity().getWorld();
                 Entity experienceOrb = world.createEntity(EntityTypes.EXPERIENCE_ORB, event.getTargetEntity().getLocation().getPosition());
@@ -65,7 +64,7 @@ public class CustomMobDropsListener {
                         if(itemLoot.shouldLoot()) {
                             Sponge.getRegistry().getType(ItemType.class, itemLoot.getId()).ifPresent(itemType -> {
                                 Entity entity = event.getTargetEntity().getWorld().createEntity(EntityTypes.ITEM, event.getTargetEntity().getLocation().getPosition());
-                                entity.offer(Keys.REPRESENTED_ITEM, ItemStack.builder().itemType(itemType).build().createSnapshot());
+                                entity.offer(Keys.REPRESENTED_ITEM, ItemStack.builder().itemType(itemType).quantity(itemLoot.getQuantityToLoot()).build().createSnapshot());
                                 event.getTargetEntity().getWorld().spawnEntity(entity);
                             });
                         }
@@ -85,7 +84,13 @@ public class CustomMobDropsListener {
 
                         if(itemLoot.shouldLoot()) {
                             Entity entity = event.getTargetEntity().getWorld().createEntity(EntityTypes.ITEM, event.getTargetEntity().getLocation().getPosition());
-                            entity.offer(Keys.REPRESENTED_ITEM, maybeItem.get().createSnapshot());
+
+                            ItemStack itemStack = maybeItem.get();
+                            int quantityToLoot = itemLoot.getQuantityToLoot();
+                            if(quantityToLoot > itemStack.getQuantity())
+                                itemStack.setQuantity(quantityToLoot);
+
+                            entity.offer(Keys.REPRESENTED_ITEM, itemStack.createSnapshot());
                             event.getTargetEntity().getWorld().spawnEntity(entity);
                         }
                         break;

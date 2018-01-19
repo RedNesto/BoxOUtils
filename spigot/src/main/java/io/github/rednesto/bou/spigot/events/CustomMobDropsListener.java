@@ -61,7 +61,7 @@ public class CustomMobDropsListener implements Listener {
                     case CLASSIC:
                         try {
                             if(itemLoot.shouldLoot())
-                                event.getDrops().add(new ItemStack(Material.valueOf(itemLoot.getId())));
+                                event.getDrops().add(new ItemStack(Material.valueOf(itemLoot.getId()), itemLoot.getQuantityToLoot()));
                         } catch (IllegalArgumentException e) {
                             BoxOUtils.getInstance().getLogger().warning("Material " + itemLoot.getId() + " does not exists");
                         }
@@ -78,7 +78,13 @@ public class CustomMobDropsListener implements Listener {
                                 BoxOUtils.getInstance().getLogger().warning("The FileItem for ID " + itemLoot.getId() + " cannot be found");
                                 break;
                             }
-                            event.getDrops().add(maybeItem.get());
+
+                            ItemStack itemStack = maybeItem.get();
+                            int quantityToLoot = itemLoot.getQuantityToLoot();
+                            if(quantityToLoot > itemStack.getAmount())
+                                itemStack.setAmount(quantityToLoot);
+
+                            event.getDrops().add(itemStack);
                         }
                         break;
                 }

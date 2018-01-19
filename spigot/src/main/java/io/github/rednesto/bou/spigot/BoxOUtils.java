@@ -138,12 +138,13 @@ public final class BoxOUtils extends JavaPlugin {
             for (String key : ((MemorySection) blocksDropsConf.get("blocks")).getKeys(false)) {
                 //noinspection unchecked
                 Config.CUSTOM_BLOCKS_DROPS.put(key, new CustomLoot(((List<Map<String, Object>>) blocksDropsConf.getList("blocks." + key + ".drops", new ArrayList<>())).stream().map(drop -> {
+                    String[] quantitySplit = ((String) drop.getOrDefault("quantity", "1-1")).split("-");
                     if (drop.containsKey("file_inv_id")) {
                         //noinspection unchecked
-                        return new ItemLoot((String) drop.get("file_inv_id"), ItemLoot.Type.FILE_INVENTORIES, drop.containsKey("chance") ? (int) drop.get("chance") : -1);
+                        return new ItemLoot((String) drop.get("file_inv_id"), ItemLoot.Type.FILE_INVENTORIES, drop.containsKey("chance") ? (int) drop.get("chance") : -1, Integer.parseInt(quantitySplit[0]), Integer.parseInt(quantitySplit[1]));
                     } else {
                         //noinspection unchecked
-                        return new ItemLoot((String) drop.get("type"), ItemLoot.Type.CLASSIC, drop.containsKey("chance") ? (int) drop.get("chance") : -1);
+                        return new ItemLoot((String) drop.get("type"), ItemLoot.Type.CLASSIC, drop.containsKey("chance") ? (int) drop.get("chance") : -1, Integer.parseInt(quantitySplit[0]), Integer.parseInt(quantitySplit[1]));
                     }
                 }).collect(Collectors.toList()), blocksDropsConf.getInt("blocks." + key + ".experience", 0), blocksDropsConf.getBoolean("blocks." + key + ".overwrite", false), blocksDropsConf.getBoolean("blocks." + key + ".exp-overwrite", false)));
             }
@@ -166,12 +167,13 @@ public final class BoxOUtils extends JavaPlugin {
             for (String key : ((MemorySection) mobsDropsConf.get("mobs")).getKeys(false)) {
                 //noinspection unchecked
                 Config.CUSTOM_MOBS_DROPS.put(key, new CustomLoot(((List<Map<String, Object>>) mobsDropsConf.getList("mobs." + key + ".drops", new ArrayList<>())).stream().map(drop -> {
+                    String[] quantitySplit = ((String) drop.getOrDefault("quantity", "1-1")).split("-");
                     if (drop.containsKey("file_inv_id")) {
                         //noinspection unchecked
-                        return new ItemLoot((String) drop.get("file_inv_id"), ItemLoot.Type.FILE_INVENTORIES, drop.containsKey("chance") ? (int) drop.get("chance") : -1);
+                        return new ItemLoot((String) drop.get("file_inv_id"), ItemLoot.Type.FILE_INVENTORIES, drop.containsKey("chance") ? (int) drop.get("chance") : -1, Integer.parseInt(quantitySplit[0]), Integer.parseInt(quantitySplit[1]));
                     } else {
                         //noinspection unchecked
-                        return new ItemLoot((String) drop.get("type"), ItemLoot.Type.CLASSIC, drop.containsKey("chance") ? (int) drop.get("chance") : -1);
+                        return new ItemLoot((String) drop.get("type"), ItemLoot.Type.CLASSIC, drop.containsKey("chance") ? (int) drop.get("chance") : -1, Integer.parseInt(quantitySplit[0]), Integer.parseInt(quantitySplit[1]));
                     }
                 }).collect(Collectors.toList()), mobsDropsConf.getInt("mobs." + key + ".experience", 0), mobsDropsConf.getBoolean("mobs." + key + ".overwrite", false), mobsDropsConf.getBoolean("mobs." + key + ".exp-overwrite", false)));
             }

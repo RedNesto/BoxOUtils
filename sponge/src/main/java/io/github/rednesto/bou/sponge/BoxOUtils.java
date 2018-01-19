@@ -211,12 +211,13 @@ public class BoxOUtils {
             } else {
                 type = ItemLoot.Type.FILE_INVENTORIES;
             }
+            String[] quantityBounds = customLoot.getNode("quantity").getString("1-1").split("-");
             switch(type) {
                 case CLASSIC:
-                    itemLoots.add(new ItemLoot(customLoot.getNode("type").getString(), type, customLoot.getNode("chance").getInt()));
+                    itemLoots.add(new ItemLoot(customLoot.getNode("type").getString(), type, customLoot.getNode("chance").getInt(), Integer.parseInt(quantityBounds[0]), Integer.parseInt(quantityBounds[1])));
                     break;
                 case FILE_INVENTORIES:
-                    itemLoots.add(new ItemLoot(customLoot.getNode("file_inv_id").getString(), type, customLoot.getNode("chance").getInt()));
+                    itemLoots.add(new ItemLoot(customLoot.getNode("file_inv_id").getString(), type, customLoot.getNode("chance").getInt(), Integer.parseInt(quantityBounds[0]), Integer.parseInt(quantityBounds[1])));
                     break;
             }
         });
@@ -229,6 +230,4 @@ public class BoxOUtils {
     public Logger getLogger() {
         return logger;
     }
-
-    // TODO experience-overwrite
 }
