@@ -210,6 +210,20 @@ public class Config {
      */
     public static Map<String, CustomLoot> CUSTOM_MOBS_DROPS = new HashMap<>();
 
+    /*
+     * BLOCK SPAWNERS
+     */
+
+    /**
+     * True if the block spawners are enabled
+     */
+    public static boolean BLOCK_SPAWNERS_ENABLED = false;
+
+    /**
+     * A Map which have for key the ID (Spigot: Material, Sponge: Minecraft Item ID) and for value the list of items to loot
+     */
+    public static Map<String, List<SpawnedMob>> BLOCK_SPAWNERS_DROPS = new HashMap<>();
+
     private Config() {}
 
     public static boolean canHarvest(String item) {

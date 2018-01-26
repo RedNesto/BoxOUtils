@@ -62,14 +62,6 @@ public class ItemLoot {
         return type;
     }
 
-    public int getChance() {
-        return chance;
-    }
-
-    public int getQuantityTo() {
-        return quantityTo;
-    }
-
     public enum Type {
 
         CLASSIC,

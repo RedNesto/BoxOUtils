@@ -24,9 +24,8 @@
 package io.github.rednesto.bou.sponge;
 
 import com.google.inject.Inject;
-import io.github.rednesto.bou.common.Config;
-import io.github.rednesto.bou.common.CustomLoot;
-import io.github.rednesto.bou.common.ItemLoot;
+import io.github.rednesto.bou.common.*;
+import io.github.rednesto.bou.sponge.listeners.BlockSpawnersListener;
 import io.github.rednesto.bou.sponge.listeners.CustomBlockDropsListener;
 import io.github.rednesto.bou.sponge.listeners.CustomMobDropsListener;
 import io.github.rednesto.bou.sponge.listeners.FastHarvestListener;
@@ -50,6 +49,7 @@ import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static io.github.rednesto.bou.common.Config.*;
 
@@ -183,6 +183,30 @@ public class BoxOUtils {
                 readDrops(child, itemLoots);
                 ConfigurationNode node = child.getValue();
                 Config.CUSTOM_MOBS_DROPS.put((String) child.getKey(), new CustomLoot(itemLoots, node.getNode("experience").getInt(), node.getNode("overwrite").getBoolean(false), node.getNode("exp-overwrite").getBoolean(false)));
+            }
+        }
+
+        File blockSpawnersConfFile = new File(this.configDir.toFile(), "blockspawners.conf");
+
+        if(!blockSpawnersConfFile.exists())
+            Files.copy(getClass().getResourceAsStream("/blockspawners.conf"), blockSpawnersConfFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+
+        ConfigurationNode blockSpawnersConf = HoconConfigurationLoader.builder().setFile(blockSpawnersConfFile).build().load();
+
+        if(blockSpawnersConf.getNode("enabled").getBoolean(false)) {
+            Config.BLOCK_SPAWNERS_ENABLED = true;
+
+            Sponge.getEventManager().registerListeners(this, new BlockSpawnersListener());
+
+            for (Map.Entry<Object, ? extends ConfigurationNode> child : blockSpawnersConf.getNode("blocks").getChildrenMap().entrySet()) {
+                ConfigurationNode node = child.getValue();
+                List<SpawnedMob> spawnedMobs = node.getNode("spawns").getChildrenList().stream()
+                        .map(spawn -> {
+                            String[] quantityBounds = spawn.getNode("quantity").getString("1-1").split("-");
+                            return new SpawnedMob(spawn.getNode("type").getString(), spawn.getNode("chance").getInt(), Integer.parseInt(quantityBounds[0]), Integer.parseInt(quantityBounds[1]));
+                        })
+                        .collect(Collectors.toList());
+                Config.BLOCK_SPAWNERS_DROPS.put((String) child.getKey(), spawnedMobs);
             }
         }
 
