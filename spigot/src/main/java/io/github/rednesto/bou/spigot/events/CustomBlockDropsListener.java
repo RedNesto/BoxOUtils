@@ -26,6 +26,7 @@ package io.github.rednesto.bou.spigot.events;
 import io.github.rednesto.bou.common.Config;
 import io.github.rednesto.bou.common.CustomLoot;
 import io.github.rednesto.bou.spigot.BoxOUtils;
+import io.github.rednesto.bou.spigot.Utils;
 import io.github.rednesto.fileinventories.api.FileInventories;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -36,6 +37,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.Optional;
 
@@ -71,8 +73,17 @@ public class CustomBlockDropsListener implements Listener {
                     switch(itemLoot.getType()) {
                         case CLASSIC:
                             try {
-                                if(itemLoot.shouldLoot())
-                                    event.getBlock().getWorld().dropItem(event.getBlock().getLocation(), new ItemStack(Material.valueOf(itemLoot.getId()), itemLoot.getQuantityToLoot()));
+                                if(!itemLoot.shouldLoot())
+                                    break;
+
+                                ItemStack itemStack = new ItemStack(Material.valueOf(itemLoot.getId()), itemLoot.getQuantityToLoot());
+                                if (itemLoot.getDisplayname() != null) {
+                                    ItemMeta itemMeta = itemStack.getItemMeta();
+                                    itemMeta.setDisplayName(Utils.applyColorCodes(itemLoot.getDisplayname()));
+                                    itemStack.setItemMeta(itemMeta);
+                                }
+
+                                event.getBlock().getWorld().dropItem(event.getBlock().getLocation(), itemStack);
                             } catch (IllegalArgumentException e) {
                                 BoxOUtils.getInstance().getLogger().warning("Material " + itemLoot.getId() + " does not exists");
                             }

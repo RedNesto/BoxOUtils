@@ -24,12 +24,15 @@
 package io.github.rednesto.bou.sponge;
 
 import com.google.inject.Inject;
-import io.github.rednesto.bou.common.*;
+import io.github.rednesto.bou.common.Config;
+import io.github.rednesto.bou.common.CustomLoot;
+import io.github.rednesto.bou.common.ItemLoot;
+import io.github.rednesto.bou.common.SpawnedMob;
+import io.github.rednesto.bou.sponge.integration.FileInventoriesIntegration;
 import io.github.rednesto.bou.sponge.listeners.BlockSpawnersListener;
 import io.github.rednesto.bou.sponge.listeners.CustomBlockDropsListener;
 import io.github.rednesto.bou.sponge.listeners.CustomMobDropsListener;
 import io.github.rednesto.bou.sponge.listeners.FastHarvestListener;
-import io.github.rednesto.fileinventories.api.FileInventoriesService;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
@@ -38,6 +41,7 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.config.ConfigDir;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.game.state.GamePreInitializationEvent;
+import org.spongepowered.api.plugin.Dependency;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.util.TypeTokens;
 
@@ -49,7 +53,10 @@ import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
+
+import javax.annotation.Nullable;
 
 import static io.github.rednesto.bou.common.Config.*;
 
@@ -60,7 +67,8 @@ import static io.github.rednesto.bou.common.Config.*;
         description = "Control what each blocks/mobs loots, right-click to harvest, and more to come!",
         authors = {
                 "RedNesto"
-        }
+        },
+        dependencies = @Dependency(id = "file-inventories", version = "[0.3.0,)", optional = true)
 )
 public class BoxOUtils {
 
@@ -71,11 +79,18 @@ public class BoxOUtils {
     @ConfigDir(sharedRoot = false)
     private Path configDir;
 
+    @Nullable
+    private FileInventoriesIntegration fileInventoriesIntegration;
+
     private static BoxOUtils instance;
 
     @Listener
     public void onPreInit(GamePreInitializationEvent event) {
         instance = this;
+        if (Sponge.getPluginManager().isLoaded("file-inventories")) {
+            fileInventoriesIntegration = new FileInventoriesIntegration();
+        }
+
         try {
             loadConf();
         } catch(IOException e) {
@@ -210,20 +225,8 @@ public class BoxOUtils {
             }
         }
 
-        if(Config.CUSTOM_BLOCKS_DROPS_ENABLED || Config.CUSTOM_MOBS_DROPS_ENABLED) {
-            Sponge.getServiceManager().provide(FileInventoriesService.class).ifPresent(service -> {
-                File fileitems = new File(this.configDir.toFile(), "fileitems");
-                if(fileitems.exists() && fileitems.isDirectory()) {
-                    for(File file : fileitems.listFiles(file -> file.isFile() && file.getName().endsWith(".json"))) {
-                        try {
-                            service.load(FileInventoriesService.LoadTarget.LOAD_ITEMS, file.toPath());
-                        } catch (IOException e) {
-                            this.logger.error("Cannot load configuration");
-                            e.printStackTrace();
-                        }
-                    }
-                }
-            });
+        if((Config.CUSTOM_BLOCKS_DROPS_ENABLED || Config.CUSTOM_MOBS_DROPS_ENABLED) && this.fileInventoriesIntegration != null) {
+            this.fileInventoriesIntegration.loadItems();
         }
     }
 
@@ -238,10 +241,10 @@ public class BoxOUtils {
             String[] quantityBounds = customLoot.getNode("quantity").getString("1-1").split("-");
             switch(type) {
                 case CLASSIC:
-                    itemLoots.add(new ItemLoot(customLoot.getNode("type").getString(), type, customLoot.getNode("chance").getInt(), Integer.parseInt(quantityBounds[0]), Integer.parseInt(quantityBounds[1])));
+                    itemLoots.add(new ItemLoot(customLoot.getNode("type").getString(), type, customLoot.getNode("displayname").getString(), customLoot.getNode("chance").getInt(), Integer.parseInt(quantityBounds[0]), Integer.parseInt(quantityBounds[1])));
                     break;
                 case FILE_INVENTORIES:
-                    itemLoots.add(new ItemLoot(customLoot.getNode("file_inv_id").getString(), type, customLoot.getNode("chance").getInt(), Integer.parseInt(quantityBounds[0]), Integer.parseInt(quantityBounds[1])));
+                    itemLoots.add(new ItemLoot(customLoot.getNode("file_inv_id").getString(), type, customLoot.getNode("displayname").getString(), customLoot.getNode("chance").getInt(), Integer.parseInt(quantityBounds[0]), Integer.parseInt(quantityBounds[1])));
                     break;
             }
         });
@@ -253,5 +256,17 @@ public class BoxOUtils {
 
     public Logger getLogger() {
         return logger;
+    }
+
+    public Path getConfigDir() {
+        return configDir;
+    }
+
+    public boolean fileInvDo(Consumer<FileInventoriesIntegration> action) {
+        if (this.fileInventoriesIntegration == null)
+            return false;
+
+        action.accept(this.fileInventoriesIntegration);
+        return true;
     }
 }

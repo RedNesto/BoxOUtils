@@ -26,7 +26,6 @@ package io.github.rednesto.bou.sponge.listeners;
 import io.github.rednesto.bou.common.Config;
 import io.github.rednesto.bou.common.CustomLoot;
 import io.github.rednesto.bou.sponge.BoxOUtils;
-import io.github.rednesto.fileinventories.api.FileInventoriesService;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.key.Keys;
@@ -41,8 +40,7 @@ import org.spongepowered.api.event.filter.cause.First;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
-
-import java.util.Optional;
+import org.spongepowered.api.text.serializer.TextSerializers;
 
 public class CustomBlockDropsListener {
 
@@ -63,42 +61,22 @@ public class CustomBlockDropsListener {
                 loot.getItemLoots().forEach(itemLoot -> {
                     switch(itemLoot.getType()) {
                         case CLASSIC:
-                            if(itemLoot.shouldLoot()) {
+                            if (itemLoot.shouldLoot()) {
                                 Sponge.getServer().getWorld(transaction.getOriginal().getWorldUniqueId()).ifPresent(world -> {
                                     Sponge.getRegistry().getType(ItemType.class, itemLoot.getId()).ifPresent(itemType -> {
                                         Entity entity = world.createEntity(EntityTypes.ITEM, transaction.getOriginal().getLocation().orElse(player.getLocation()).getPosition());
-                                        entity.offer(Keys.REPRESENTED_ITEM, ItemStack.builder().itemType(itemType).quantity(itemLoot.getQuantityToLoot()).build().createSnapshot());
+                                        ItemStack itemStack = ItemStack.of(itemType, itemLoot.getQuantityToLoot());
+                                        if (itemLoot.getDisplayname() != null)
+                                            itemStack.offer(Keys.DISPLAY_NAME, TextSerializers.FORMATTING_CODE.deserialize(itemLoot.getDisplayname()));
+
+                                        entity.offer(Keys.REPRESENTED_ITEM, itemStack.createSnapshot());
                                         world.spawnEntity(entity);
                                     });
                                 });
                             }
                             break;
                         case FILE_INVENTORIES:
-                            if(itemLoot.shouldLoot()) {
-                                Optional<FileInventoriesService> maybeService = Sponge.getServiceManager().provide(FileInventoriesService.class);
-                                if(!maybeService.isPresent()) {
-                                    BoxOUtils.getInstance().getLogger().error("The FileInventoriesService cannot be found. Has FileInventories been installed on this server?");
-                                    break;
-                                }
-
-                                Optional<ItemStack> maybeItem = maybeService.get().getItem(itemLoot.getId(), player);
-                                if(!maybeItem.isPresent()) {
-                                    BoxOUtils.getInstance().getLogger().error("The FileItem for ID " + itemLoot.getId() + " cannot be found");
-                                    break;
-                                }
-
-                                Sponge.getServer().getWorld(transaction.getOriginal().getWorldUniqueId()).ifPresent(world -> {
-                                    Entity entity = world.createEntity(EntityTypes.ITEM, transaction.getOriginal().getLocation().orElse(player.getLocation()).getPosition());
-
-                                    ItemStack itemStack = maybeItem.get();
-                                    int quantityToLoot = itemLoot.getQuantityToLoot();
-                                    if(quantityToLoot > itemStack.getQuantity())
-                                        itemStack.setQuantity(quantityToLoot);
-
-                                    entity.offer(Keys.REPRESENTED_ITEM, itemStack.createSnapshot());
-                                    world.spawnEntity(entity);
-                                });
-                            }
+                            BoxOUtils.getInstance().fileInvDo(integration -> integration.spawnBlockDrop(itemLoot, player, transaction.getOriginal()));
                             break;
                     }
                 });

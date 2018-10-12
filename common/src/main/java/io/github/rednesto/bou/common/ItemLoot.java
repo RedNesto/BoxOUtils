@@ -29,15 +29,17 @@ public class ItemLoot {
 
     private String id;
     private Type type;
+    private String displayname;
     private int chance;
     private int quantityFrom;
     private int quantityTo;
 
     private static final Random random = new Random();
 
-    public ItemLoot(String id, Type type, int chance, int quantityFrom, int quantityTo) {
+    public ItemLoot(String id, Type type, String displayname, int chance, int quantityFrom, int quantityTo) {
         this.id = id;
         this.type = type;
+        this.displayname = displayname;
         this.chance = chance;
         this.quantityFrom = quantityFrom;
         this.quantityTo = quantityTo;
@@ -60,6 +62,10 @@ public class ItemLoot {
 
     public Type getType() {
         return type;
+    }
+
+    public String getDisplayname() {
+        return displayname;
     }
 
     public enum Type {

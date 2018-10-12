@@ -3,12 +3,12 @@ plugins {
     id 'net.minecrell.licenser' version '0.3'
 }
 
-version = '0.3'
-archivesBaseName = 'RedNestosBoxOUtils'
+version = '0.4'
+archivesBaseName = 'BoxOUtils'
 
 dependencies {
     compile project(':common')
-    compile 'org.spongepowered:spongeapi:7.0.0'
+    compile 'org.spongepowered:spongeapi:7.1.0'
 
     compileOnly fileTree(dir: 'libs', include: '*.jar')
 }

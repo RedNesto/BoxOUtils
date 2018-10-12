@@ -26,6 +26,7 @@ package io.github.rednesto.bou.spigot.events;
 import io.github.rednesto.bou.common.Config;
 import io.github.rednesto.bou.common.CustomLoot;
 import io.github.rednesto.bou.spigot.BoxOUtils;
+import io.github.rednesto.bou.spigot.Utils;
 import io.github.rednesto.fileinventories.api.FileInventories;
 import org.bukkit.Material;
 import org.bukkit.entity.Entity;
@@ -35,6 +36,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.Optional;
 
@@ -60,8 +62,17 @@ public class CustomMobDropsListener implements Listener {
                 switch(itemLoot.getType()) {
                     case CLASSIC:
                         try {
-                            if(itemLoot.shouldLoot())
-                                event.getDrops().add(new ItemStack(Material.valueOf(itemLoot.getId()), itemLoot.getQuantityToLoot()));
+                            if(!itemLoot.shouldLoot())
+                                break;
+
+                            ItemStack itemStack = new ItemStack(Material.valueOf(itemLoot.getId()), itemLoot.getQuantityToLoot());
+                            if (itemLoot.getDisplayname() != null) {
+                                ItemMeta itemMeta = itemStack.getItemMeta();
+                                itemMeta.setDisplayName(Utils.applyColorCodes(itemLoot.getDisplayname()));
+                                itemStack.setItemMeta(itemMeta);
+                            }
+
+                            event.getDrops().add(itemStack);
                         } catch (IllegalArgumentException e) {
                             BoxOUtils.getInstance().getLogger().warning("Material " + itemLoot.getId() + " does not exists");
                         }

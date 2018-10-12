@@ -26,7 +26,6 @@ package io.github.rednesto.bou.sponge.listeners;
 import io.github.rednesto.bou.common.Config;
 import io.github.rednesto.bou.common.CustomLoot;
 import io.github.rednesto.bou.sponge.BoxOUtils;
-import io.github.rednesto.fileinventories.api.FileInventoriesService;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.entity.Entity;
@@ -40,9 +39,8 @@ import org.spongepowered.api.event.filter.cause.First;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.text.serializer.TextSerializers;
 import org.spongepowered.api.world.World;
-
-import java.util.Optional;
 
 public class CustomMobDropsListener {
 
@@ -64,35 +62,17 @@ public class CustomMobDropsListener {
                         if(itemLoot.shouldLoot()) {
                             Sponge.getRegistry().getType(ItemType.class, itemLoot.getId()).ifPresent(itemType -> {
                                 Entity entity = event.getTargetEntity().getWorld().createEntity(EntityTypes.ITEM, event.getTargetEntity().getLocation().getPosition());
-                                entity.offer(Keys.REPRESENTED_ITEM, ItemStack.builder().itemType(itemType).quantity(itemLoot.getQuantityToLoot()).build().createSnapshot());
+                                ItemStack itemStack = ItemStack.of(itemType, itemLoot.getQuantityToLoot());
+                                if (itemLoot.getDisplayname() != null)
+                                    itemStack.offer(Keys.DISPLAY_NAME, TextSerializers.FORMATTING_CODE.deserialize(itemLoot.getDisplayname()));
+
+                                entity.offer(Keys.REPRESENTED_ITEM, itemStack.createSnapshot());
                                 event.getTargetEntity().getWorld().spawnEntity(entity);
                             });
                         }
                         break;
                     case FILE_INVENTORIES:
-                        Optional<FileInventoriesService> maybeService = Sponge.getServiceManager().provide(FileInventoriesService.class);
-                        if(!maybeService.isPresent()) {
-                            BoxOUtils.getInstance().getLogger().warn("The FileInventoriesService cannot be found. Has FileInventories been installed on this server?");
-                            break;
-                        }
-
-                        Optional<ItemStack> maybeItem = maybeService.get().getItem(itemLoot.getId(), player);
-                        if(!maybeItem.isPresent()) {
-                            BoxOUtils.getInstance().getLogger().warn("The FileItem for ID " + itemLoot.getId() + " cannot be found");
-                            break;
-                        }
-
-                        if(itemLoot.shouldLoot()) {
-                            Entity entity = event.getTargetEntity().getWorld().createEntity(EntityTypes.ITEM, event.getTargetEntity().getLocation().getPosition());
-
-                            ItemStack itemStack = maybeItem.get();
-                            int quantityToLoot = itemLoot.getQuantityToLoot();
-                            if(quantityToLoot > itemStack.getQuantity())
-                                itemStack.setQuantity(quantityToLoot);
-
-                            entity.offer(Keys.REPRESENTED_ITEM, itemStack.createSnapshot());
-                            event.getTargetEntity().getWorld().spawnEntity(entity);
-                        }
+                        BoxOUtils.getInstance().fileInvDo(integration -> integration.spawnMobDrop(itemLoot, player, event.getTargetEntity()));
                         break;
                 }
             });
