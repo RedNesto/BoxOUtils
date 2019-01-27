@@ -25,6 +25,7 @@ package io.github.rednesto.bou.sponge.listeners;
 
 import io.github.rednesto.bou.common.Config;
 import io.github.rednesto.bou.common.CustomLoot;
+import io.github.rednesto.bou.common.MoneyLoot;
 import io.github.rednesto.bou.sponge.BoxOUtils;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.key.Keys;
@@ -33,19 +34,27 @@ import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.ExperienceOrb;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
+import org.spongepowered.api.event.cause.entity.damage.source.IndirectEntityDamageSource;
 import org.spongepowered.api.event.entity.DestructEntityEvent;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
-import org.spongepowered.api.event.filter.cause.First;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.service.economy.EconomyService;
+import org.spongepowered.api.service.economy.account.UniqueAccount;
+import org.spongepowered.api.service.economy.transaction.TransactionResult;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.text.serializer.TextSerializers;
 import org.spongepowered.api.world.World;
+
+import java.math.BigDecimal;
+import java.util.Optional;
 
 public class CustomMobDropsListener {
 
     @Listener
-    public void onMobDeath(DestructEntityEvent.Death event, @First Player player) {
+    public void onMobDeath(DestructEntityEvent.Death event) {
         CustomLoot loot = Config.CUSTOM_MOBS_DROPS.get(event.getTargetEntity().getType().getId());
 
         if(loot != null) {
@@ -54,6 +63,48 @@ public class CustomMobDropsListener {
                 Entity experienceOrb = world.createEntity(EntityTypes.EXPERIENCE_ORB, event.getTargetEntity().getLocation().getPosition());
                 experienceOrb.offer(Keys.CONTAINED_EXPERIENCE, loot.getExperience());
                 world.spawnEntity(experienceOrb);
+            }
+
+            Player player = event.getCause().first(Player.class).orElse(null);
+            if (player == null) {
+                Optional<IndirectEntityDamageSource> maybeIndirectSource = event.getCause().first(IndirectEntityDamageSource.class);
+                if (maybeIndirectSource.isPresent()) {
+                    Entity indirectSource = maybeIndirectSource.get().getIndirectSource();
+                    if (indirectSource instanceof Player) {
+                        player = (Player) indirectSource;
+                    }
+                }
+            }
+
+            Player finalPlayer = player;
+            if (finalPlayer != null && loot.getMoneyLoot() != null && loot.getMoneyLoot().shouldLoot()) {
+                MoneyLoot moneyLoot = loot.getMoneyLoot();
+                int randomQuantity = moneyLoot.getAmount().getRandomQuantity();
+                Sponge.getServiceManager().provide(EconomyService.class).ifPresent(economyService -> {
+                    Optional<UniqueAccount> maybeAccount = economyService.getOrCreateAccount(finalPlayer.getUniqueId());
+                    if (!maybeAccount.isPresent()) {
+                        return;
+                    }
+
+                    TransactionResult transactionResult = maybeAccount.get().deposit(economyService.getDefaultCurrency(), BigDecimal.valueOf(randomQuantity), event.getCause());
+                    switch (transactionResult.getResult()) {
+                        case ACCOUNT_NO_SPACE:
+                            finalPlayer
+                                    .sendMessage(Text.of(TextColors.RED, "You do not have enough space in your account to earn ", transactionResult.getAmount(), " ", transactionResult.getCurrency().getDisplayName()));
+                            break;
+                        case FAILED:
+                        case CONTEXT_MISMATCH:
+                            finalPlayer.sendMessage(Text.of(TextColors.RED, "Unable to add ", transactionResult.getAmount(), " ", transactionResult.getCurrency().getDisplayName(), " to your account"));
+                            break;
+                        case SUCCESS:
+                            if (moneyLoot.getMessage() != null) {
+                                String formattedAmount = TextSerializers.FORMATTING_CODE.serialize(transactionResult.getCurrency().format(transactionResult.getAmount()));
+                                String message = moneyLoot.getMessage().replace("{money_amount}", formattedAmount);
+                                finalPlayer.sendMessage(TextSerializers.FORMATTING_CODE.deserialize(message));
+                            }
+                            break;
+                    }
+                });
             }
 
             loot.getItemLoots().forEach(itemLoot -> {
@@ -72,7 +123,9 @@ public class CustomMobDropsListener {
                         }
                         break;
                     case FILE_INVENTORIES:
-                        BoxOUtils.getInstance().fileInvDo(integration -> integration.spawnMobDrop(itemLoot, player, event.getTargetEntity()));
+                        if (finalPlayer != null) {
+                            BoxOUtils.getInstance().fileInvDo(integration -> integration.spawnMobDrop(itemLoot, finalPlayer, event.getTargetEntity()));
+                        }
                         break;
                 }
             });

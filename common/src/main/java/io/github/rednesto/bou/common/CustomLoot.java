@@ -31,12 +31,14 @@ public class CustomLoot {
     private int experience;
     private boolean overwrite;
     private boolean expOverwrite;
+    private MoneyLoot moneyLoot;
 
-    public CustomLoot(List<ItemLoot> itemLoots, int experience, boolean overwrite, boolean expOverwrite) {
+    public CustomLoot(List<ItemLoot> itemLoots, int experience, boolean overwrite, boolean expOverwrite, MoneyLoot moneyLoot) {
         this.itemLoots = itemLoots;
         this.experience = experience;
         this.overwrite = overwrite;
         this.expOverwrite = expOverwrite;
+        this.moneyLoot = moneyLoot;
     }
 
     public List<ItemLoot> getItemLoots() {
@@ -53,5 +55,9 @@ public class CustomLoot {
 
     public boolean isExpOverwrite() {
         return expOverwrite;
+    }
+
+    public MoneyLoot getMoneyLoot() {
+        return moneyLoot;
     }
 }

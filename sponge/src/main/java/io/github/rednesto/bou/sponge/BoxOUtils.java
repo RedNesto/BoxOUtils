@@ -24,9 +24,11 @@
 package io.github.rednesto.bou.sponge;
 
 import com.google.inject.Inject;
+import io.github.rednesto.bou.common.BoundedIntQuantity;
 import io.github.rednesto.bou.common.Config;
 import io.github.rednesto.bou.common.CustomLoot;
 import io.github.rednesto.bou.common.ItemLoot;
+import io.github.rednesto.bou.common.MoneyLoot;
 import io.github.rednesto.bou.common.SpawnedMob;
 import io.github.rednesto.bou.sponge.integration.FileInventoriesIntegration;
 import io.github.rednesto.bou.sponge.listeners.BlockSpawnersListener;
@@ -177,7 +179,7 @@ public class BoxOUtils {
                 List<ItemLoot> itemLoots = new ArrayList<>();
                 readDrops(child, itemLoots);
                 ConfigurationNode node = child.getValue();
-                Config.CUSTOM_BLOCKS_DROPS.put((String) child.getKey(), new CustomLoot(itemLoots, node.getNode("experience").getInt(), node.getNode("overwrite").getBoolean(false), node.getNode("exp-overwrite").getBoolean(false)));
+                Config.CUSTOM_BLOCKS_DROPS.put((String) child.getKey(), new CustomLoot(itemLoots, node.getNode("experience").getInt(), node.getNode("overwrite").getBoolean(false), node.getNode("exp-overwrite").getBoolean(false), readMoneyLoot(node.getNode("money"))));
             }
         }
 
@@ -197,7 +199,8 @@ public class BoxOUtils {
                 List<ItemLoot> itemLoots = new ArrayList<>();
                 readDrops(child, itemLoots);
                 ConfigurationNode node = child.getValue();
-                Config.CUSTOM_MOBS_DROPS.put((String) child.getKey(), new CustomLoot(itemLoots, node.getNode("experience").getInt(), node.getNode("overwrite").getBoolean(false), node.getNode("exp-overwrite").getBoolean(false)));
+
+                Config.CUSTOM_MOBS_DROPS.put((String) child.getKey(), new CustomLoot(itemLoots, node.getNode("experience").getInt(), node.getNode("overwrite").getBoolean(false), node.getNode("exp-overwrite").getBoolean(false), readMoneyLoot(node.getNode("money"))));
             }
         }
 
@@ -248,6 +251,15 @@ public class BoxOUtils {
                     break;
             }
         });
+    }
+
+    private MoneyLoot readMoneyLoot(ConfigurationNode moneyNode) {
+        String amount = moneyNode.getNode("amount").getString();
+        if (amount == null) {
+            return null;
+        }
+
+        return new MoneyLoot(BoundedIntQuantity.parse(amount), moneyNode.getNode("chance").getInt(), moneyNode.getNode("message").getString());
     }
 
     public static BoxOUtils getInstance() {

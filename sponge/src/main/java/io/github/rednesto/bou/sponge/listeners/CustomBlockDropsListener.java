@@ -25,6 +25,7 @@ package io.github.rednesto.bou.sponge.listeners;
 
 import io.github.rednesto.bou.common.Config;
 import io.github.rednesto.bou.common.CustomLoot;
+import io.github.rednesto.bou.common.MoneyLoot;
 import io.github.rednesto.bou.sponge.BoxOUtils;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
@@ -40,7 +41,15 @@ import org.spongepowered.api.event.filter.cause.First;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.service.economy.EconomyService;
+import org.spongepowered.api.service.economy.account.UniqueAccount;
+import org.spongepowered.api.service.economy.transaction.TransactionResult;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.text.serializer.TextSerializers;
+
+import java.math.BigDecimal;
+import java.util.Optional;
 
 public class CustomBlockDropsListener {
 
@@ -55,6 +64,35 @@ public class CustomBlockDropsListener {
                         Entity experienceOrb = world.createEntity(EntityTypes.EXPERIENCE_ORB, transaction.getOriginal().getLocation().orElse(player.getLocation()).getPosition());
                         experienceOrb.offer(Keys.CONTAINED_EXPERIENCE, loot.getExperience());
                         world.spawnEntity(experienceOrb);
+                    });
+                }
+
+                if (loot.getMoneyLoot() != null && loot.getMoneyLoot().shouldLoot()) {
+                    MoneyLoot moneyLoot = loot.getMoneyLoot();
+                    int randomQuantity = moneyLoot.getAmount().getRandomQuantity();
+                    Sponge.getServiceManager().provide(EconomyService.class).ifPresent(economyService -> {
+                        Optional<UniqueAccount> maybeAccount = economyService.getOrCreateAccount(player.getUniqueId());
+                        if (!maybeAccount.isPresent()) {
+                            return;
+                        }
+
+                        TransactionResult transactionResult = maybeAccount.get().deposit(economyService.getDefaultCurrency(), BigDecimal.valueOf(randomQuantity), event.getCause());
+                        switch (transactionResult.getResult()) {
+                            case ACCOUNT_NO_SPACE:
+                                player.sendMessage(Text.of(TextColors.RED, "You do not have enough space in your account to earn ", transactionResult.getAmount(), " ", transactionResult.getCurrency().getDisplayName()));
+                                break;
+                            case FAILED:
+                            case CONTEXT_MISMATCH:
+                                player.sendMessage(Text.of(TextColors.RED, "Unable to add ", transactionResult.getAmount(), " ", transactionResult.getCurrency().getDisplayName(), " to your account"));
+                                break;
+                            case SUCCESS:
+                                if (moneyLoot.getMessage() != null) {
+                                    String formattedAmount = TextSerializers.FORMATTING_CODE.serialize(transactionResult.getCurrency().format(transactionResult.getAmount()));
+                                    String message = moneyLoot.getMessage().replace("{money_amount}", formattedAmount);
+                                    player.sendMessage(TextSerializers.FORMATTING_CODE.deserialize(message));
+                                }
+                                break;
+                        }
                     });
                 }
 
