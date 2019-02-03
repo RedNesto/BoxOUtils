@@ -66,7 +66,7 @@ import static io.github.rednesto.bou.common.Config.*;
         id = "box-o-utils",
         name = "Box O' Utils",
         url = "https://rednesto.github.io/box-o-utils",
-        description = "Control what each blocks/mobs loots, right-click to harvest, and more to come!",
+        description = "Control what blocks/mobs can loot (items, experience, money), right-click to harvest; more to come",
         authors = {
                 "RedNesto"
         },
