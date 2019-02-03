@@ -34,12 +34,15 @@ import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.ExperienceOrb;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
+import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.cause.EventContext;
 import org.spongepowered.api.event.cause.entity.damage.source.IndirectEntityDamageSource;
 import org.spongepowered.api.event.entity.DestructEntityEvent;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.service.economy.Currency;
 import org.spongepowered.api.service.economy.EconomyService;
 import org.spongepowered.api.service.economy.account.UniqueAccount;
 import org.spongepowered.api.service.economy.transaction.TransactionResult;
@@ -86,8 +89,19 @@ public class CustomMobDropsListener {
                         return;
                     }
 
-                    TransactionResult transactionResult = maybeAccount.get().deposit(economyService.getDefaultCurrency(), BigDecimal.valueOf(randomQuantity), event.getCause());
-                    switch (transactionResult.getResult()) {
+                    Currency usedCurrency;
+                    if (moneyLoot.getCurrencyId() == null) {
+                        usedCurrency = economyService.getDefaultCurrency();
+                    } else {
+                        usedCurrency = Sponge.getGame().getRegistry().getType(Currency.class, moneyLoot.getCurrencyId()).orElse(null);
+                    }
+
+                    if (usedCurrency == null) {
+                        return;
+                    }
+
+                    Cause cause = Cause.of(EventContext.empty(), BoxOUtils.getInstance());
+                    TransactionResult transactionResult = maybeAccount.get().deposit(usedCurrency, BigDecimal.valueOf(randomQuantity), cause);                    switch (transactionResult.getResult()) {
                         case ACCOUNT_NO_SPACE:
                             finalPlayer
                                     .sendMessage(Text.of(TextColors.RED, "You do not have enough space in your account to earn ", transactionResult.getAmount(), " ", transactionResult.getCurrency().getDisplayName()));

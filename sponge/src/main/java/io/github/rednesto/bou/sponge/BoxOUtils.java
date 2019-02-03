@@ -259,7 +259,7 @@ public class BoxOUtils {
             return null;
         }
 
-        return new MoneyLoot(BoundedIntQuantity.parse(amount), moneyNode.getNode("chance").getInt(), moneyNode.getNode("message").getString());
+        return new MoneyLoot(BoundedIntQuantity.parse(amount), moneyNode.getNode("currency").getString(), moneyNode.getNode("chance").getInt(), moneyNode.getNode("message").getString());
     }
 
     public static BoxOUtils getInstance() {

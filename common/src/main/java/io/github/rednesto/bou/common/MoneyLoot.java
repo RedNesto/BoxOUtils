@@ -28,13 +28,15 @@ import java.util.Random;
 public class MoneyLoot {
 
     private BoundedIntQuantity amount;
+    private String currencyId;
     private int chance;
     private String message;
 
     private static final Random RANDOM = new Random();
 
-    public MoneyLoot(BoundedIntQuantity amount, int chance, String message) {
+    public MoneyLoot(BoundedIntQuantity amount, String currencyId, int chance, String message) {
         this.amount = amount;
+        this.currencyId = currencyId;
         this.chance = chance;
         this.message = message;
     }
@@ -45,6 +47,10 @@ public class MoneyLoot {
 
     public BoundedIntQuantity getAmount() {
         return amount;
+    }
+
+    public String getCurrencyId() {
+        return currencyId;
     }
 
     public int getChance() {
