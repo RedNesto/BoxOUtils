@@ -42,6 +42,7 @@ import org.slf4j.Logger;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.config.ConfigDir;
 import org.spongepowered.api.event.Listener;
+import org.spongepowered.api.event.game.GameReloadEvent;
 import org.spongepowered.api.event.game.state.GamePreInitializationEvent;
 import org.spongepowered.api.plugin.Dependency;
 import org.spongepowered.api.plugin.Plugin;
@@ -84,6 +85,11 @@ public class BoxOUtils {
     @Nullable
     private FileInventoriesIntegration fileInventoriesIntegration;
 
+    private boolean fastHarvestListenersRegistered = false;
+    private boolean blockDropsListenersRegistered = false;
+    private boolean mobDropsListenersRegistered = false;
+    private boolean blockSpawnersListenersRegistered = false;
+
     private static BoxOUtils instance;
 
     @Listener
@@ -101,6 +107,16 @@ public class BoxOUtils {
         }
     }
 
+    @Listener
+    public void onConfigReload(GameReloadEvent event) {
+        try {
+            loadConf();
+        } catch(IOException e) {
+            this.logger.error("Cannot reload configuration");
+            e.printStackTrace();
+        }
+    }
+
     private void loadConf() throws IOException {
         Files.createDirectories(configDir);
 
@@ -112,7 +128,10 @@ public class BoxOUtils {
         ConfigurationNode fastHarvestConf = HoconConfigurationLoader.builder().setFile(fastHarvestConfFile).build().load();
 
         if(fastHarvestConf.getNode("enabled").getBoolean(false)) {
-            Sponge.getEventManager().registerListeners(this, new FastHarvestListener());
+            if (!fastHarvestListenersRegistered) {
+                Sponge.getEventManager().registerListeners(this, new FastHarvestListener());
+                fastHarvestListenersRegistered = true;
+            }
 
             SEED_DROP_MINIMUM = fastHarvestConf.getNode("seed", "minimum").getInt();
             SEED_DROP_COUNT = fastHarvestConf.getNode("seed", "count").getInt();
@@ -150,9 +169,9 @@ public class BoxOUtils {
             BEETROOT_DROP_CHANCE = fastHarvestConf.getNode("beetroot", "chance").getInt();
             BEETROOT_DROP_CHANCE_OF = fastHarvestConf.getNode("beetroot", "chance_of").getInt();
 
-            if(fastHarvestConf.getNode("list", "enabled").getBoolean(false)) {
-                HARVEST_LIST_ENABLED = true;
-
+            HARVEST_LIST_ENABLED = fastHarvestConf.getNode("list", "enabled").getBoolean(false);
+            HARVEST_TOOLS.clear();
+            if(HARVEST_LIST_ENABLED) {
                 HARVEST_LIST_IS_WHITELIST = fastHarvestConf.getNode("list", "is_whitelist").getBoolean(true);
                 try {
                     HARVEST_TOOLS = fastHarvestConf.getNode("list", "tools").getList(TypeTokens.STRING_TOKEN);
@@ -170,10 +189,13 @@ public class BoxOUtils {
 
         ConfigurationNode blocksDropsConf = HoconConfigurationLoader.builder().setFile(blocksDropsConfFile).build().load();
 
-        if(blocksDropsConf.getNode("enabled").getBoolean(false)) {
-            Config.CUSTOM_BLOCKS_DROPS_ENABLED = true;
-
-            Sponge.getEventManager().registerListeners(this, new CustomBlockDropsListener());
+        Config.CUSTOM_BLOCKS_DROPS_ENABLED = blocksDropsConf.getNode("enabled").getBoolean(false);
+        Config.CUSTOM_BLOCKS_DROPS.clear();
+        if(Config.CUSTOM_BLOCKS_DROPS_ENABLED) {
+            if (!blockDropsListenersRegistered) {
+                Sponge.getEventManager().registerListeners(this, new CustomBlockDropsListener());
+                blockDropsListenersRegistered = true;
+            }
 
             for (Map.Entry<Object, ? extends ConfigurationNode> child : blocksDropsConf.getNode("blocks").getChildrenMap().entrySet()) {
                 List<ItemLoot> itemLoots = new ArrayList<>();
@@ -190,10 +212,13 @@ public class BoxOUtils {
 
         ConfigurationNode mobsDropsConf = HoconConfigurationLoader.builder().setFile(mobsDropsConfFile).build().load();
 
-        if(mobsDropsConf.getNode("enabled").getBoolean(false)) {
-            Config.CUSTOM_MOBS_DROPS_ENABLED = true;
-
-            Sponge.getEventManager().registerListeners(this, new CustomMobDropsListener());
+        Config.CUSTOM_MOBS_DROPS_ENABLED = mobsDropsConf.getNode("enabled").getBoolean(false);
+        Config.CUSTOM_MOBS_DROPS.clear();
+        if(Config.CUSTOM_MOBS_DROPS_ENABLED) {
+            if (!mobDropsListenersRegistered) {
+                Sponge.getEventManager().registerListeners(this, new CustomMobDropsListener());
+                mobDropsListenersRegistered = true;
+            }
 
             for (Map.Entry<Object, ? extends ConfigurationNode> child : mobsDropsConf.getNode("mobs").getChildrenMap().entrySet()) {
                 List<ItemLoot> itemLoots = new ArrayList<>();
@@ -211,11 +236,14 @@ public class BoxOUtils {
 
         ConfigurationNode blockSpawnersConf = HoconConfigurationLoader.builder().setFile(blockSpawnersConfFile).build().load();
 
-        if(blockSpawnersConf.getNode("enabled").getBoolean(false)) {
-            Config.BLOCK_SPAWNERS_ENABLED = true;
+        Config.BLOCK_SPAWNERS_ENABLED = blockSpawnersConf.getNode("enabled").getBoolean(false);
+        if(Config.BLOCK_SPAWNERS_ENABLED) {
+            if (!blockSpawnersListenersRegistered) {
+                Sponge.getEventManager().registerListeners(this, new BlockSpawnersListener());
+                blockSpawnersListenersRegistered = true;
+            }
 
-            Sponge.getEventManager().registerListeners(this, new BlockSpawnersListener());
-
+            Config.BLOCK_SPAWNERS_DROPS.clear();
             for (Map.Entry<Object, ? extends ConfigurationNode> child : blockSpawnersConf.getNode("blocks").getChildrenMap().entrySet()) {
                 ConfigurationNode node = child.getValue();
                 List<SpawnedMob> spawnedMobs = node.getNode("spawns").getChildrenList().stream()
