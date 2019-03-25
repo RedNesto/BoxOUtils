@@ -30,7 +30,6 @@ import io.github.rednesto.bou.common.CustomLoot;
 import io.github.rednesto.bou.common.ItemLoot;
 import io.github.rednesto.bou.common.MoneyLoot;
 import io.github.rednesto.bou.common.SpawnedMob;
-import io.github.rednesto.bou.sponge.integration.FileInventoriesIntegration;
 import io.github.rednesto.bou.sponge.listeners.BlockSpawnersListener;
 import io.github.rednesto.bou.sponge.listeners.CustomBlockDropsListener;
 import io.github.rednesto.bou.sponge.listeners.CustomMobDropsListener;
@@ -56,10 +55,7 @@ import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
-
-import javax.annotation.Nullable;
 
 import static io.github.rednesto.bou.common.Config.*;
 
@@ -82,9 +78,6 @@ public class BoxOUtils {
     @ConfigDir(sharedRoot = false)
     private Path configDir;
 
-    @Nullable
-    private FileInventoriesIntegration fileInventoriesIntegration;
-
     private boolean fastHarvestListenersRegistered = false;
     private boolean blockDropsListenersRegistered = false;
     private boolean mobDropsListenersRegistered = false;
@@ -95,9 +88,7 @@ public class BoxOUtils {
     @Listener
     public void onPreInit(GamePreInitializationEvent event) {
         instance = this;
-        if (Sponge.getPluginManager().isLoaded("file-inventories")) {
-            fileInventoriesIntegration = new FileInventoriesIntegration();
-        }
+        IntegrationsManager.INSTANCE.loadIntegrations();
 
         try {
             loadConf();
@@ -256,28 +247,32 @@ public class BoxOUtils {
             }
         }
 
-        if((Config.CUSTOM_BLOCKS_DROPS_ENABLED || Config.CUSTOM_MOBS_DROPS_ENABLED) && this.fileInventoriesIntegration != null) {
-            this.fileInventoriesIntegration.loadItems();
-        }
+        if (Config.CUSTOM_BLOCKS_DROPS_ENABLED || Config.CUSTOM_MOBS_DROPS_ENABLED)
+            IntegrationsManager.INSTANCE.initCustomDropsProviders(this);
     }
 
     private void readDrops(Map.Entry<Object, ? extends ConfigurationNode> child, List<ItemLoot> itemLoots) {
         child.getValue().getNode("drops").getChildrenList().forEach(customLoot -> {
-            ItemLoot.Type type;
-            if(customLoot.getNode("file_inv_id").isVirtual()) {
-                type = ItemLoot.Type.CLASSIC;
+            String providerId;
+            String itemId;
+            if (customLoot.getNode("file_inv_id").isVirtual()) {
+                providerId = customLoot.getNode("provider").getString();
+                itemId = customLoot.getNode("type").getString();
             } else {
-                type = ItemLoot.Type.FILE_INVENTORIES;
+                // TODO Remove this branch in a future update. Only exists for backwards compatibility
+                providerId = "file-inv";
+                itemId = customLoot.getNode("file_inv_id").getString();
+                logger.warn("The CustomDrop for '" + child.getKey() + "' uses the 'file_inv_id' property which will be removed in a future version.");
+                logger.warn("Please replace this key with 'type' and add 'provider = \"file-inv\"' beside it.");
             }
+
+            if (itemId == null) {
+                logger.warn("The CustomDrop for '" + child.getKey() + "' does not have a 'type'. It will not be loaded.");
+                return;
+            }
+
             String[] quantityBounds = customLoot.getNode("quantity").getString("1-1").split("-");
-            switch(type) {
-                case CLASSIC:
-                    itemLoots.add(new ItemLoot(customLoot.getNode("type").getString(), type, customLoot.getNode("displayname").getString(), customLoot.getNode("chance").getInt(), Integer.parseInt(quantityBounds[0]), Integer.parseInt(quantityBounds[1])));
-                    break;
-                case FILE_INVENTORIES:
-                    itemLoots.add(new ItemLoot(customLoot.getNode("file_inv_id").getString(), type, customLoot.getNode("displayname").getString(), customLoot.getNode("chance").getInt(), Integer.parseInt(quantityBounds[0]), Integer.parseInt(quantityBounds[1])));
-                    break;
-            }
+            itemLoots.add(new ItemLoot(itemId, providerId, customLoot.getNode("displayname").getString(), customLoot.getNode("chance").getInt(), Integer.parseInt(quantityBounds[0]), Integer.parseInt(quantityBounds[1])));
         });
     }
 
@@ -300,13 +295,5 @@ public class BoxOUtils {
 
     public Path getConfigDir() {
         return configDir;
-    }
-
-    public boolean fileInvDo(Consumer<FileInventoriesIntegration> action) {
-        if (this.fileInventoriesIntegration == null)
-            return false;
-
-        action.accept(this.fileInventoriesIntegration);
-        return true;
     }
 }

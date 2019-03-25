@@ -6,11 +6,16 @@ plugins {
 version = '0.6'
 archivesBaseName = 'BoxOUtils'
 
+repositories {
+    maven {
+        url 'https://jitpack.io'
+    }
+}
+
 dependencies {
     compile project(':common')
     compile 'org.spongepowered:spongeapi:7.1.0'
-
-    compileOnly fileTree(dir: 'libs', include: '*.jar')
+    compile 'com.github.RedNesto:FileInventories:0.3.2'
 }
 
 sponge.plugin.id = 'box-o-utils'

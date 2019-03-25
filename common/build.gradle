@@ -2,6 +2,10 @@ plugins {
     id 'net.minecrell.licenser' version '0.4.1'
 }
 
+dependencies {
+    compile 'com.google.code.findbugs:jsr305:3.0.2'
+}
+
 license {
     header = rootProject.file('LICENSE')
 

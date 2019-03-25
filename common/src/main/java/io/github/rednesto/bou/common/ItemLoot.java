@@ -25,10 +25,13 @@ package io.github.rednesto.bou.common;
 
 import java.util.Random;
 
+import javax.annotation.Nullable;
+
 public class ItemLoot {
 
     private String id;
-    private Type type;
+    @Nullable
+    private String providerId;
     private String displayname;
     private int chance;
     private int quantityFrom;
@@ -36,9 +39,9 @@ public class ItemLoot {
 
     private static final Random random = new Random();
 
-    public ItemLoot(String id, Type type, String displayname, int chance, int quantityFrom, int quantityTo) {
+    public ItemLoot(String id, @Nullable String providerId, String displayname, int chance, int quantityFrom, int quantityTo) {
         this.id = id;
-        this.type = type;
+        this.providerId = providerId;
         this.displayname = displayname;
         this.chance = chance;
         this.quantityFrom = quantityFrom;
@@ -60,17 +63,12 @@ public class ItemLoot {
         return id;
     }
 
-    public Type getType() {
-        return type;
+    @Nullable
+    public String getProviderId() {
+        return providerId;
     }
 
     public String getDisplayname() {
         return displayname;
-    }
-
-    public enum Type {
-
-        CLASSIC,
-        FILE_INVENTORIES
     }
 }

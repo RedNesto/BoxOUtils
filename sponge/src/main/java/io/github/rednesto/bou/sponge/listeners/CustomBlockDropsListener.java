@@ -25,140 +25,58 @@ package io.github.rednesto.bou.sponge.listeners;
 
 import io.github.rednesto.bou.common.Config;
 import io.github.rednesto.bou.common.CustomLoot;
-import io.github.rednesto.bou.common.MoneyLoot;
-import io.github.rednesto.bou.sponge.BoxOUtils;
-import org.spongepowered.api.Sponge;
+import io.github.rednesto.bou.sponge.CustomDropsProcessor;
 import org.spongepowered.api.block.BlockSnapshot;
-import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.ExperienceOrb;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
-import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.cause.EventContext;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.event.filter.cause.First;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
-import org.spongepowered.api.item.ItemType;
-import org.spongepowered.api.item.inventory.ItemStack;
-import org.spongepowered.api.service.economy.Currency;
-import org.spongepowered.api.service.economy.EconomyService;
-import org.spongepowered.api.service.economy.account.UniqueAccount;
-import org.spongepowered.api.service.economy.transaction.TransactionResult;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
-import org.spongepowered.api.text.serializer.TextSerializers;
-
-import java.math.BigDecimal;
-import java.util.Optional;
+import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.World;
 
 public class CustomBlockDropsListener {
 
     @Listener
     public void onBlockBreak(ChangeBlockEvent.Break event, @First Player player) {
-        event.getTransactions().forEach(transaction -> {
+        for (Transaction<BlockSnapshot> transaction : event.getTransactions()) {
             CustomLoot loot = Config.CUSTOM_BLOCKS_DROPS.get(transaction.getOriginal().getState().getType().getId());
+            if (loot == null)
+                continue;
 
-            if(loot != null) {
-                if(loot.getExperience() > 0) {
-                    Sponge.getServer().getWorld(transaction.getOriginal().getWorldUniqueId()).ifPresent(world -> {
-                        Entity experienceOrb = world.createEntity(EntityTypes.EXPERIENCE_ORB, transaction.getOriginal().getLocation().orElse(player.getLocation()).getPosition());
-                        experienceOrb.offer(Keys.CONTAINED_EXPERIENCE, loot.getExperience());
-                        world.spawnEntity(experienceOrb);
-                    });
-                }
-
-                if (loot.getMoneyLoot() != null && loot.getMoneyLoot().shouldLoot()) {
-                    MoneyLoot moneyLoot = loot.getMoneyLoot();
-                    int randomQuantity = moneyLoot.getAmount().getRandomQuantity();
-                    Sponge.getServiceManager().provide(EconomyService.class).ifPresent(economyService -> {
-                        Optional<UniqueAccount> maybeAccount = economyService.getOrCreateAccount(player.getUniqueId());
-                        if (!maybeAccount.isPresent()) {
-                            return;
-                        }
-
-                        Currency usedCurrency;
-                        if (moneyLoot.getCurrencyId() == null) {
-                            usedCurrency = economyService.getDefaultCurrency();
-                        } else {
-                            usedCurrency = Sponge.getGame().getRegistry().getType(Currency.class, moneyLoot.getCurrencyId()).orElse(null);
-                        }
-
-                        if (usedCurrency == null) {
-                            return;
-                        }
-
-                        Cause cause = Cause.of(EventContext.empty(), BoxOUtils.getInstance());
-                        TransactionResult transactionResult = maybeAccount.get().deposit(usedCurrency, BigDecimal.valueOf(randomQuantity), cause);
-                        switch (transactionResult.getResult()) {
-                            case ACCOUNT_NO_SPACE:
-                                player.sendMessage(Text.of(TextColors.RED, "You do not have enough space in your account to earn ", transactionResult.getAmount(), " ", transactionResult.getCurrency().getDisplayName()));
-                                break;
-                            case FAILED:
-                            case CONTEXT_MISMATCH:
-                                player.sendMessage(Text.of(TextColors.RED, "Unable to add ", transactionResult.getAmount(), " ", transactionResult.getCurrency().getDisplayName(), " to your account"));
-                                break;
-                            case SUCCESS:
-                                if (moneyLoot.getMessage() != null) {
-                                    String formattedAmount = TextSerializers.FORMATTING_CODE.serialize(transactionResult.getCurrency().format(transactionResult.getAmount()));
-                                    String message = moneyLoot.getMessage().replace("{money_amount}", formattedAmount);
-                                    player.sendMessage(TextSerializers.FORMATTING_CODE.deserialize(message));
-                                }
-                                break;
-                        }
-                    });
-                }
-
-                loot.getItemLoots().forEach(itemLoot -> {
-                    switch(itemLoot.getType()) {
-                        case CLASSIC:
-                            if (itemLoot.shouldLoot()) {
-                                Sponge.getServer().getWorld(transaction.getOriginal().getWorldUniqueId()).ifPresent(world -> {
-                                    Sponge.getRegistry().getType(ItemType.class, itemLoot.getId()).ifPresent(itemType -> {
-                                        Entity entity = world.createEntity(EntityTypes.ITEM, transaction.getOriginal().getLocation().orElse(player.getLocation()).getPosition());
-                                        ItemStack itemStack = ItemStack.of(itemType, itemLoot.getQuantityToLoot());
-                                        if (itemLoot.getDisplayname() != null)
-                                            itemStack.offer(Keys.DISPLAY_NAME, TextSerializers.FORMATTING_CODE.deserialize(itemLoot.getDisplayname()));
-
-                                        entity.offer(Keys.REPRESENTED_ITEM, itemStack.createSnapshot());
-                                        world.spawnEntity(entity);
-                                    });
-                                });
-                            }
-                            break;
-                        case FILE_INVENTORIES:
-                            BoxOUtils.getInstance().fileInvDo(integration -> integration.spawnBlockDrop(itemLoot, player, transaction.getOriginal()));
-                            break;
-                    }
-                });
-            }
-        });
+            Location<World> targetLocation = transaction.getOriginal().getLocation().orElse(player.getLocation());
+            CustomDropsProcessor.dropLoot(loot, player, targetLocation);
+        }
     }
 
     @Listener
     public void onItemDrop(DropItemEvent.Destruct event, @First Player player) {
-        event.getCause().first(BlockSnapshot.class).ifPresent(block -> {
-            CustomLoot customLoot = Config.CUSTOM_BLOCKS_DROPS.get(block.getState().getType().getId());
-            if(customLoot != null && customLoot.isOverwrite()) {
-                event.setCancelled(true);
-            }
-        });
+        BlockSnapshot block = event.getCause().first(BlockSnapshot.class).orElse(null);
+        if (block == null)
+            return;
+
+        CustomLoot customLoot = Config.CUSTOM_BLOCKS_DROPS.get(block.getState().getType().getId());
+        if (customLoot != null && customLoot.isOverwrite())
+            event.setCancelled(true);
     }
 
     @Listener
     public void onExpOrbSpawn(SpawnEntityEvent event) {
-        event.getEntities().forEach(entity -> {
-            if(entity instanceof ExperienceOrb) {
-                event.getCause().noneOf(ExperienceOrb.class).forEach(it -> {
-                    if(it instanceof BlockSnapshot) {
-                        CustomLoot customLoot = Config.CUSTOM_BLOCKS_DROPS.get(((BlockSnapshot) it).getState().getType().getId());
-                        if (customLoot != null && customLoot.isExpOverwrite())
-                            event.setCancelled(true);
-                    }
-                });
+        for (Entity entity : event.getEntities()) {
+            if (!(entity instanceof ExperienceOrb))
+                continue;
+
+            for (Object cause : event.getCause().noneOf(ExperienceOrb.class)) {
+                if (cause instanceof BlockSnapshot) {
+                    CustomLoot customLoot = Config.CUSTOM_BLOCKS_DROPS.get(((BlockSnapshot) cause).getState().getType().getId());
+                    if (customLoot != null && customLoot.isExpOverwrite())
+                        event.setCancelled(true);
+                }
             }
-        });
+        }
     }
 }
