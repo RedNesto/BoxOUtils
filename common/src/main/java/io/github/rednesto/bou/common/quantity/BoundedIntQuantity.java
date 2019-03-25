@@ -21,53 +21,41 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.github.rednesto.bou.common;
-
-import io.github.rednesto.bou.common.quantity.IIntQuantity;
+package io.github.rednesto.bou.common.quantity;
 
 import java.util.Random;
 
-import javax.annotation.Nullable;
+public class BoundedIntQuantity implements IIntQuantity {
 
-public class ItemLoot {
+    private int from;
+    private int to;
 
-    private String id;
-    @Nullable
-    private String providerId;
-    private String displayname;
-    private int chance;
-    @Nullable
-    private IIntQuantity quantity;
+    private static final Random RANDOM = new Random();
 
-    private static final Random random = new Random();
-
-    public ItemLoot(String id, @Nullable String providerId, String displayname, int chance, @Nullable IIntQuantity quantity) {
-        this.id = id;
-        this.providerId = providerId;
-        this.displayname = displayname;
-        this.chance = chance;
-        this.quantity = quantity;
+    public BoundedIntQuantity(int from, int to) {
+        this.from = from;
+        this.to = to;
     }
 
-    public boolean shouldLoot() {
-        return chance <= 0 || random.nextInt(100) <= chance;
+    public int get() {
+        if(from == to)
+            return to;
+
+        return RANDOM.nextInt(to + 1 - from) + from;
     }
 
-    public String getId() {
-        return id;
+    public int getFrom() {
+        return from;
     }
 
-    @Nullable
-    public String getProviderId() {
-        return providerId;
+    public int getTo() {
+        return to;
     }
 
-    public String getDisplayname() {
-        return displayname;
-    }
-
-    @Nullable
-    public IIntQuantity getQuantity() {
-        return quantity;
+    public static BoundedIntQuantity parse(String toParse) {
+        String[] bounds = toParse.split("-", 2);
+        int from = Integer.parseInt(bounds[0]);
+        int to = Integer.parseInt(bounds[1]);
+        return new BoundedIntQuantity(from, to);
     }
 }

@@ -23,18 +23,20 @@
  */
 package io.github.rednesto.bou.common;
 
+import io.github.rednesto.bou.common.quantity.IIntQuantity;
+
 import java.util.Random;
 
 public class MoneyLoot {
 
-    private BoundedIntQuantity amount;
+    private IIntQuantity amount;
     private String currencyId;
     private int chance;
     private String message;
 
     private static final Random RANDOM = new Random();
 
-    public MoneyLoot(BoundedIntQuantity amount, String currencyId, int chance, String message) {
+    public MoneyLoot(IIntQuantity amount, String currencyId, int chance, String message) {
         this.amount = amount;
         this.currencyId = currencyId;
         this.chance = chance;
@@ -45,7 +47,7 @@ public class MoneyLoot {
         return chance <= 0 || RANDOM.nextInt(100) <= chance;
     }
 
-    public BoundedIntQuantity getAmount() {
+    public IIntQuantity getAmount() {
         return amount;
     }
 

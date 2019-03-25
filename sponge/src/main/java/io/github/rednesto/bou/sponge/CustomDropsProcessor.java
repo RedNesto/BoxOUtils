@@ -26,6 +26,7 @@ package io.github.rednesto.bou.sponge;
 import io.github.rednesto.bou.common.CustomLoot;
 import io.github.rednesto.bou.common.ItemLoot;
 import io.github.rednesto.bou.common.MoneyLoot;
+import io.github.rednesto.bou.common.quantity.IIntQuantity;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.entity.Entity;
@@ -53,7 +54,7 @@ public class CustomDropsProcessor {
     public static void dropLoot(CustomLoot loot, @Nullable Player targetPlayer, @Nullable Location<World> targetLocation) {
         @Nullable MoneyLoot moneyLoot = loot.getMoneyLoot();
         if (targetPlayer != null && moneyLoot != null && moneyLoot.shouldLoot()) {
-            int randomQuantity = moneyLoot.getAmount().getRandomQuantity();
+            int randomQuantity = moneyLoot.getAmount().get();
             Sponge.getServiceManager().provide(EconomyService.class).ifPresent(economyService -> {
                 UniqueAccount account = economyService.getOrCreateAccount(targetPlayer.getUniqueId()).orElse(null);
                 if (account == null)
@@ -110,7 +111,9 @@ public class CustomDropsProcessor {
             if (itemStack == null)
                 continue;
 
-            itemStack.setQuantity(itemLoot.getQuantityToLoot());
+            IIntQuantity quantity = itemLoot.getQuantity();
+            if (quantity != null)
+                itemStack.setQuantity(quantity.get());
 
             if (itemLoot.getDisplayname() != null)
                 itemStack.offer(Keys.DISPLAY_NAME, TextSerializers.FORMATTING_CODE.deserialize(itemLoot.getDisplayname()));

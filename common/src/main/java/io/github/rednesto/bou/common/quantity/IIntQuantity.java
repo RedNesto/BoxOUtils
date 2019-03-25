@@ -21,53 +21,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.github.rednesto.bou.common;
+package io.github.rednesto.bou.common.quantity;
 
-import io.github.rednesto.bou.common.quantity.IIntQuantity;
+public interface IIntQuantity {
 
-import java.util.Random;
-
-import javax.annotation.Nullable;
-
-public class ItemLoot {
-
-    private String id;
-    @Nullable
-    private String providerId;
-    private String displayname;
-    private int chance;
-    @Nullable
-    private IIntQuantity quantity;
-
-    private static final Random random = new Random();
-
-    public ItemLoot(String id, @Nullable String providerId, String displayname, int chance, @Nullable IIntQuantity quantity) {
-        this.id = id;
-        this.providerId = providerId;
-        this.displayname = displayname;
-        this.chance = chance;
-        this.quantity = quantity;
-    }
-
-    public boolean shouldLoot() {
-        return chance <= 0 || random.nextInt(100) <= chance;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    @Nullable
-    public String getProviderId() {
-        return providerId;
-    }
-
-    public String getDisplayname() {
-        return displayname;
-    }
-
-    @Nullable
-    public IIntQuantity getQuantity() {
-        return quantity;
-    }
+    int get();
 }

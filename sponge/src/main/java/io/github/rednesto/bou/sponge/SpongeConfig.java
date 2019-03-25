@@ -23,12 +23,14 @@
  */
 package io.github.rednesto.bou.sponge;
 
-import io.github.rednesto.bou.common.BoundedIntQuantity;
 import io.github.rednesto.bou.common.Config;
 import io.github.rednesto.bou.common.CustomLoot;
 import io.github.rednesto.bou.common.ItemLoot;
 import io.github.rednesto.bou.common.MoneyLoot;
 import io.github.rednesto.bou.common.SpawnedMob;
+import io.github.rednesto.bou.common.quantity.BoundedIntQuantity;
+import io.github.rednesto.bou.common.quantity.FixedIntQuantity;
+import io.github.rednesto.bou.common.quantity.IIntQuantity;
 import io.github.rednesto.bou.sponge.listeners.BlockSpawnersListener;
 import io.github.rednesto.bou.sponge.listeners.CustomBlockDropsListener;
 import io.github.rednesto.bou.sponge.listeners.CustomMobDropsListener;
@@ -47,6 +49,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import javax.annotation.Nullable;
 
 import static io.github.rednesto.bou.common.Config.*;
 
@@ -143,7 +147,7 @@ public class SpongeConfig {
                 ConfigurationNode node = child.getValue();
                 Config.CUSTOM_BLOCKS_DROPS.put((String) child.getKey(),
                         new CustomLoot(itemLoots, node.getNode("experience").getInt(), node.getNode("overwrite").getBoolean(false),
-                                node.getNode("exp-overwrite").getBoolean(false), readMoneyLoot(node.getNode("money"))));
+                                node.getNode("exp-overwrite").getBoolean(false), readMoneyLoot(plugin, node.getNode("money"))));
             }
         }
 
@@ -168,7 +172,7 @@ public class SpongeConfig {
                 ConfigurationNode node = child.getValue();
 
                 Config.CUSTOM_MOBS_DROPS.put((String) child.getKey(), new CustomLoot(itemLoots, node.getNode("experience").getInt(),
-                        node.getNode("overwrite").getBoolean(false), node.getNode("exp-overwrite").getBoolean(false), readMoneyLoot(node.getNode("money"))));
+                        node.getNode("overwrite").getBoolean(false), node.getNode("exp-overwrite").getBoolean(false), readMoneyLoot(plugin, node.getNode("money"))));
             }
         }
 
@@ -219,22 +223,143 @@ public class SpongeConfig {
             }
 
             if (itemId == null) {
-                plugin.getLogger().warn("The CustomDrop for '" + child.getKey() + "' does not have a 'type'. It will not be loaded.");
+                plugin.getLogger().error("The CustomDrop for '" + child.getKey() + "' does not have a 'type'. It will not be loaded.");
                 return;
             }
 
-            String[] quantityBounds = customLoot.getNode("quantity").getString("1-1").split("-");
-            itemLoots.add(new ItemLoot(itemId, providerId, customLoot.getNode("displayname").getString(), customLoot.getNode("chance").getInt(), Integer.parseInt(quantityBounds[0]),
-                    Integer.parseInt(quantityBounds[1])));
+            IIntQuantity quantity = null;
+            ConfigurationNode quantityNode = customLoot.getNode("quantity");
+            if (!quantityNode.isVirtual())
+                quantity = readQuantity(plugin, quantityNode, CustomDropFixedQuantityErrorReporter.INSTANCE, CustomDropBoundedQuantityErrorReporter.INSTANCE);
+
+            if (quantity instanceof BoundedIntQuantity) {
+                BoundedIntQuantity boundedQuantity = (BoundedIntQuantity) quantity;
+                if (boundedQuantity.getFrom() < 0) {
+                    plugin.getLogger().error("The quantity lower bound ({}) of CustomDrop '{}' for '{}' is negative. This drop will not be loaded.",
+                            boundedQuantity.getFrom(), itemId, child.getKey());
+                    return;
+                }
+
+                if (boundedQuantity.getTo() < boundedQuantity.getFrom()) {
+                    plugin.getLogger().error("The quantity upper bound ({}) of CustomDrop '{}' for '{}' is less than its lower bound ({}). This drop will not be loaded.",
+                            boundedQuantity.getTo(), itemId, child.getKey(), boundedQuantity.getFrom());
+                    return;
+                }
+            }
+
+            itemLoots.add(new ItemLoot(itemId, providerId, customLoot.getNode("displayname").getString(), customLoot.getNode("chance").getInt(), quantity));
         });
     }
 
-    public static MoneyLoot readMoneyLoot(ConfigurationNode moneyNode) {
-        String amount = moneyNode.getNode("amount").getString();
-        if (amount == null) {
+    @Nullable
+    public static MoneyLoot readMoneyLoot(BoxOUtils plugin, ConfigurationNode moneyNode) {
+        if (moneyNode.isVirtual())
+            return null;
+
+        ConfigurationNode amountNode = moneyNode.getNode("amount");
+        if (amountNode.isVirtual()) {
+            plugin.getLogger().error("No money amount set for '{}'. No money will be given for this CustomDrop.", moneyNode.getPath()[1]);
             return null;
         }
 
-        return new MoneyLoot(BoundedIntQuantity.parse(amount), moneyNode.getNode("currency").getString(), moneyNode.getNode("chance").getInt(), moneyNode.getNode("message").getString());
+        IIntQuantity quantity = readQuantity(plugin, amountNode, MoneyFixedQuantityErrorReporter.INSTANCE, MoneyBoundedQuantityErrorReporter.INSTANCE);
+        if (quantity == null)
+            return null;
+
+        if (quantity instanceof BoundedIntQuantity) {
+            BoundedIntQuantity boundedQuantity = (BoundedIntQuantity) quantity;
+            if (boundedQuantity.getFrom() < 0) {
+                plugin.getLogger().error("The money amount lower bound ({}) for '{}' is negative. This drop will not be loaded.",
+                        boundedQuantity.getFrom(), moneyNode.getPath()[1]);
+                return null;
+            }
+
+            if (boundedQuantity.getTo() < boundedQuantity.getFrom()) {
+                plugin.getLogger().error("The quantity upper bound ({}) for '{}' is less than its lower bound ({}). This drop will not be loaded.",
+                        boundedQuantity.getTo(), moneyNode.getPath()[1], boundedQuantity.getFrom());
+                return null;
+            }
+        }
+
+        return new MoneyLoot(quantity, moneyNode.getNode("currency").getString(), moneyNode.getNode("chance").getInt(), moneyNode.getNode("message").getString());
+    }
+
+    @Nullable
+    private static IIntQuantity readQuantity(BoxOUtils plugin, ConfigurationNode amountNode,
+            @Nullable ErrorReporter fixedQuantityErrorReporter, @Nullable ErrorReporter boundedQuantityErrorReporter) {
+        int amount = amountNode.getInt();
+        // 0 means the value cannot be read as int, so we assume it is a bounded quantity
+        if (amount == 0) {
+            String bounds = amountNode.getString();
+            if (bounds == null) {
+                if (boundedQuantityErrorReporter != null)
+                    boundedQuantityErrorReporter.report(plugin, amountNode);
+
+                return null;
+            }
+
+            try {
+                return BoundedIntQuantity.parse(bounds);
+            } catch (NumberFormatException e) {
+                if (boundedQuantityErrorReporter != null)
+                    boundedQuantityErrorReporter.report(plugin, amountNode);
+
+                return null;
+            }
+        } else {
+            if (amount < 0) {
+                if (fixedQuantityErrorReporter != null)
+                    fixedQuantityErrorReporter.report(plugin, amountNode);
+
+                return null;
+            }
+
+            return new FixedIntQuantity(amount);
+        }
+    }
+
+    private interface ErrorReporter {
+
+        void report(BoxOUtils plugin, ConfigurationNode node);
+    }
+
+    private static class CustomDropFixedQuantityErrorReporter implements ErrorReporter {
+
+        public static final ErrorReporter INSTANCE = new CustomDropFixedQuantityErrorReporter();
+
+        @Override
+        public void report(BoxOUtils plugin, ConfigurationNode configurationNode) {
+            plugin.getLogger().error("Invalid CustomDrop fixed quantity for '{}'. This drop will not be loaded.", configurationNode.getPath()[1]);
+        }
+    }
+
+    private static class CustomDropBoundedQuantityErrorReporter implements ErrorReporter {
+
+        public static final ErrorReporter INSTANCE = new CustomDropBoundedQuantityErrorReporter();
+
+        @Override
+        public void report(BoxOUtils plugin, ConfigurationNode configurationNode) {
+            plugin.getLogger().error("Invalid CustomDrop bounded quantity for '{}'. This drop will not be loaded.", configurationNode.getPath()[1]);
+        }
+    }
+
+    private static class MoneyFixedQuantityErrorReporter implements ErrorReporter {
+
+        public static final ErrorReporter INSTANCE = new MoneyFixedQuantityErrorReporter();
+
+        @Override
+        public void report(BoxOUtils plugin, ConfigurationNode configurationNode) {
+            plugin.getLogger().error("Invalid money amount for '{}'. No money will be given for this CustomDrop.", configurationNode.getPath()[1]);
+        }
+    }
+
+    private static class MoneyBoundedQuantityErrorReporter implements ErrorReporter {
+
+        public static final ErrorReporter INSTANCE = new MoneyBoundedQuantityErrorReporter();
+
+        @Override
+        public void report(BoxOUtils plugin, ConfigurationNode configurationNode) {
+            plugin.getLogger().error("Invalid bounded money amount for '{}'. No money will be given for this CustomDrop.", configurationNode.getPath()[1]);
+        }
     }
 }
