@@ -1,4 +1,4 @@
 rootProject.name = 'BoxOUtils'
 
-include 'common', 'spigot', 'sponge'
+include 'common', /*'spigot',*/ 'sponge'
 
