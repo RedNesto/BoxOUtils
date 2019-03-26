@@ -40,10 +40,11 @@ import java.nio.file.Path;
         name = "Box O' Utils",
         url = "https://rednesto.github.io/box-o-utils",
         description = "Control what blocks/mobs can loot (items, experience, money), right-click to harvest; more to come",
-        authors = {
-                "RedNesto"
-        },
-        dependencies = @Dependency(id = "file-inventories", version = "[0.3.0,)", optional = true)
+        authors = {"RedNesto"},
+        dependencies = {
+                @Dependency(id = "file-inventories", version = "[0.3.0,)", optional = true),
+                @Dependency(id = "byte-items", version = "[2.3,)", optional = true)
+        }
 )
 public class BoxOUtils {
 
@@ -63,7 +64,7 @@ public class BoxOUtils {
 
         try {
             SpongeConfig.loadConf(this);
-        } catch(IOException e) {
+        } catch (IOException e) {
             this.logger.error("Cannot load configuration");
             e.printStackTrace();
         }
@@ -73,7 +74,7 @@ public class BoxOUtils {
     public void onConfigReload(GameReloadEvent event) {
         try {
             SpongeConfig.loadConf(this);
-        } catch(IOException e) {
+        } catch (IOException e) {
             this.logger.error("Cannot reload configuration");
             e.printStackTrace();
         }

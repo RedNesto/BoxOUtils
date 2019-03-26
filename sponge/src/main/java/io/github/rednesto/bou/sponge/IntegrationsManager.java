@@ -23,6 +23,7 @@
  */
 package io.github.rednesto.bou.sponge;
 
+import io.github.rednesto.bou.sponge.integration.ByteItemsCustomDropsProvider;
 import io.github.rednesto.bou.sponge.integration.FileInventoriesCustomDropsProvider;
 import io.github.rednesto.bou.sponge.integration.vanilla.VanillaCustomDropsProvider;
 import org.spongepowered.api.Sponge;
@@ -70,6 +71,10 @@ public final class IntegrationsManager {
     void loadIntegrations() {
         if (Sponge.getPluginManager().isLoaded("file-inventories")) {
             customDropsProviders.put("file-inv", new FileInventoriesCustomDropsProvider());
+        }
+
+        if (Sponge.getPluginManager().isLoaded("byte-items")) {
+            customDropsProviders.put("byte-items", new ByteItemsCustomDropsProvider());
         }
     }
 }

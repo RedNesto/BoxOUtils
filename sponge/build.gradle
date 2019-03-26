@@ -14,8 +14,9 @@ repositories {
 
 dependencies {
     compile project(':common')
-    compile 'org.spongepowered:spongeapi:7.1.0'
-    compile 'com.github.RedNesto:FileInventories:0.3.2'
+    compileOnly 'org.spongepowered:spongeapi:7.1.0'
+    compileOnly 'com.github.RedNesto:FileInventories:0.3.2'
+    compileOnly 'com.github.randombyte-developer:byte-items:v2.3'
 }
 
 sponge.plugin.id = 'box-o-utils'
