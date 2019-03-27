@@ -49,7 +49,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
@@ -191,12 +190,36 @@ public class SpongeConfig {
 
             for (Map.Entry<Object, ? extends ConfigurationNode> child : rootNode.getNode("blocks").getChildrenMap().entrySet()) {
                 ConfigurationNode node = child.getValue();
-                List<SpawnedMob> spawnedMobs = node.getNode("spawns").getChildrenList().stream()
-                        .map(spawn -> {
-                            String[] quantityBounds = spawn.getNode("quantity").getString("1-1").split("-");
-                            return new SpawnedMob(spawn.getNode("type").getString(), spawn.getNode("chance").getInt(), Integer.parseInt(quantityBounds[0]), Integer.parseInt(quantityBounds[1]));
-                        })
-                        .collect(Collectors.toList());
+                List<SpawnedMob> spawnedMobs = new ArrayList<>();
+                node.getNode("spawns").getChildrenList().forEach(spawn -> {
+                    String mobType = spawn.getNode("type").getString();
+                    if (mobType == null) {
+                        plugin.getLogger().error("A BlockSpawner spawn for '{}' has no 'type'", child.getKey());
+                        return;
+                    }
+
+                    IIntQuantity quantity = null;
+                    ConfigurationNode quantityNode = spawn.getNode("quantity");
+                    if (!quantityNode.isVirtual())
+                        quantity = readQuantity(plugin, quantityNode, BlockSpawnerFixedQuantityErrorReporter.INSTANCE, BlockSpawnerBoundedQuantityErrorReporter.INSTANCE);
+
+                    if (quantity instanceof BoundedIntQuantity) {
+                        BoundedIntQuantity boundedQuantity = (BoundedIntQuantity) quantity;
+                        if (boundedQuantity.getFrom() < 0) {
+                            plugin.getLogger().error("The quantity lower bound ({}) of BlockSpawner '{}' for mob '{}' is negative. This spawn will not be loaded.",
+                                    boundedQuantity.getFrom(), mobType, child.getKey());
+                            return;
+                        }
+
+                        if (boundedQuantity.getTo() < boundedQuantity.getFrom()) {
+                            plugin.getLogger().error("The quantity upper bound ({}) of BlockSpawner '{}' for mob '{}' is less than its lower bound ({}). This spawn will not be loaded.",
+                                    boundedQuantity.getTo(), mobType, child.getKey(), boundedQuantity.getFrom());
+                            return;
+                        }
+                    }
+
+                    spawnedMobs.add(new SpawnedMob(mobType, spawn.getNode("chance").getInt(), quantity));
+                });
                 Config.BLOCK_SPAWNERS_DROPS.put((String) child.getKey(), spawnedMobs);
             }
         }
@@ -369,6 +392,30 @@ public class SpongeConfig {
         @Override
         public void report(BoxOUtils plugin, ConfigurationNode configurationNode) {
             plugin.getLogger().error("Invalid bounded money amount for '{}'. No money will be given for this CustomDrop.", configurationNode.getPath()[1]);
+        }
+    }
+
+    private static class BlockSpawnerFixedQuantityErrorReporter implements ErrorReporter {
+
+        public static final ErrorReporter INSTANCE = new BlockSpawnerFixedQuantityErrorReporter();
+
+        @Override
+        public void report(BoxOUtils plugin, ConfigurationNode configurationNode) {
+            ConfigurationNode parent = configurationNode.getParent();
+            String mobType = parent != null ? parent.getNode("type").getString("unknown") : "unknown";
+            plugin.getLogger().error("Invalid BlockSpawner fixed quantity of mob '{}' for '{}'. This spawner will not be loaded.", mobType, configurationNode.getPath()[1]);
+        }
+    }
+
+    private static class BlockSpawnerBoundedQuantityErrorReporter implements ErrorReporter {
+
+        public static final ErrorReporter INSTANCE = new BlockSpawnerBoundedQuantityErrorReporter();
+
+        @Override
+        public void report(BoxOUtils plugin, ConfigurationNode configurationNode) {
+            ConfigurationNode parent = configurationNode.getParent();
+            String mobType = parent != null ? parent.getNode("type").getString("unknown") : "unknown";
+            plugin.getLogger().error("Invalid BlockSpawner bounded quantity of mob '{}' for '{}'. This spawner will not be loaded.", mobType, configurationNode.getPath()[1]);
         }
     }
 }
