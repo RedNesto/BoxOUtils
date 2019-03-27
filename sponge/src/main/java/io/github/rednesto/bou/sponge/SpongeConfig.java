@@ -39,15 +39,16 @@ import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.asset.Asset;
 import org.spongepowered.api.util.TypeTokens;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
@@ -64,12 +65,17 @@ public class SpongeConfig {
     public static void loadConf(BoxOUtils plugin) throws IOException {
         Files.createDirectories(plugin.getConfigDir());
 
-        File fastHarvestConfFile = new File(plugin.getConfigDir().toFile(), "fastharvest.conf");
+        Path fastHarvestConfFile = plugin .getConfigDir().resolve("fastharvest.conf");
+        if (Files.notExists(fastHarvestConfFile)) {
+            Optional<Asset> maybeConfFile = Sponge.getAssetManager().getAsset(plugin, "config/fastharvest.conf");
+            if (maybeConfFile.isPresent()) {
+                maybeConfFile.get().copyToFile(fastHarvestConfFile);
+            } else {
+                plugin.getLogger().error("Cannot get default FastHarvest configuration file.");
+            }
+        }
 
-        if (!fastHarvestConfFile.exists())
-            Files.copy(plugin.getClass().getResourceAsStream("/fastharvest.conf"), fastHarvestConfFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-
-        ConfigurationNode fastHarvestConf = HoconConfigurationLoader.builder().setFile(fastHarvestConfFile).build().load();
+        ConfigurationNode fastHarvestConf = HoconConfigurationLoader.builder().setPath(fastHarvestConfFile).build().load();
 
         FAST_HARVEST_ENABLED = fastHarvestConf.getNode("enabled").getBoolean(false);
         if (FAST_HARVEST_ENABLED) {
@@ -127,12 +133,18 @@ public class SpongeConfig {
             }
         }
 
-        File blocksDropsConfFile = new File(plugin.getConfigDir().toFile(), "blocksdrops.conf");
+        Path blocksDropsConfFile = plugin.getConfigDir().resolve("blocksdrops.conf");
 
-        if (!blocksDropsConfFile.exists())
-            Files.copy(plugin.getClass().getResourceAsStream("/blocksdrops.conf"), blocksDropsConfFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+        if (Files.notExists(blocksDropsConfFile)) {
+            Optional<Asset> maybeConfFile = Sponge.getAssetManager().getAsset(plugin, "config/blocksdrops.conf");
+            if (maybeConfFile.isPresent()) {
+                maybeConfFile.get().copyToFile(blocksDropsConfFile);
+            } else {
+                plugin.getLogger().error("Cannot get default BlockDrops configuration file.");
+            }
+        }
 
-        ConfigurationNode blocksDropsConf = HoconConfigurationLoader.builder().setFile(blocksDropsConfFile).build().load();
+        ConfigurationNode blocksDropsConf = HoconConfigurationLoader.builder().setPath(blocksDropsConfFile).build().load();
 
         Config.CUSTOM_BLOCKS_DROPS_ENABLED = blocksDropsConf.getNode("enabled").getBoolean(false);
         Config.CUSTOM_BLOCKS_DROPS.clear();
@@ -152,12 +164,18 @@ public class SpongeConfig {
             }
         }
 
-        File mobsDropsConfFile = new File(plugin.getConfigDir().toFile(), "mobsdrops.conf");
+        Path mobsDropsConfFile = plugin.getConfigDir().resolve("mobsdrops.conf");
 
-        if (!mobsDropsConfFile.exists())
-            Files.copy(plugin.getClass().getResourceAsStream("/mobsdrops.conf"), mobsDropsConfFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+        if (Files.notExists(mobsDropsConfFile)) {
+            Optional<Asset> maybeConfFile = Sponge.getAssetManager().getAsset(plugin, "config/mobsdrops.conf");
+            if (maybeConfFile.isPresent()) {
+                maybeConfFile.get().copyToFile(mobsDropsConfFile);
+            } else {
+                plugin.getLogger().error("Cannot get default MobsDrops configuration file.");
+            }
+        }
 
-        ConfigurationNode mobsDropsConf = HoconConfigurationLoader.builder().setFile(mobsDropsConfFile).build().load();
+        ConfigurationNode mobsDropsConf = HoconConfigurationLoader.builder().setPath(mobsDropsConfFile).build().load();
 
         Config.CUSTOM_MOBS_DROPS_ENABLED = mobsDropsConf.getNode("enabled").getBoolean(false);
         Config.CUSTOM_MOBS_DROPS.clear();
@@ -177,12 +195,18 @@ public class SpongeConfig {
             }
         }
 
-        File blockSpawnersConfFile = new File(plugin.getConfigDir().toFile(), "blockspawners.conf");
+        Path blockSpawnersConfFile = plugin.getConfigDir().resolve("blockspawners.conf");
 
-        if (!blockSpawnersConfFile.exists())
-            Files.copy(plugin.getClass().getResourceAsStream("/blockspawners.conf"), blockSpawnersConfFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+        if (Files.notExists(blockSpawnersConfFile)) {
+            Optional<Asset> maybeConfFile = Sponge.getAssetManager().getAsset(plugin, "config/blockspawners.conf");
+            if (maybeConfFile.isPresent()) {
+                maybeConfFile.get().copyToFile(blockSpawnersConfFile);
+            } else {
+                plugin.getLogger().error("Cannot get default BlockSpawners configuration file.");
+            }
+        }
 
-        ConfigurationNode blockSpawnersConf = HoconConfigurationLoader.builder().setFile(blockSpawnersConfFile).build().load();
+        ConfigurationNode blockSpawnersConf = HoconConfigurationLoader.builder().setPath(blockSpawnersConfFile).build().load();
 
         Config.BLOCK_SPAWNERS_ENABLED = blockSpawnersConf.getNode("enabled").getBoolean(false);
         Config.BLOCK_SPAWNERS_DROPS.clear();
