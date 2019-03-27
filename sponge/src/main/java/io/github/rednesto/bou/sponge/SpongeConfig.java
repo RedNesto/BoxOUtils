@@ -65,88 +65,100 @@ public class SpongeConfig {
     public static void loadConf(BoxOUtils plugin) throws IOException {
         Files.createDirectories(plugin.getConfigDir());
 
-        Path fastHarvestConfFile = plugin .getConfigDir().resolve("fastharvest.conf");
-        if (Files.notExists(fastHarvestConfFile)) {
-            Optional<Asset> maybeConfFile = Sponge.getAssetManager().getAsset(plugin, "config/fastharvest.conf");
-            if (maybeConfFile.isPresent()) {
-                maybeConfFile.get().copyToFile(fastHarvestConfFile);
+        loadFastHarvest(plugin);
+        loadBlocksDrops(plugin);
+        loadMobsDrops(plugin);
+        loadBlockSpawners(plugin);
+
+        if (Config.CUSTOM_BLOCKS_DROPS_ENABLED || Config.CUSTOM_MOBS_DROPS_ENABLED)
+            IntegrationsManager.INSTANCE.initCustomDropsProviders(plugin);
+    }
+
+    private static void loadFastHarvest(BoxOUtils plugin) throws IOException {
+        Path confFile = plugin .getConfigDir().resolve("fastharvest.conf");
+        if (Files.notExists(confFile)) {
+            Optional<Asset> maybeDefaultConf = Sponge.getAssetManager().getAsset(plugin, "config/fastharvest.conf");
+            if (maybeDefaultConf.isPresent()) {
+                maybeDefaultConf.get().copyToFile(confFile);
             } else {
                 plugin.getLogger().error("Cannot get default FastHarvest configuration file.");
             }
         }
 
-        ConfigurationNode fastHarvestConf = HoconConfigurationLoader.builder().setPath(fastHarvestConfFile).build().load();
+        ConfigurationNode rootNode = HoconConfigurationLoader.builder().setPath(confFile).build().load();
 
-        FAST_HARVEST_ENABLED = fastHarvestConf.getNode("enabled").getBoolean(false);
+        FAST_HARVEST_ENABLED = rootNode.getNode("enabled").getBoolean(false);
         if (FAST_HARVEST_ENABLED) {
             if (!fastHarvestListenersRegistered) {
                 Sponge.getEventManager().registerListeners(plugin, new FastHarvestListener());
                 fastHarvestListenersRegistered = true;
             }
 
-            SEED_DROP_MINIMUM = fastHarvestConf.getNode("seed", "minimum").getInt();
-            SEED_DROP_COUNT = fastHarvestConf.getNode("seed", "count").getInt();
-            SEED_DROP_FORTUNE_FACTOR = fastHarvestConf.getNode("seed", "fortune_factor").getInt();
-            SEED_DROP_CHANCE = fastHarvestConf.getNode("seed", "chance").getInt();
-            SEED_DROP_CHANCE_OF = fastHarvestConf.getNode("seed", "chance_of").getInt();
+            SEED_DROP_MINIMUM = rootNode.getNode("seed", "minimum").getInt();
+            SEED_DROP_COUNT = rootNode.getNode("seed", "count").getInt();
+            SEED_DROP_FORTUNE_FACTOR = rootNode.getNode("seed", "fortune_factor").getInt();
+            SEED_DROP_CHANCE = rootNode.getNode("seed", "chance").getInt();
+            SEED_DROP_CHANCE_OF = rootNode.getNode("seed", "chance_of").getInt();
 
-            WHEAT_DROP_MINIMUM = fastHarvestConf.getNode("wheat", "minimum").getInt();
-            WHEAT_DROP_COUNT = fastHarvestConf.getNode("wheat", "count").getInt();
-            WHEAT_DROP_FORTUNE_FACTOR = fastHarvestConf.getNode("wheat", "fortune_factor").getInt();
-            WHEAT_DROP_CHANCE = fastHarvestConf.getNode("wheat", "chance").getInt();
-            WHEAT_DROP_CHANCE_OF = fastHarvestConf.getNode("wheat", "chance_of").getInt();
+            WHEAT_DROP_MINIMUM = rootNode.getNode("wheat", "minimum").getInt();
+            WHEAT_DROP_COUNT = rootNode.getNode("wheat", "count").getInt();
+            WHEAT_DROP_FORTUNE_FACTOR = rootNode.getNode("wheat", "fortune_factor").getInt();
+            WHEAT_DROP_CHANCE = rootNode.getNode("wheat", "chance").getInt();
+            WHEAT_DROP_CHANCE_OF = rootNode.getNode("wheat", "chance_of").getInt();
 
-            CARROT_DROP_MINIMUM = fastHarvestConf.getNode("carrot", "minimum").getInt();
-            CARROT_DROP_COUNT = fastHarvestConf.getNode("carrot", "count").getInt();
-            CARROT_DROP_FORTUNE_FACTOR = fastHarvestConf.getNode("carrot", "fortune_factor").getInt();
-            CARROT_DROP_CHANCE = fastHarvestConf.getNode("carrot", "chance").getInt();
-            CARROT_DROP_CHANCE_OF = fastHarvestConf.getNode("carrot", "chance_of").getInt();
+            CARROT_DROP_MINIMUM = rootNode.getNode("carrot", "minimum").getInt();
+            CARROT_DROP_COUNT = rootNode.getNode("carrot", "count").getInt();
+            CARROT_DROP_FORTUNE_FACTOR = rootNode.getNode("carrot", "fortune_factor").getInt();
+            CARROT_DROP_CHANCE = rootNode.getNode("carrot", "chance").getInt();
+            CARROT_DROP_CHANCE_OF = rootNode.getNode("carrot", "chance_of").getInt();
 
-            POTATO_DROP_MINIMUM = fastHarvestConf.getNode("potato", "minimum").getInt();
-            POTATO_DROP_COUNT = fastHarvestConf.getNode("potato", "count").getInt();
-            POTATO_DROP_FORTUNE_FACTOR = fastHarvestConf.getNode("potato", "fortune_factor").getInt();
-            POTATO_DROP_CHANCE = fastHarvestConf.getNode("potato", "chance").getInt();
-            POTATO_DROP_CHANCE_OF = fastHarvestConf.getNode("potato", "chance_of").getInt();
+            POTATO_DROP_MINIMUM = rootNode.getNode("potato", "minimum").getInt();
+            POTATO_DROP_COUNT = rootNode.getNode("potato", "count").getInt();
+            POTATO_DROP_FORTUNE_FACTOR = rootNode.getNode("potato", "fortune_factor").getInt();
+            POTATO_DROP_CHANCE = rootNode.getNode("potato", "chance").getInt();
+            POTATO_DROP_CHANCE_OF = rootNode.getNode("potato", "chance_of").getInt();
 
-            BEETROOT_SEED_DROP_MINIMUM = fastHarvestConf.getNode("beetroot_seed", "minimum").getInt();
-            BEETROOT_SEED_DROP_COUNT = fastHarvestConf.getNode("beetroot_seed", "count").getInt();
-            BEETROOT_SEED_DROP_FORTUNE_FACTOR = fastHarvestConf.getNode("beetroot_seed", "fortune_factor").getInt();
-            BEETROOT_SEED_DROP_CHANCE = fastHarvestConf.getNode("beetroot_seed", "chance").getInt();
-            BEETROOT_SEED_DROP_CHANCE_OF = fastHarvestConf.getNode("beetroot_seed", "chance_of").getInt();
+            BEETROOT_SEED_DROP_MINIMUM = rootNode.getNode("beetroot_seed", "minimum").getInt();
+            BEETROOT_SEED_DROP_COUNT = rootNode.getNode("beetroot_seed", "count").getInt();
+            BEETROOT_SEED_DROP_FORTUNE_FACTOR = rootNode.getNode("beetroot_seed", "fortune_factor").getInt();
+            BEETROOT_SEED_DROP_CHANCE = rootNode.getNode("beetroot_seed", "chance").getInt();
+            BEETROOT_SEED_DROP_CHANCE_OF = rootNode.getNode("beetroot_seed", "chance_of").getInt();
 
-            BEETROOT_DROP_MINIMUM = fastHarvestConf.getNode("beetroot", "minimum").getInt();
-            BEETROOT_DROP_COUNT = fastHarvestConf.getNode("beetroot", "count").getInt();
-            BEETROOT_DROP_FORTUNE_FACTOR = fastHarvestConf.getNode("beetroot", "fortune_factor").getInt();
-            BEETROOT_DROP_CHANCE = fastHarvestConf.getNode("beetroot", "chance").getInt();
-            BEETROOT_DROP_CHANCE_OF = fastHarvestConf.getNode("beetroot", "chance_of").getInt();
+            BEETROOT_DROP_MINIMUM = rootNode.getNode("beetroot", "minimum").getInt();
+            BEETROOT_DROP_COUNT = rootNode.getNode("beetroot", "count").getInt();
+            BEETROOT_DROP_FORTUNE_FACTOR = rootNode.getNode("beetroot", "fortune_factor").getInt();
+            BEETROOT_DROP_CHANCE = rootNode.getNode("beetroot", "chance").getInt();
+            BEETROOT_DROP_CHANCE_OF = rootNode.getNode("beetroot", "chance_of").getInt();
 
-            HARVEST_LIST_ENABLED = fastHarvestConf.getNode("list", "enabled").getBoolean(false);
+            HARVEST_LIST_ENABLED = rootNode.getNode("list", "enabled").getBoolean(false);
             HARVEST_TOOLS.clear();
             if (HARVEST_LIST_ENABLED) {
-                HARVEST_LIST_IS_WHITELIST = fastHarvestConf.getNode("list", "is_whitelist").getBoolean(true);
+                HARVEST_LIST_IS_WHITELIST = rootNode.getNode("list", "is_whitelist").getBoolean(true);
                 try {
-                    HARVEST_TOOLS = fastHarvestConf.getNode("list", "tools").getList(TypeTokens.STRING_TOKEN);
+                    HARVEST_TOOLS = rootNode.getNode("list", "tools").getList(TypeTokens.STRING_TOKEN);
                 } catch (ObjectMappingException e) {
                     plugin.getLogger().error("An error occurred while reading the list of tools for FastHarvest");
                     e.printStackTrace();
                 }
             }
         }
+    }
 
-        Path blocksDropsConfFile = plugin.getConfigDir().resolve("blocksdrops.conf");
+    private static void loadBlocksDrops(BoxOUtils plugin) throws IOException {
+        Path confFile = plugin.getConfigDir().resolve("blocksdrops.conf");
 
-        if (Files.notExists(blocksDropsConfFile)) {
-            Optional<Asset> maybeConfFile = Sponge.getAssetManager().getAsset(plugin, "config/blocksdrops.conf");
-            if (maybeConfFile.isPresent()) {
-                maybeConfFile.get().copyToFile(blocksDropsConfFile);
+        if (Files.notExists(confFile)) {
+            Optional<Asset> maybeDefaultConf = Sponge.getAssetManager().getAsset(plugin, "config/blocksdrops.conf");
+            if (maybeDefaultConf.isPresent()) {
+                maybeDefaultConf.get().copyToFile(confFile);
             } else {
                 plugin.getLogger().error("Cannot get default BlockDrops configuration file.");
             }
         }
 
-        ConfigurationNode blocksDropsConf = HoconConfigurationLoader.builder().setPath(blocksDropsConfFile).build().load();
+        ConfigurationNode rootNode = HoconConfigurationLoader.builder().setPath(confFile).build().load();
 
-        Config.CUSTOM_BLOCKS_DROPS_ENABLED = blocksDropsConf.getNode("enabled").getBoolean(false);
+        Config.CUSTOM_BLOCKS_DROPS_ENABLED = rootNode.getNode("enabled").getBoolean(false);
         Config.CUSTOM_BLOCKS_DROPS.clear();
         if (Config.CUSTOM_BLOCKS_DROPS_ENABLED) {
             if (!blockDropsListenersRegistered) {
@@ -154,7 +166,7 @@ public class SpongeConfig {
                 blockDropsListenersRegistered = true;
             }
 
-            for (Map.Entry<Object, ? extends ConfigurationNode> child : blocksDropsConf.getNode("blocks").getChildrenMap().entrySet()) {
+            for (Map.Entry<Object, ? extends ConfigurationNode> child : rootNode.getNode("blocks").getChildrenMap().entrySet()) {
                 List<ItemLoot> itemLoots = new ArrayList<>();
                 readDrops(plugin, child, itemLoots);
                 ConfigurationNode node = child.getValue();
@@ -163,21 +175,23 @@ public class SpongeConfig {
                                 node.getNode("exp-overwrite").getBoolean(false), readMoneyLoot(plugin, node.getNode("money"))));
             }
         }
+    }
 
-        Path mobsDropsConfFile = plugin.getConfigDir().resolve("mobsdrops.conf");
+    private static void loadMobsDrops(BoxOUtils plugin) throws IOException {
+        Path confFile = plugin.getConfigDir().resolve("mobsdrops.conf");
 
-        if (Files.notExists(mobsDropsConfFile)) {
-            Optional<Asset> maybeConfFile = Sponge.getAssetManager().getAsset(plugin, "config/mobsdrops.conf");
-            if (maybeConfFile.isPresent()) {
-                maybeConfFile.get().copyToFile(mobsDropsConfFile);
+        if (Files.notExists(confFile)) {
+            Optional<Asset> maybeDefaultConf = Sponge.getAssetManager().getAsset(plugin, "config/mobsdrops.conf");
+            if (maybeDefaultConf.isPresent()) {
+                maybeDefaultConf.get().copyToFile(confFile);
             } else {
                 plugin.getLogger().error("Cannot get default MobsDrops configuration file.");
             }
         }
 
-        ConfigurationNode mobsDropsConf = HoconConfigurationLoader.builder().setPath(mobsDropsConfFile).build().load();
+        ConfigurationNode rootNode = HoconConfigurationLoader.builder().setPath(confFile).build().load();
 
-        Config.CUSTOM_MOBS_DROPS_ENABLED = mobsDropsConf.getNode("enabled").getBoolean(false);
+        Config.CUSTOM_MOBS_DROPS_ENABLED = rootNode.getNode("enabled").getBoolean(false);
         Config.CUSTOM_MOBS_DROPS.clear();
         if (Config.CUSTOM_MOBS_DROPS_ENABLED) {
             if (!mobDropsListenersRegistered) {
@@ -185,7 +199,7 @@ public class SpongeConfig {
                 mobDropsListenersRegistered = true;
             }
 
-            for (Map.Entry<Object, ? extends ConfigurationNode> child : mobsDropsConf.getNode("mobs").getChildrenMap().entrySet()) {
+            for (Map.Entry<Object, ? extends ConfigurationNode> child : rootNode.getNode("mobs").getChildrenMap().entrySet()) {
                 List<ItemLoot> itemLoots = new ArrayList<>();
                 readDrops(plugin, child, itemLoots);
                 ConfigurationNode node = child.getValue();
@@ -194,21 +208,23 @@ public class SpongeConfig {
                         node.getNode("overwrite").getBoolean(false), node.getNode("exp-overwrite").getBoolean(false), readMoneyLoot(plugin, node.getNode("money"))));
             }
         }
+    }
 
-        Path blockSpawnersConfFile = plugin.getConfigDir().resolve("blockspawners.conf");
+    private static void loadBlockSpawners(BoxOUtils plugin) throws IOException {
+        Path confFile = plugin.getConfigDir().resolve("blockspawners.conf");
 
-        if (Files.notExists(blockSpawnersConfFile)) {
-            Optional<Asset> maybeConfFile = Sponge.getAssetManager().getAsset(plugin, "config/blockspawners.conf");
-            if (maybeConfFile.isPresent()) {
-                maybeConfFile.get().copyToFile(blockSpawnersConfFile);
+        if (Files.notExists(confFile)) {
+            Optional<Asset> maybeDefaultConf = Sponge.getAssetManager().getAsset(plugin, "config/blockspawners.conf");
+            if (maybeDefaultConf.isPresent()) {
+                maybeDefaultConf.get().copyToFile(confFile);
             } else {
                 plugin.getLogger().error("Cannot get default BlockSpawners configuration file.");
             }
         }
 
-        ConfigurationNode blockSpawnersConf = HoconConfigurationLoader.builder().setPath(blockSpawnersConfFile).build().load();
+        ConfigurationNode rootNode = HoconConfigurationLoader.builder().setPath(confFile).build().load();
 
-        Config.BLOCK_SPAWNERS_ENABLED = blockSpawnersConf.getNode("enabled").getBoolean(false);
+        Config.BLOCK_SPAWNERS_ENABLED = rootNode.getNode("enabled").getBoolean(false);
         Config.BLOCK_SPAWNERS_DROPS.clear();
         if (Config.BLOCK_SPAWNERS_ENABLED) {
             if (!blockSpawnersListenersRegistered) {
@@ -216,7 +232,7 @@ public class SpongeConfig {
                 blockSpawnersListenersRegistered = true;
             }
 
-            for (Map.Entry<Object, ? extends ConfigurationNode> child : blockSpawnersConf.getNode("blocks").getChildrenMap().entrySet()) {
+            for (Map.Entry<Object, ? extends ConfigurationNode> child : rootNode.getNode("blocks").getChildrenMap().entrySet()) {
                 ConfigurationNode node = child.getValue();
                 List<SpawnedMob> spawnedMobs = node.getNode("spawns").getChildrenList().stream()
                         .map(spawn -> {
@@ -227,12 +243,9 @@ public class SpongeConfig {
                 Config.BLOCK_SPAWNERS_DROPS.put((String) child.getKey(), spawnedMobs);
             }
         }
-
-        if (Config.CUSTOM_BLOCKS_DROPS_ENABLED || Config.CUSTOM_MOBS_DROPS_ENABLED)
-            IntegrationsManager.INSTANCE.initCustomDropsProviders(plugin);
     }
 
-    public static void readDrops(BoxOUtils plugin, Map.Entry<Object, ? extends ConfigurationNode> child, List<ItemLoot> itemLoots) {
+    private static void readDrops(BoxOUtils plugin, Map.Entry<Object, ? extends ConfigurationNode> child, List<ItemLoot> itemLoots) {
         child.getValue().getNode("drops").getChildrenList().forEach(customLoot -> {
             String providerId;
             String itemId;
@@ -277,7 +290,7 @@ public class SpongeConfig {
     }
 
     @Nullable
-    public static MoneyLoot readMoneyLoot(BoxOUtils plugin, ConfigurationNode moneyNode) {
+    private static MoneyLoot readMoneyLoot(BoxOUtils plugin, ConfigurationNode moneyNode) {
         if (moneyNode.isVirtual())
             return null;
 
