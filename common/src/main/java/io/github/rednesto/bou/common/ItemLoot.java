@@ -25,8 +25,6 @@ package io.github.rednesto.bou.common;
 
 import io.github.rednesto.bou.common.quantity.IIntQuantity;
 
-import java.util.Random;
-
 import javax.annotation.Nullable;
 
 public class ItemLoot {
@@ -35,22 +33,20 @@ public class ItemLoot {
     @Nullable
     private String providerId;
     private String displayname;
-    private int chance;
+    private double chance;
     @Nullable
     private IIntQuantity quantity;
 
-    private static final Random random = new Random();
-
-    public ItemLoot(String id, @Nullable String providerId, String displayname, int chance, @Nullable IIntQuantity quantity) {
+    public ItemLoot(String id, @Nullable String providerId, String displayname, double chance, @Nullable IIntQuantity quantity) {
         this.id = id;
         this.providerId = providerId;
         this.displayname = displayname;
-        this.chance = chance;
+        this.chance = chance / 100;
         this.quantity = quantity;
     }
 
     public boolean shouldLoot() {
-        return chance <= 0 || random.nextInt(100) <= chance;
+        return chance <= 0 || Math.random() <= chance;
     }
 
     public String getId() {

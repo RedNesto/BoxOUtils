@@ -218,7 +218,7 @@ public class SpongeConfig {
                         }
                     }
 
-                    spawnedMobs.add(new SpawnedMob(mobType, spawn.getNode("chance").getInt(), quantity));
+                    spawnedMobs.add(new SpawnedMob(mobType, spawn.getNode("chance").getDouble(), quantity));
                 });
                 Config.BLOCK_SPAWNERS_DROPS.put((String) child.getKey(), spawnedMobs);
             }
@@ -279,7 +279,7 @@ public class SpongeConfig {
                 }
             }
 
-            itemLoots.add(new ItemLoot(itemId, providerId, customLoot.getNode("displayname").getString(), customLoot.getNode("chance").getInt(), quantity));
+            itemLoots.add(new ItemLoot(itemId, providerId, customLoot.getNode("displayname").getString(), customLoot.getNode("chance").getDouble(), quantity));
         });
     }
 
@@ -313,7 +313,7 @@ public class SpongeConfig {
             }
         }
 
-        return new MoneyLoot(quantity, moneyNode.getNode("currency").getString(), moneyNode.getNode("chance").getInt(), moneyNode.getNode("message").getString());
+        return new MoneyLoot(quantity, moneyNode.getNode("currency").getString(), moneyNode.getNode("chance").getDouble(), moneyNode.getNode("message").getString());
     }
 
     @Nullable

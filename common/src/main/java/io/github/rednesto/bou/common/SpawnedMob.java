@@ -25,32 +25,24 @@ package io.github.rednesto.bou.common;
 
 import io.github.rednesto.bou.common.quantity.IIntQuantity;
 
-import java.util.Random;
-
 public class SpawnedMob {
 
     private String id;
-    private int chance;
+    private double chance;
     private IIntQuantity quantity;
 
-    private static final Random random = new Random();
-
-    public SpawnedMob(String id, int chance, IIntQuantity quantity) {
+    public SpawnedMob(String id, double chance, IIntQuantity quantity) {
         this.id = id;
-        this.chance = chance;
+        this.chance = chance / 100;
         this.quantity = quantity;
     }
 
     public boolean shouldSpawn() {
-        return chance <= 0 || random.nextInt(100) <= chance;
+        return chance <= 0 || Math.random() <= chance;
     }
 
     public String getId() {
         return id;
-    }
-
-    public int getChance() {
-        return chance;
     }
 
     public IIntQuantity getQuantity() {

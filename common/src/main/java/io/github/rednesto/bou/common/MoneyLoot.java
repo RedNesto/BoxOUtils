@@ -25,26 +25,22 @@ package io.github.rednesto.bou.common;
 
 import io.github.rednesto.bou.common.quantity.IIntQuantity;
 
-import java.util.Random;
-
 public class MoneyLoot {
 
     private IIntQuantity amount;
     private String currencyId;
-    private int chance;
+    private double chance;
     private String message;
 
-    private static final Random RANDOM = new Random();
-
-    public MoneyLoot(IIntQuantity amount, String currencyId, int chance, String message) {
+    public MoneyLoot(IIntQuantity amount, String currencyId, double chance, String message) {
         this.amount = amount;
         this.currencyId = currencyId;
-        this.chance = chance;
+        this.chance = chance / 100;
         this.message = message;
     }
 
     public boolean shouldLoot() {
-        return chance <= 0 || RANDOM.nextInt(100) <= chance;
+        return chance <= 0 || Math.random() <= chance;
     }
 
     public IIntQuantity getAmount() {
@@ -53,10 +49,6 @@ public class MoneyLoot {
 
     public String getCurrencyId() {
         return currencyId;
-    }
-
-    public int getChance() {
-        return chance;
     }
 
     public String getMessage() {
