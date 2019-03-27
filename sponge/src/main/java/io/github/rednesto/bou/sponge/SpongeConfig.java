@@ -75,17 +75,7 @@ public class SpongeConfig {
     }
 
     private static void loadFastHarvest(BoxOUtils plugin) throws IOException {
-        Path confFile = plugin .getConfigDir().resolve("fastharvest.conf");
-        if (Files.notExists(confFile)) {
-            Optional<Asset> maybeDefaultConf = Sponge.getAssetManager().getAsset(plugin, "config/fastharvest.conf");
-            if (maybeDefaultConf.isPresent()) {
-                maybeDefaultConf.get().copyToFile(confFile);
-            } else {
-                plugin.getLogger().error("Cannot get default FastHarvest configuration file.");
-            }
-        }
-
-        ConfigurationNode rootNode = HoconConfigurationLoader.builder().setPath(confFile).build().load();
+        ConfigurationNode rootNode = loadFileSafely(plugin, "fastharvest.conf", "FastHarvest");
 
         FAST_HARVEST_ENABLED = rootNode.getNode("enabled").getBoolean(false);
         if (FAST_HARVEST_ENABLED) {
@@ -145,18 +135,7 @@ public class SpongeConfig {
     }
 
     private static void loadBlocksDrops(BoxOUtils plugin) throws IOException {
-        Path confFile = plugin.getConfigDir().resolve("blocksdrops.conf");
-
-        if (Files.notExists(confFile)) {
-            Optional<Asset> maybeDefaultConf = Sponge.getAssetManager().getAsset(plugin, "config/blocksdrops.conf");
-            if (maybeDefaultConf.isPresent()) {
-                maybeDefaultConf.get().copyToFile(confFile);
-            } else {
-                plugin.getLogger().error("Cannot get default BlockDrops configuration file.");
-            }
-        }
-
-        ConfigurationNode rootNode = HoconConfigurationLoader.builder().setPath(confFile).build().load();
+        ConfigurationNode rootNode = loadFileSafely(plugin, "blocksdrops.conf", "BlocksDrops");
 
         Config.CUSTOM_BLOCKS_DROPS_ENABLED = rootNode.getNode("enabled").getBoolean(false);
         Config.CUSTOM_BLOCKS_DROPS.clear();
@@ -178,18 +157,7 @@ public class SpongeConfig {
     }
 
     private static void loadMobsDrops(BoxOUtils plugin) throws IOException {
-        Path confFile = plugin.getConfigDir().resolve("mobsdrops.conf");
-
-        if (Files.notExists(confFile)) {
-            Optional<Asset> maybeDefaultConf = Sponge.getAssetManager().getAsset(plugin, "config/mobsdrops.conf");
-            if (maybeDefaultConf.isPresent()) {
-                maybeDefaultConf.get().copyToFile(confFile);
-            } else {
-                plugin.getLogger().error("Cannot get default MobsDrops configuration file.");
-            }
-        }
-
-        ConfigurationNode rootNode = HoconConfigurationLoader.builder().setPath(confFile).build().load();
+        ConfigurationNode rootNode = loadFileSafely(plugin, "mobsdrops.conf", "MobsDrops");
 
         Config.CUSTOM_MOBS_DROPS_ENABLED = rootNode.getNode("enabled").getBoolean(false);
         Config.CUSTOM_MOBS_DROPS.clear();
@@ -211,18 +179,7 @@ public class SpongeConfig {
     }
 
     private static void loadBlockSpawners(BoxOUtils plugin) throws IOException {
-        Path confFile = plugin.getConfigDir().resolve("blockspawners.conf");
-
-        if (Files.notExists(confFile)) {
-            Optional<Asset> maybeDefaultConf = Sponge.getAssetManager().getAsset(plugin, "config/blockspawners.conf");
-            if (maybeDefaultConf.isPresent()) {
-                maybeDefaultConf.get().copyToFile(confFile);
-            } else {
-                plugin.getLogger().error("Cannot get default BlockSpawners configuration file.");
-            }
-        }
-
-        ConfigurationNode rootNode = HoconConfigurationLoader.builder().setPath(confFile).build().load();
+        ConfigurationNode rootNode = loadFileSafely(plugin, "blockspawners.conf", "BlockSpawners");
 
         Config.BLOCK_SPAWNERS_ENABLED = rootNode.getNode("enabled").getBoolean(false);
         Config.BLOCK_SPAWNERS_DROPS.clear();
@@ -243,6 +200,20 @@ public class SpongeConfig {
                 Config.BLOCK_SPAWNERS_DROPS.put((String) child.getKey(), spawnedMobs);
             }
         }
+    }
+
+    private static ConfigurationNode loadFileSafely(BoxOUtils plugin, String filename, String presentableConfigName) throws IOException {
+        Path destFile = plugin.getConfigDir().resolve(filename);
+        if (Files.notExists(destFile)) {
+            Optional<Asset> defaultConf = Sponge.getAssetManager().getAsset(plugin, "config/" + filename);
+            if (defaultConf.isPresent()) {
+                defaultConf.get().copyToFile(destFile);
+            } else {
+                plugin.getLogger().error("Cannot get default " + presentableConfigName + " configuration file.");
+            }
+        }
+
+        return HoconConfigurationLoader.builder().setPath(destFile).build().load();
     }
 
     private static void readDrops(BoxOUtils plugin, Map.Entry<Object, ? extends ConfigurationNode> child, List<ItemLoot> itemLoots) {
