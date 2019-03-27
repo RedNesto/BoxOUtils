@@ -50,6 +50,9 @@ public class FastHarvestListener {
 
     @Listener
     public void onSecondaryClick(InteractBlockEvent.Secondary.MainHand event, @First Player player) {
+        if (!FAST_HARVEST_ENABLED)
+            return;
+
         switch(event.getTargetBlock().getState().getType().getId()) {
             case "minecraft:wheat":
                 ItemStack maybeItemInHand = player.getItemInHand(event.getHandType()).orElse(ItemStack.empty());

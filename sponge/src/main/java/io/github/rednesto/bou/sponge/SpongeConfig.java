@@ -71,7 +71,8 @@ public class SpongeConfig {
 
         ConfigurationNode fastHarvestConf = HoconConfigurationLoader.builder().setFile(fastHarvestConfFile).build().load();
 
-        if (fastHarvestConf.getNode("enabled").getBoolean(false)) {
+        FAST_HARVEST_ENABLED = fastHarvestConf.getNode("enabled").getBoolean(false);
+        if (FAST_HARVEST_ENABLED) {
             if (!fastHarvestListenersRegistered) {
                 Sponge.getEventManager().registerListeners(plugin, new FastHarvestListener());
                 fastHarvestListenersRegistered = true;
@@ -184,13 +185,13 @@ public class SpongeConfig {
         ConfigurationNode blockSpawnersConf = HoconConfigurationLoader.builder().setFile(blockSpawnersConfFile).build().load();
 
         Config.BLOCK_SPAWNERS_ENABLED = blockSpawnersConf.getNode("enabled").getBoolean(false);
+        Config.BLOCK_SPAWNERS_DROPS.clear();
         if (Config.BLOCK_SPAWNERS_ENABLED) {
             if (!blockSpawnersListenersRegistered) {
                 Sponge.getEventManager().registerListeners(plugin, new BlockSpawnersListener());
                 blockSpawnersListenersRegistered = true;
             }
 
-            Config.BLOCK_SPAWNERS_DROPS.clear();
             for (Map.Entry<Object, ? extends ConfigurationNode> child : blockSpawnersConf.getNode("blocks").getChildrenMap().entrySet()) {
                 ConfigurationNode node = child.getValue();
                 List<SpawnedMob> spawnedMobs = node.getNode("spawns").getChildrenList().stream()
