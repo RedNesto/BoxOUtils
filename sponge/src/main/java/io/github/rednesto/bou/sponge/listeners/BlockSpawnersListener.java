@@ -23,6 +23,7 @@
  */
 package io.github.rednesto.bou.sponge.listeners;
 
+import com.flowpowered.math.vector.Vector3i;
 import io.github.rednesto.bou.common.Config;
 import io.github.rednesto.bou.common.SpawnedMob;
 import org.spongepowered.api.Sponge;
@@ -31,6 +32,7 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.filter.cause.First;
+import org.spongepowered.api.world.World;
 
 import java.util.List;
 
@@ -39,22 +41,28 @@ public class BlockSpawnersListener {
     @Listener
     public void onBlockBreak(ChangeBlockEvent.Break event, @First Player player) {
         event.getTransactions().forEach(transaction -> {
-            List<SpawnedMob> spawnedMobs = Config.BLOCK_SPAWNERS_DROPS.get(transaction.getOriginal().getState().getType().getId());
+            List<SpawnedMob> toSpawnMobs = Config.BLOCK_SPAWNERS_DROPS.get(transaction.getOriginal().getState().getType().getId());
+            if (toSpawnMobs == null)
+                return;
 
-            if (spawnedMobs != null) {
-                spawnedMobs.forEach(spawnedMob -> {
-                    if(spawnedMob.shouldSpawn()) {
-                        Sponge.getServer().getWorld(transaction.getOriginal().getWorldUniqueId()).ifPresent(world -> {
-                            Sponge.getRegistry().getType(EntityType.class, spawnedMob.getId()).ifPresent(entityType -> {
-                                int quantityToSpawn = spawnedMob.getQuantityToSpawn();
-                                for(int i = 0; i < quantityToSpawn; i++) {
-                                    world.spawnEntity(world.createEntity(entityType, transaction.getOriginal().getPosition()));
-                                }
-                            });
-                        });
-                    }
-                });
-            }
+            World world = Sponge.getServer().getWorld(transaction.getOriginal().getWorldUniqueId()).orElse(null);
+            if (world == null)
+                return;
+
+            Vector3i spawnPosition = transaction.getOriginal().getPosition();
+            toSpawnMobs.forEach(toSpawn -> {
+                if (!toSpawn.shouldSpawn())
+                    return;
+
+                EntityType entityType = Sponge.getRegistry().getType(EntityType.class, toSpawn.getId()).orElse(null);
+                if (entityType == null)
+                    return;
+
+                int quantityToSpawn = toSpawn.getQuantityToSpawn();
+                for (int i = 0; i < quantityToSpawn; i++) {
+                    world.spawnEntity(world.createEntity(entityType, spawnPosition));
+                }
+            });
         });
     }
 }
