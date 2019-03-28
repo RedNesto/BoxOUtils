@@ -25,12 +25,16 @@ package io.github.rednesto.bou.sponge;
 
 import com.google.inject.Inject;
 import org.slf4j.Logger;
+import org.spongepowered.api.command.CommandSource;
+import org.spongepowered.api.command.source.ConsoleSource;
 import org.spongepowered.api.config.ConfigDir;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.game.GameReloadEvent;
 import org.spongepowered.api.event.game.state.GamePreInitializationEvent;
 import org.spongepowered.api.plugin.Dependency;
 import org.spongepowered.api.plugin.Plugin;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.format.TextColors;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -65,8 +69,7 @@ public class BoxOUtils {
         try {
             SpongeConfig.loadConf(this);
         } catch (IOException e) {
-            this.logger.error("Cannot load configuration");
-            e.printStackTrace();
+            this.logger.error("An exception occurred when loading configuration", e);
         }
     }
 
@@ -75,8 +78,10 @@ public class BoxOUtils {
         try {
             SpongeConfig.loadConf(this);
         } catch (IOException e) {
-            this.logger.error("Cannot reload configuration");
-            e.printStackTrace();
+            this.logger.error("An exception occurred when reloading configuration", e);
+            event.getCause().first(CommandSource.class)
+                    .filter(source -> !(source instanceof ConsoleSource))
+                    .ifPresent(source -> source.sendMessage(Text.of(TextColors.RED, "[Box O' Utils] Unable to reload configuration: " + e.getMessage())));
         }
     }
 
