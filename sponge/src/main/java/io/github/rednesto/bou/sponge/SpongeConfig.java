@@ -218,7 +218,18 @@ public class SpongeConfig {
                         }
                     }
 
-                    spawnedMobs.add(new SpawnedMob(mobType, spawn.getNode("chance").getDouble(), quantity));
+                    double chance = 0;
+                    ConfigurationNode chanceNode = spawn.getNode("chance");
+                    if (!chanceNode.isVirtual()) {
+                        chance = chanceNode.getDouble(Double.NaN);
+                        if (Double.isNaN(chance)) {
+                            plugin.getLogger().error("Chance of BlockSpawner mob '{}' for block '{}' is not a valid number ('{}'). This spawn will not be loaded.",
+                                    mobType, child.getKey(), chanceNode.getValue());
+                            return;
+                        }
+                    }
+
+                    spawnedMobs.add(new SpawnedMob(mobType, chance, quantity));
                 });
                 Config.BLOCK_SPAWNERS_DROPS.put((String) child.getKey(), spawnedMobs);
             }
@@ -279,7 +290,18 @@ public class SpongeConfig {
                 }
             }
 
-            itemLoots.add(new ItemLoot(itemId, providerId, customLoot.getNode("displayname").getString(), customLoot.getNode("chance").getDouble(), quantity));
+            double chance = 0;
+            ConfigurationNode chanceNode = customLoot.getNode("chance");
+            if (!chanceNode.isVirtual()) {
+                chance = chanceNode.getDouble(Double.NaN);
+                if (Double.isNaN(chance)) {
+                    plugin.getLogger().error("Chance of CustomDrop '{}' of block '{}' is not a valid number ('{}'). This spawn will not be loaded.",
+                            itemId, child.getKey(), chanceNode.getValue());
+                    return;
+                }
+            }
+
+            itemLoots.add(new ItemLoot(itemId, providerId, customLoot.getNode("displayname").getString(), chance, quantity));
         });
     }
 
@@ -313,7 +335,18 @@ public class SpongeConfig {
             }
         }
 
-        return new MoneyLoot(quantity, moneyNode.getNode("currency").getString(), moneyNode.getNode("chance").getDouble(), moneyNode.getNode("message").getString());
+        double chance = 0;
+        ConfigurationNode chanceNode = moneyNode.getNode("chance");
+        if (!chanceNode.isVirtual()) {
+            chance = chanceNode.getDouble(Double.NaN);
+            if (Double.isNaN(chance)) {
+                plugin.getLogger().error("The money reward chance of CustomDrop block '{}' is not a valid number ('{}'). This spawn will not be loaded.",
+                        moneyNode.getPath()[1], chanceNode.getValue());
+                return null;
+            }
+        }
+
+        return new MoneyLoot(quantity, moneyNode.getNode("currency").getString(), chance, moneyNode.getNode("message").getString());
     }
 
     @Nullable
