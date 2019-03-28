@@ -25,13 +25,16 @@ package io.github.rednesto.bou.common;
 
 import io.github.rednesto.bou.common.quantity.IIntQuantity;
 
+import javax.annotation.Nullable;
+
 public class SpawnedMob {
 
     private String id;
     private double chance;
+    @Nullable
     private IIntQuantity quantity;
 
-    public SpawnedMob(String id, double chance, IIntQuantity quantity) {
+    public SpawnedMob(String id, double chance, @Nullable IIntQuantity quantity) {
         this.id = id;
         this.chance = chance / 100;
         this.quantity = quantity;
@@ -45,6 +48,7 @@ public class SpawnedMob {
         return id;
     }
 
+    @Nullable
     public IIntQuantity getQuantity() {
         return quantity;
     }

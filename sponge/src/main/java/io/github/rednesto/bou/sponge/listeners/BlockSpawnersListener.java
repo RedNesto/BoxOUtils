@@ -58,7 +58,7 @@ public class BlockSpawnersListener {
                 if (entityType == null)
                     return;
 
-                int quantityToSpawn = toSpawn.getQuantity().get();
+                int quantityToSpawn = toSpawn.getQuantity() != null ? toSpawn.getQuantity().get() : 1;
                 for (int i = 0; i < quantityToSpawn; i++) {
                     world.spawnEntity(world.createEntity(entityType, spawnPosition));
                 }
