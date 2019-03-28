@@ -25,15 +25,18 @@ package io.github.rednesto.bou.common;
 
 import java.util.List;
 
+import javax.annotation.Nullable;
+
 public class CustomLoot {
 
     private List<ItemLoot> itemLoots;
     private int experience;
     private boolean overwrite;
     private boolean expOverwrite;
+    @Nullable
     private MoneyLoot moneyLoot;
 
-    public CustomLoot(List<ItemLoot> itemLoots, int experience, boolean overwrite, boolean expOverwrite, MoneyLoot moneyLoot) {
+    public CustomLoot(List<ItemLoot> itemLoots, int experience, boolean overwrite, boolean expOverwrite, @Nullable MoneyLoot moneyLoot) {
         this.itemLoots = itemLoots;
         this.experience = experience;
         this.overwrite = overwrite;
@@ -57,6 +60,7 @@ public class CustomLoot {
         return expOverwrite;
     }
 
+    @Nullable
     public MoneyLoot getMoneyLoot() {
         return moneyLoot;
     }

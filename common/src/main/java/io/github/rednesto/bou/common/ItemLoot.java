@@ -32,12 +32,13 @@ public class ItemLoot {
     private String id;
     @Nullable
     private String providerId;
+    @Nullable
     private String displayname;
     private double chance;
     @Nullable
     private IIntQuantity quantity;
 
-    public ItemLoot(String id, @Nullable String providerId, String displayname, double chance, @Nullable IIntQuantity quantity) {
+    public ItemLoot(String id, @Nullable String providerId, @Nullable String displayname, double chance, @Nullable IIntQuantity quantity) {
         this.id = id;
         this.providerId = providerId;
         this.displayname = displayname;
@@ -58,6 +59,7 @@ public class ItemLoot {
         return providerId;
     }
 
+    @Nullable
     public String getDisplayname() {
         return displayname;
     }

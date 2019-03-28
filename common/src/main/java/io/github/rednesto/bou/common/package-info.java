@@ -21,43 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+@ParametersAreNonnullByDefault
 package io.github.rednesto.bou.common;
 
-import io.github.rednesto.bou.common.quantity.IIntQuantity;
-
-import javax.annotation.Nullable;
-
-public class MoneyLoot {
-
-    private IIntQuantity amount;
-    @Nullable
-    private String currencyId;
-    private double chance;
-    @Nullable
-    private String message;
-
-    public MoneyLoot(IIntQuantity amount, @Nullable String currencyId, double chance, @Nullable String message) {
-        this.amount = amount;
-        this.currencyId = currencyId;
-        this.chance = chance / 100;
-        this.message = message;
-    }
-
-    public boolean shouldLoot() {
-        return chance <= 0 || Math.random() <= chance;
-    }
-
-    public IIntQuantity getAmount() {
-        return amount;
-    }
-
-    @Nullable
-    public String getCurrencyId() {
-        return currencyId;
-    }
-
-    @Nullable
-    public String getMessage() {
-        return message;
-    }
-}
+import javax.annotation.ParametersAreNonnullByDefault;
