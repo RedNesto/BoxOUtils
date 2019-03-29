@@ -1,9 +1,9 @@
 plugins {
     id 'org.spongepowered.plugin' version '0.9.0'
     id 'net.minecrell.licenser' version '0.4.1'
+    id 'com.qixalite.spongestart2' version '4.0.0'
 }
 
-version = '0.7'
 archivesBaseName = 'BoxOUtils'
 
 repositories {
@@ -14,7 +14,10 @@ repositories {
 
 dependencies {
     compile project(':common')
+
     compileOnly 'org.spongepowered:spongeapi:7.1.0'
+    annotationProcessor 'org.spongepowered:spongeapi:7.1.0'
+
     compileOnly 'com.github.RedNesto:FileInventories:0.3.2'
     compileOnly 'com.github.randombyte-developer:byte-items:v2.3'
 }
@@ -22,11 +25,7 @@ dependencies {
 sponge.plugin.id = 'box-o-utils'
 
 shadowJar {
-    classifier = null
-
-    dependencies {
-        include(dependency(':common'))
-    }
+    archiveClassifier.set(null)
 }
 
 license {
@@ -35,4 +34,8 @@ license {
     include '**/*.java'
 
     newLine = false
+}
+
+spongestart {
+    minecraft '1.12.2'
 }

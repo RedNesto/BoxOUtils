@@ -1,40 +1,19 @@
 /*
 
-# Gradle Wrapper
+!/.gitignore
 
-!gradle/
+!/gradle/
 
-# Spigot
+!/common/
+!/spigot/
+!/sponge/
 
-!common/
-common/*
+!/build.gradle
+!/gradle.properties
+!/settings.gradle
 
-!common/src/
-!common/build.gradle
+!/gradlew
+!/gradlew.bat
 
-# Spigot
-
-!spigot/
-spigot/*
-
-!spigot/src/
-!spigot/build.gradle
-
-# Sponge
-
-!sponge/
-sponge/*
-
-!sponge/src/
-!sponge/build.gradle
-
-# Root
-
-!.gitignore
-!build.gradle
-!gradle.properties
-!gradlew
-!gradlew.bat
-!LICENSE
-!README.md
-!settings.gradle
+!/LICENSE
+!/README.md
