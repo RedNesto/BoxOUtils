@@ -21,48 +21,52 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.github.rednesto.bou.sponge.integration;
+package io.github.rednesto.bou.example;
 
-import de.randombyte.byteitems.api.ByteItemsService;
 import io.github.rednesto.bou.sponge.BoxOUtils;
 import io.github.rednesto.bou.sponge.ICustomDropsProvider;
-import org.spongepowered.api.Sponge;
+import io.github.rednesto.bou.sponge.IntegrationsManager;
+import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.event.Listener;
-import org.spongepowered.api.event.service.ChangeServiceProviderEvent;
+import org.spongepowered.api.item.enchantment.Enchantment;
+import org.spongepowered.api.item.enchantment.EnchantmentTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
-import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 
+import java.util.Collections;
 import java.util.Optional;
 
 import javax.annotation.Nullable;
 
-public class ByteItemsCustomDropsProvider implements ICustomDropsProvider {
+public class EnchantCustomDropsProvider implements ICustomDropsProvider {
 
-    @Nullable
-    private ByteItemsService backingService;
+    private final BouIntegrationExample plugin;
+
+    public EnchantCustomDropsProvider(BouIntegrationExample plugin) {
+        this.plugin = plugin;
+    }
 
     @Override
     public void init(BoxOUtils plugin) {
-        Sponge.getEventManager().registerListeners(plugin, this);
+        this.plugin.logger.info("Initializing EnchantCustomDropsProvider");
     }
 
     @Override
     public String getId() {
-        return "byte-items";
+        return "auto-enchant";
     }
 
     @Override
     public Optional<ItemStack> createItemStack(String id, @Nullable Player targetPlayer) {
-        if (backingService == null)
-            return Optional.empty();
+        return IntegrationsManager.INSTANCE.getDefaultCustomDropsProvider().createItemStack(id, targetPlayer)
+                .map(item -> {
+                    Enchantment enchant = Enchantment.builder()
+                            .type(EnchantmentTypes.KNOCKBACK)
+                            .level(1)
+                            .build();
 
-        return backingService.get(id).map(ItemStackSnapshot::createStack);
-    }
+                    item.offer(Keys.ITEM_ENCHANTMENTS, Collections.singletonList(enchant));
 
-    @Listener
-    public void onServiceProviderChange(ChangeServiceProviderEvent event) {
-        if (event.getService().equals(ByteItemsService.class))
-            backingService = (ByteItemsService) event.getNewProvider();
+                    return item;
+                });
     }
 }

@@ -30,6 +30,8 @@ import org.spongepowered.api.command.source.ConsoleSource;
 import org.spongepowered.api.config.ConfigDir;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.game.GameReloadEvent;
+import org.spongepowered.api.event.game.state.GameConstructionEvent;
+import org.spongepowered.api.event.game.state.GamePostInitializationEvent;
 import org.spongepowered.api.event.game.state.GamePreInitializationEvent;
 import org.spongepowered.api.plugin.Dependency;
 import org.spongepowered.api.plugin.Plugin;
@@ -62,15 +64,24 @@ public class BoxOUtils {
     private static BoxOUtils instance;
 
     @Listener
-    public void onPreInit(GamePreInitializationEvent event) {
+    public void onConstruction(GameConstructionEvent event) {
         instance = this;
-        IntegrationsManager.INSTANCE.loadIntegrations();
+    }
 
+    @Listener
+    public void onPreInit(GamePreInitializationEvent event) {
         try {
             SpongeConfig.loadConf(this);
         } catch (IOException e) {
             this.logger.error("An exception occurred when loading configuration", e);
         }
+    }
+
+    @Listener
+    public void onPostInit(GamePostInitializationEvent event) {
+        this.logger.info("Loading built-in integrations");
+        IntegrationsManager.INSTANCE.loadBuiltins();
+        IntegrationsManager.INSTANCE.initIntegrations(this);
     }
 
     @Listener

@@ -36,6 +36,11 @@ import javax.annotation.Nullable;
 public class VanillaCustomDropsProvider implements ICustomDropsProvider {
 
     @Override
+    public String getId() {
+        return "vanilla";
+    }
+
+    @Override
     public Optional<ItemStack> createItemStack(String id, @Nullable Player targetPlayer) {
         return Sponge.getRegistry().getType(ItemType.class, id).map(ItemStack::of);
     }

@@ -23,11 +23,7 @@
  */
 package io.github.rednesto.bou.sponge;
 
-import io.github.rednesto.bou.common.Config;
-import io.github.rednesto.bou.common.CustomLoot;
-import io.github.rednesto.bou.common.ItemLoot;
-import io.github.rednesto.bou.common.MoneyLoot;
-import io.github.rednesto.bou.common.SpawnedMob;
+import io.github.rednesto.bou.common.*;
 import io.github.rednesto.bou.common.quantity.BoundedIntQuantity;
 import io.github.rednesto.bou.common.quantity.FixedIntQuantity;
 import io.github.rednesto.bou.common.quantity.IIntQuantity;
@@ -69,8 +65,7 @@ public class SpongeConfig {
         loadMobsDrops(plugin);
         loadBlockSpawners(plugin);
 
-        if (Config.CUSTOM_BLOCKS_DROPS_ENABLED || Config.CUSTOM_MOBS_DROPS_ENABLED)
-            IntegrationsManager.INSTANCE.initCustomDropsProviders(plugin);
+        IntegrationsManager.INSTANCE.initIntegrations(plugin);
     }
 
     private static void loadFastHarvest(BoxOUtils plugin) throws IOException {

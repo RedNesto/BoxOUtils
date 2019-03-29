@@ -21,20 +21,27 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.github.rednesto.bou.sponge;
+package io.github.rednesto.bou.example;
 
-import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.item.inventory.ItemStack;
+import com.google.inject.Inject;
+import io.github.rednesto.bou.sponge.IntegrationsManager;
+import org.slf4j.Logger;
+import org.spongepowered.api.event.Listener;
+import org.spongepowered.api.event.game.state.GameInitializationEvent;
+import org.spongepowered.api.plugin.Dependency;
+import org.spongepowered.api.plugin.Plugin;
 
-import java.util.Optional;
+@Plugin(id = "bou-integration-example",
+        description = "An example plugin showing how to register Box O' Utils integrations",
+        dependencies = @Dependency(id = "box-o-utils"))
+public class BouIntegrationExample {
 
-import javax.annotation.Nullable;
+    @Inject
+    public Logger logger;
 
-public interface ICustomDropsProvider {
-
-    default void init(BoxOUtils plugin) {}
-
-    String getId();
-
-    Optional<ItemStack> createItemStack(String id, @Nullable Player targetPlayer);
+    @Listener
+    public void onInit(GameInitializationEvent event) {
+        logger.info("Registering example CustomDropsProvider");
+        IntegrationsManager.INSTANCE.register(new EnchantCustomDropsProvider(this));
+    }
 }

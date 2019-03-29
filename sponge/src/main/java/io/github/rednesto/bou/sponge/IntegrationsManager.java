@@ -23,6 +23,7 @@
  */
 package io.github.rednesto.bou.sponge;
 
+import io.github.rednesto.bou.common.Config;
 import io.github.rednesto.bou.sponge.integration.ByteItemsCustomDropsProvider;
 import io.github.rednesto.bou.sponge.integration.FileInventoriesCustomDropsProvider;
 import io.github.rednesto.bou.sponge.integration.vanilla.VanillaCustomDropsProvider;
@@ -44,7 +45,19 @@ public final class IntegrationsManager {
     private final ICustomDropsProvider defaultCustomDropsProvider = new VanillaCustomDropsProvider();
     private final Map<String, ICustomDropsProvider> customDropsProviders = new HashMap<>();
 
-    private IntegrationsManager() {}
+    private IntegrationsManager() {
+        register(defaultCustomDropsProvider);
+    }
+
+    public void register(ICustomDropsProvider customDropsProvider) {
+        customDropsProviders.put(customDropsProvider.getId(), customDropsProvider);
+        if (customDropsProvidersInit)
+            customDropsProvider.init(BoxOUtils.getInstance());
+    }
+
+    public ICustomDropsProvider getDefaultCustomDropsProvider() {
+        return defaultCustomDropsProvider;
+    }
 
     public Optional<ItemStack> createCustomDropStack(@Nullable String providerId, String id, @Nullable Player targetPlayer) {
         if (providerId == null)
@@ -57,7 +70,22 @@ public final class IntegrationsManager {
         return Optional.empty();
     }
 
-    void initCustomDropsProviders(BoxOUtils plugin) {
+    void loadBuiltins() {
+        if (Sponge.getPluginManager().isLoaded("file-inventories")) {
+            register(new FileInventoriesCustomDropsProvider());
+        }
+
+        if (Sponge.getPluginManager().isLoaded("byte-items")) {
+            register(new ByteItemsCustomDropsProvider());
+        }
+    }
+
+    void initIntegrations(BoxOUtils plugin) {
+        if (Config.CUSTOM_BLOCKS_DROPS_ENABLED || Config.CUSTOM_MOBS_DROPS_ENABLED)
+            initCustomDropsProviders(plugin);
+    }
+
+    private void initCustomDropsProviders(BoxOUtils plugin) {
         if (customDropsProvidersInit)
             return;
 
@@ -65,16 +93,6 @@ public final class IntegrationsManager {
         defaultCustomDropsProvider.init(plugin);
         for (ICustomDropsProvider provider : customDropsProviders.values()) {
             provider.init(plugin);
-        }
-    }
-
-    void loadIntegrations() {
-        if (Sponge.getPluginManager().isLoaded("file-inventories")) {
-            customDropsProviders.put("file-inv", new FileInventoriesCustomDropsProvider());
-        }
-
-        if (Sponge.getPluginManager().isLoaded("byte-items")) {
-            customDropsProviders.put("byte-items", new ByteItemsCustomDropsProvider());
         }
     }
 }

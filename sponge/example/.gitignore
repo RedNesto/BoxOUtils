@@ -2,9 +2,6 @@
 
 !/.gitignore
 
-!/example/
-
 !/src/
 
 !/build.gradle
-!/gradle.properties

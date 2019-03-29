@@ -67,6 +67,11 @@ public class FileInventoriesCustomDropsProvider implements ICustomDropsProvider 
     }
 
     @Override
+    public String getId() {
+        return "file-inv";
+    }
+
+    @Override
     public Optional<ItemStack> createItemStack(String id, @Nullable Player targetPlayer) {
         Optional<FileInventoriesService> maybeService = Sponge.getServiceManager().provide(FileInventoriesService.class);
         if (!maybeService.isPresent()) {
