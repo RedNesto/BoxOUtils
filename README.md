@@ -1,4 +1,4 @@
-# RedNesto's Box O' Utils
+# RedNesto's Box O' Utils [![JitPack](https://jitpack.io/v/RedNesto/BoxOUtils.svg)](https://jitpack.io/#RedNesto/BoxOUtils)
 
 Box O' Utils is a [Spigot](https://www.spigotmc.org/resources/rednestos-box-o-utils.52237//) and [Sponge](https://ore.spongepowered.org/RedNesto/Box-O'-Utils) plugin allowing server owners to do random things like harvest a crop with a right-click or customize blocks and mobs loots (for more control over the loots data, you can use FileInventories, see more [on the Wiki](https://github.com/RedNesto/BoxOUtils/wiki/FileInventories-Integration)).
 
