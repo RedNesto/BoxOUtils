@@ -44,6 +44,7 @@ public class ByteItemsCustomDropsProvider implements ICustomDropsProvider {
 
     @Override
     public void init(BoxOUtils plugin) {
+        Sponge.getServiceManager().provide(ByteItemsService.class).ifPresent(service -> backingService = service);
         Sponge.getEventManager().registerListeners(plugin, this);
     }
 
