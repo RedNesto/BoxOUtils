@@ -59,11 +59,7 @@ public class EnchantCustomDropsProvider implements ICustomDropsProvider {
     public Optional<ItemStack> createItemStack(String id, @Nullable Player targetPlayer) {
         return IntegrationsManager.INSTANCE.getDefaultCustomDropsProvider().createItemStack(id, targetPlayer)
                 .map(item -> {
-                    Enchantment enchant = Enchantment.builder()
-                            .type(EnchantmentTypes.KNOCKBACK)
-                            .level(1)
-                            .build();
-
+                    Enchantment enchant = Enchantment.of(EnchantmentTypes.KNOCKBACK, 1);
                     item.offer(Keys.ITEM_ENCHANTMENTS, Collections.singletonList(enchant));
 
                     return item;
