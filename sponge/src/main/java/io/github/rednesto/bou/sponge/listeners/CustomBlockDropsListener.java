@@ -60,8 +60,9 @@ public class CustomBlockDropsListener {
             return;
 
         CustomLoot customLoot = Config.CUSTOM_BLOCKS_DROPS.get(block.getState().getType().getId());
-        if (customLoot != null && customLoot.isOverwrite())
-            event.setCancelled(true);
+        if (customLoot != null) {
+            CustomDropsProcessor.handleDropItemEvent(event, customLoot);
+        }
     }
 
     @Listener

@@ -23,7 +23,10 @@
  */
 package io.github.rednesto.bou.common;
 
+import io.github.rednesto.bou.common.lootReuse.LootReuse;
+
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.Nullable;
 
@@ -35,13 +38,16 @@ public class CustomLoot {
     private boolean expOverwrite;
     @Nullable
     private MoneyLoot moneyLoot;
+    @Nullable
+    private Reuse reuse;
 
-    public CustomLoot(List<ItemLoot> itemLoots, int experience, boolean overwrite, boolean expOverwrite, @Nullable MoneyLoot moneyLoot) {
+    public CustomLoot(List<ItemLoot> itemLoots, int experience, boolean overwrite, boolean expOverwrite, @Nullable MoneyLoot moneyLoot, @Nullable Reuse reuse) {
         this.itemLoots = itemLoots;
         this.experience = experience;
         this.overwrite = overwrite;
         this.expOverwrite = expOverwrite;
         this.moneyLoot = moneyLoot;
+        this.reuse = reuse;
     }
 
     public List<ItemLoot> getItemLoots() {
@@ -63,5 +69,29 @@ public class CustomLoot {
     @Nullable
     public MoneyLoot getMoneyLoot() {
         return moneyLoot;
+    }
+
+    @Nullable
+    public Reuse getReuse() {
+        return reuse;
+    }
+
+    public static class Reuse {
+
+        private float multiplier;
+        private Map<String, LootReuse> items;
+
+        public Reuse(float multiplier, Map<String, LootReuse> items) {
+            this.multiplier = multiplier;
+            this.items = items;
+        }
+
+        public float getMultiplier() {
+            return multiplier;
+        }
+
+        public Map<String, LootReuse> getItems() {
+            return items;
+        }
     }
 }

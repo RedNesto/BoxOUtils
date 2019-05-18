@@ -24,6 +24,9 @@
 package io.github.rednesto.bou.sponge;
 
 import io.github.rednesto.bou.common.*;
+import io.github.rednesto.bou.common.lootReuse.LootReuse;
+import io.github.rednesto.bou.common.lootReuse.MultiplyLootReuse;
+import io.github.rednesto.bou.common.lootReuse.SimpleLootReuse;
 import io.github.rednesto.bou.common.quantity.BoundedIntQuantity;
 import io.github.rednesto.bou.common.quantity.FixedIntQuantity;
 import io.github.rednesto.bou.common.quantity.IIntQuantity;
@@ -41,10 +44,7 @@ import org.spongepowered.api.util.TypeTokens;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 import javax.annotation.Nullable;
 
@@ -143,9 +143,14 @@ public class SpongeConfig {
                 List<ItemLoot> itemLoots = new ArrayList<>();
                 readDrops(plugin, child, itemLoots);
                 ConfigurationNode node = child.getValue();
+                CustomLoot.Reuse reuse = null;
+                if (!node.getNode("reuse").isVirtual()) {
+                    reuse = readReuse(plugin, node.getNode("reuse"));
+                }
+
                 Config.CUSTOM_BLOCKS_DROPS.put((String) child.getKey(),
                         new CustomLoot(itemLoots, node.getNode("experience").getInt(), node.getNode("overwrite").getBoolean(false),
-                                node.getNode("exp-overwrite").getBoolean(false), readMoneyLoot(plugin, node.getNode("money"))));
+                                node.getNode("exp-overwrite").getBoolean(false), readMoneyLoot(plugin, node.getNode("money")), reuse));
             }
         }
     }
@@ -165,9 +170,13 @@ public class SpongeConfig {
                 List<ItemLoot> itemLoots = new ArrayList<>();
                 readDrops(plugin, child, itemLoots);
                 ConfigurationNode node = child.getValue();
+                CustomLoot.Reuse reuse = null;
+                if (!node.getNode("reuse").isVirtual()) {
+                    reuse = readReuse(plugin, node.getNode("reuse"));
+                }
 
                 Config.CUSTOM_MOBS_DROPS.put((String) child.getKey(), new CustomLoot(itemLoots, node.getNode("experience").getInt(),
-                        node.getNode("overwrite").getBoolean(false), node.getNode("exp-overwrite").getBoolean(false), readMoneyLoot(plugin, node.getNode("money"))));
+                        node.getNode("overwrite").getBoolean(false), node.getNode("exp-overwrite").getBoolean(false), readMoneyLoot(plugin, node.getNode("money")), reuse));
             }
         }
     }
@@ -243,6 +252,39 @@ public class SpongeConfig {
         }
 
         return HoconConfigurationLoader.builder().setPath(destFile).build().load();
+    }
+
+    private static CustomLoot.Reuse readReuse(BoxOUtils plugin, ConfigurationNode reuseNode) {
+        float multiplier = reuseNode.getNode("multiplier").getFloat(1);
+        Map<String, LootReuse> reuses = new HashMap<>();
+        for (Map.Entry<Object, ? extends ConfigurationNode> entry : reuseNode.getNode("items").getChildrenMap().entrySet()) {
+            String itemId = SpongeUtils.addMcNamespaceIfNeeded(entry.getKey().toString());
+            LootReuse reuse = readLootReuse(plugin, entry.getValue());
+            if (reuse != null) {
+                reuses.put(itemId, reuse);
+            }
+        }
+
+        return new CustomLoot.Reuse(multiplier, reuses);
+    }
+
+    @Nullable
+    private static LootReuse readLootReuse(BoxOUtils plugin, ConfigurationNode itemNode) {
+        ConfigurationNode multiplierNode = itemNode.getNode("multiplier");
+        if (!multiplierNode.isVirtual()) {
+            return new MultiplyLootReuse(multiplierNode.getFloat());
+        }
+
+        ConfigurationNode quantityNode = itemNode.getNode("quantity");
+        if (!quantityNode.isVirtual()) {
+            IIntQuantity quantity = readQuantity(plugin, quantityNode, null, null);
+            if (quantity == null)
+                return null;
+
+            return new SimpleLootReuse(quantity);
+        }
+
+        return null;
     }
 
     private static void readDrops(BoxOUtils plugin, Map.Entry<Object, ? extends ConfigurationNode> child, List<ItemLoot> itemLoots) {

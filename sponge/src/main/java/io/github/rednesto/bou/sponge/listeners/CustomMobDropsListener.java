@@ -68,8 +68,9 @@ public class CustomMobDropsListener {
             return;
 
         CustomLoot customLoot = Config.CUSTOM_MOBS_DROPS.get(entity.getType().getId());
-        if (customLoot != null && customLoot.isOverwrite())
-            event.setCancelled(true);
+        if (customLoot != null) {
+            CustomDropsProcessor.handleDropItemEvent(event, customLoot);
+        }
     }
 
     @Listener
