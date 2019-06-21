@@ -24,7 +24,9 @@
 package io.github.rednesto.bou.common;
 
 import io.github.rednesto.bou.common.lootReuse.LootReuse;
+import io.github.rednesto.bou.common.requirement.CustomLootRequirement;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -36,16 +38,24 @@ public class CustomLoot {
     private int experience;
     private boolean overwrite;
     private boolean expOverwrite;
+    private Collection<CustomLootRequirement<?>> requirements;
     @Nullable
     private MoneyLoot moneyLoot;
     @Nullable
     private Reuse reuse;
 
-    public CustomLoot(List<ItemLoot> itemLoots, int experience, boolean overwrite, boolean expOverwrite, @Nullable MoneyLoot moneyLoot, @Nullable Reuse reuse) {
+    public CustomLoot(List<ItemLoot> itemLoots,
+                      int experience,
+                      boolean overwrite,
+                      boolean expOverwrite,
+                      Collection<CustomLootRequirement<?>> requirements,
+                      @Nullable MoneyLoot moneyLoot,
+                      @Nullable Reuse reuse) {
         this.itemLoots = itemLoots;
         this.experience = experience;
         this.overwrite = overwrite;
         this.expOverwrite = expOverwrite;
+        this.requirements = requirements;
         this.moneyLoot = moneyLoot;
         this.reuse = reuse;
     }
@@ -66,6 +76,10 @@ public class CustomLoot {
         return expOverwrite;
     }
 
+    public Collection<CustomLootRequirement<?>> getRequirements() {
+        return requirements;
+    }
+
     @Nullable
     public MoneyLoot getMoneyLoot() {
         return moneyLoot;
@@ -80,10 +94,12 @@ public class CustomLoot {
 
         private float multiplier;
         private Map<String, LootReuse> items;
+        private Collection<CustomLootRequirement<?>> requirements;
 
-        public Reuse(float multiplier, Map<String, LootReuse> items) {
+        public Reuse(float multiplier, Map<String, LootReuse> items, Collection<CustomLootRequirement<?>> requirements) {
             this.multiplier = multiplier;
             this.items = items;
+            this.requirements = requirements;
         }
 
         public float getMultiplier() {
@@ -92,6 +108,10 @@ public class CustomLoot {
 
         public Map<String, LootReuse> getItems() {
             return items;
+        }
+
+        public Collection<CustomLootRequirement<?>> getRequirements() {
+            return requirements;
         }
     }
 }

@@ -21,29 +21,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.github.rednesto.bou.sponge;
+package io.github.rednesto.bou.common.requirement;
 
-import org.spongepowered.api.Platform;
-import org.spongepowered.api.Sponge;
+import ninja.leaping.configurate.ConfigurationNode;
 
-public class SpongeUtils {
+public interface CustomLootRequirementProvider {
 
-    // The implementation ID is always the same for the running instance
-    public static final String SPONGE_IMPL_ID = Sponge.getPlatform().getContainer(Platform.Component.IMPLEMENTATION).getId();
+    /**
+     * @return the id used in the 'requirements' part of CustomLoots.
+     */
+    String getId();
 
-    public static String addMcNamespaceIfNeeded(String id) {
-        return addNamespaceIfNeeded(id, "minecraft");
-    }
-
-    public static String addSpongeImplNamespaceIfNeeded(String id) {
-        return addNamespaceIfNeeded(id, SPONGE_IMPL_ID);
-    }
-
-    public static String addNamespaceIfNeeded(String id, String namespace) {
-        if (!id.contains(":")) {
-            return namespace + ":" + id;
-        }
-
-        return id;
-    }
+    /**
+     * Creates a requirement from the given configuration.
+     *
+     * @param node the configuration node of this requirement. Its key will always be this {@link #getId()}
+     *
+     * @return the created requirement
+     *
+     * @throws RequirementConfigurationException if the configuration is invalid (like missing values)
+     */
+    CustomLootRequirement<?> provide(ConfigurationNode node) throws RequirementConfigurationException;
 }

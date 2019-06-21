@@ -21,29 +21,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.github.rednesto.bou.sponge;
+package io.github.rednesto.bou.common.requirement;
 
-import org.spongepowered.api.Platform;
-import org.spongepowered.api.Sponge;
+public interface CustomLootRequirement<T> {
 
-public class SpongeUtils {
+    Class<T> getApplicableType();
 
-    // The implementation ID is always the same for the running instance
-    public static final String SPONGE_IMPL_ID = Sponge.getPlatform().getContainer(Platform.Component.IMPLEMENTATION).getId();
-
-    public static String addMcNamespaceIfNeeded(String id) {
-        return addNamespaceIfNeeded(id, "minecraft");
+    /**
+     * Indicates whether this requirement can be used for the given source.
+     *
+     * @param source the thing for which loot will be dropped
+     *
+     * @return {@code true} if this requirement can be applied to the source, {@code false} otherwise
+     */
+    default boolean appliesTo(T source) {
+        return true;
     }
 
-    public static String addSpongeImplNamespaceIfNeeded(String id) {
-        return addNamespaceIfNeeded(id, SPONGE_IMPL_ID);
-    }
-
-    public static String addNamespaceIfNeeded(String id, String namespace) {
-        if (!id.contains(":")) {
-            return namespace + ":" + id;
-        }
-
-        return id;
-    }
+    /**
+     * Indicates if the given source fulfills this requirement.
+     *
+     * @param source the source to check
+     *
+     * @return {@code true} if the source fulfills this requirement, {@code false} otherwise
+     */
+    boolean fulfills(T source);
 }

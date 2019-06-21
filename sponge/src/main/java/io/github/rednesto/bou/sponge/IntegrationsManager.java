@@ -24,10 +24,13 @@
 package io.github.rednesto.bou.sponge;
 
 import io.github.rednesto.bou.common.Config;
+import io.github.rednesto.bou.common.requirement.CustomLootRequirementProvider;
 import io.github.rednesto.bou.sponge.integration.ByteItemsCustomDropsProvider;
 import io.github.rednesto.bou.sponge.integration.FileInventoriesCustomDropsProvider;
 import io.github.rednesto.bou.sponge.integration.vanilla.VanillaCustomDropsProvider;
+import io.github.rednesto.bou.sponge.requirements.DataByKeyRequirementProvider;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.inventory.ItemStack;
 
@@ -45,14 +48,21 @@ public final class IntegrationsManager {
     private final ICustomDropsProvider defaultCustomDropsProvider = new VanillaCustomDropsProvider();
     private final Map<String, ICustomDropsProvider> customDropsProviders = new HashMap<>();
 
+    private final Map<String, CustomLootRequirementProvider> requirementProviders = new HashMap<>();
+
     private IntegrationsManager() {
         register(defaultCustomDropsProvider);
+        register(new DataByKeyRequirementProvider<>("block_data", BlockSnapshot.class));
     }
 
     public void register(ICustomDropsProvider customDropsProvider) {
         customDropsProviders.put(customDropsProvider.getId(), customDropsProvider);
         if (customDropsProvidersInit)
             customDropsProvider.init(BoxOUtils.getInstance());
+    }
+
+    public void register(CustomLootRequirementProvider requirementProvider) {
+        requirementProviders.put(requirementProvider.getId(), requirementProvider);
     }
 
     public ICustomDropsProvider getDefaultCustomDropsProvider() {
@@ -68,6 +78,11 @@ public final class IntegrationsManager {
             return provider.createItemStack(id, targetPlayer);
 
         return Optional.empty();
+    }
+
+    @Nullable
+    public CustomLootRequirementProvider getRequirementProvider(String id) {
+        return requirementProviders.get(id);
     }
 
     void loadBuiltins() {

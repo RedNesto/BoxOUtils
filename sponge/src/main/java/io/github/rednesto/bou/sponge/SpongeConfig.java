@@ -30,6 +30,9 @@ import io.github.rednesto.bou.common.lootReuse.SimpleLootReuse;
 import io.github.rednesto.bou.common.quantity.BoundedIntQuantity;
 import io.github.rednesto.bou.common.quantity.FixedIntQuantity;
 import io.github.rednesto.bou.common.quantity.IIntQuantity;
+import io.github.rednesto.bou.common.requirement.CustomLootRequirement;
+import io.github.rednesto.bou.common.requirement.CustomLootRequirementProvider;
+import io.github.rednesto.bou.common.requirement.RequirementConfigurationException;
 import io.github.rednesto.bou.sponge.listeners.BlockSpawnersListener;
 import io.github.rednesto.bou.sponge.listeners.CustomBlockDropsListener;
 import io.github.rednesto.bou.sponge.listeners.CustomMobDropsListener;
@@ -148,9 +151,12 @@ public class SpongeConfig {
                     reuse = readReuse(plugin, node.getNode("reuse"));
                 }
 
+                ConfigurationNode requirementsNode = node.getNode("requirements");
+                List<CustomLootRequirement<?>> requirements = !requirementsNode.isVirtual() ? readRequirements(plugin, requirementsNode) : Collections.emptyList();
+
                 Config.CUSTOM_BLOCKS_DROPS.put((String) child.getKey(),
                         new CustomLoot(itemLoots, node.getNode("experience").getInt(), node.getNode("overwrite").getBoolean(false),
-                                node.getNode("exp-overwrite").getBoolean(false), readMoneyLoot(plugin, node.getNode("money")), reuse));
+                                node.getNode("exp-overwrite").getBoolean(false), requirements, readMoneyLoot(plugin, node.getNode("money")), reuse));
             }
         }
     }
@@ -175,8 +181,11 @@ public class SpongeConfig {
                     reuse = readReuse(plugin, node.getNode("reuse"));
                 }
 
+                ConfigurationNode requirementsNode = node.getNode("requirements");
+                List<CustomLootRequirement<?>> requirements = !requirementsNode.isVirtual() ? readRequirements(plugin, requirementsNode) : Collections.emptyList();
+
                 Config.CUSTOM_MOBS_DROPS.put((String) child.getKey(), new CustomLoot(itemLoots, node.getNode("experience").getInt(),
-                        node.getNode("overwrite").getBoolean(false), node.getNode("exp-overwrite").getBoolean(false), readMoneyLoot(plugin, node.getNode("money")), reuse));
+                        node.getNode("overwrite").getBoolean(false), node.getNode("exp-overwrite").getBoolean(false), requirements, readMoneyLoot(plugin, node.getNode("money")), reuse));
             }
         }
     }
@@ -254,6 +263,25 @@ public class SpongeConfig {
         return HoconConfigurationLoader.builder().setPath(destFile).build().load();
     }
 
+    private static List<CustomLootRequirement<?>> readRequirements(BoxOUtils plugin, ConfigurationNode requirementsNode) {
+        List<CustomLootRequirement<?>> requirements = new ArrayList<>();
+        for (Map.Entry<Object, ? extends ConfigurationNode> requirement : requirementsNode.getChildrenMap().entrySet()) {
+            String key = requirement.getKey().toString();
+            ConfigurationNode value = requirement.getValue();
+
+            CustomLootRequirementProvider requirementProvider = IntegrationsManager.INSTANCE.getRequirementProvider(key);
+            if (requirementProvider != null) {
+                try {
+                    requirements.add(requirementProvider.provide(value));
+                } catch (RequirementConfigurationException e) {
+                    plugin.getLogger().error("Unable to read requirement", e);
+                }
+            }
+        }
+
+        return requirements;
+    }
+
     private static CustomLoot.Reuse readReuse(BoxOUtils plugin, ConfigurationNode reuseNode) {
         float multiplier = reuseNode.getNode("multiplier").getFloat(1);
         Map<String, LootReuse> reuses = new HashMap<>();
@@ -265,7 +293,9 @@ public class SpongeConfig {
             }
         }
 
-        return new CustomLoot.Reuse(multiplier, reuses);
+        ConfigurationNode requirementsNode = reuseNode.getNode("requirements");
+        List<CustomLootRequirement<?>> requirements = !requirementsNode.isVirtual() ? readRequirements(plugin, requirementsNode) : Collections.emptyList();
+        return new CustomLoot.Reuse(multiplier, reuses, requirements);
     }
 
     @Nullable

@@ -21,29 +21,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.github.rednesto.bou.sponge;
+package io.github.rednesto.bou.common.requirement;
 
-import org.spongepowered.api.Platform;
-import org.spongepowered.api.Sponge;
+public class RequirementConfigurationException extends Exception {
 
-public class SpongeUtils {
-
-    // The implementation ID is always the same for the running instance
-    public static final String SPONGE_IMPL_ID = Sponge.getPlatform().getContainer(Platform.Component.IMPLEMENTATION).getId();
-
-    public static String addMcNamespaceIfNeeded(String id) {
-        return addNamespaceIfNeeded(id, "minecraft");
+    public RequirementConfigurationException() {
+        super();
     }
 
-    public static String addSpongeImplNamespaceIfNeeded(String id) {
-        return addNamespaceIfNeeded(id, SPONGE_IMPL_ID);
+    public RequirementConfigurationException(String message) {
+        super(message);
     }
 
-    public static String addNamespaceIfNeeded(String id, String namespace) {
-        if (!id.contains(":")) {
-            return namespace + ":" + id;
-        }
+    public RequirementConfigurationException(String message, Throwable cause) {
+        super(message, cause);
+    }
 
-        return id;
+    public RequirementConfigurationException(Throwable cause) {
+        super(cause);
     }
 }

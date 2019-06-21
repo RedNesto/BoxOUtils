@@ -28,7 +28,9 @@ import io.github.rednesto.bou.common.ItemLoot;
 import io.github.rednesto.bou.common.MoneyLoot;
 import io.github.rednesto.bou.common.lootReuse.LootReuse;
 import io.github.rednesto.bou.common.quantity.IIntQuantity;
+import io.github.rednesto.bou.common.requirement.CustomLootRequirement;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityTypes;
@@ -51,6 +53,7 @@ import org.spongepowered.api.world.World;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import javax.annotation.Nullable;
@@ -65,6 +68,11 @@ public class CustomDropsProcessor {
 
         CustomLoot.Reuse reuse = customLoot.getReuse();
         if (reuse != null) {
+            BlockSnapshot block = event.getCause().first(BlockSnapshot.class).orElse(null);
+            if (block != null && !CustomDropsProcessor.fulfillsRequirements(block, reuse.getRequirements())) {
+                return;
+            }
+
             List<? extends Entity> droppedItems = event.filterEntities(test -> !(test instanceof Item));
             if (droppedItems.isEmpty()) {
                 return;
@@ -73,6 +81,26 @@ public class CustomDropsProcessor {
             List<Entity> newDroppedItems = computeItemsReuse(droppedItems, reuse);
             event.getEntities().addAll(newDroppedItems);
         }
+    }
+
+    public static boolean fulfillsRequirements(Object source, Collection<CustomLootRequirement<?>> requirements) {
+        if (requirements.isEmpty()) {
+            return true;
+        }
+
+        for (CustomLootRequirement value : requirements) {
+            //noinspection unchecked
+            if (!value.getApplicableType().isAssignableFrom(source.getClass()) || !value.appliesTo(source)) {
+                continue;
+            }
+
+            //noinspection unchecked
+            if (!value.fulfills(source)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     public static void dropLoot(CustomLoot loot, @Nullable Player targetPlayer, @Nullable Location<World> targetLocation) {

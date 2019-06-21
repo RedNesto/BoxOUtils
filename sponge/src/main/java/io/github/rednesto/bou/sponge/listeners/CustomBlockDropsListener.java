@@ -44,12 +44,16 @@ public class CustomBlockDropsListener {
     @Listener
     public void onBlockBreak(ChangeBlockEvent.Break event, @First Player player) {
         for (Transaction<BlockSnapshot> transaction : event.getTransactions()) {
-            CustomLoot loot = Config.CUSTOM_BLOCKS_DROPS.get(transaction.getOriginal().getState().getType().getId());
-            if (loot == null)
+            BlockSnapshot originalBlock = transaction.getOriginal();
+            CustomLoot loot = Config.CUSTOM_BLOCKS_DROPS.get(originalBlock.getState().getType().getId());
+            if (loot == null) {
                 continue;
+            }
 
-            Location<World> targetLocation = transaction.getOriginal().getLocation().orElse(player.getLocation());
-            CustomDropsProcessor.dropLoot(loot, player, targetLocation);
+            Location<World> targetLocation = originalBlock.getLocation().orElse(player.getLocation());
+            if (CustomDropsProcessor.fulfillsRequirements(originalBlock, loot.getRequirements())) {
+                CustomDropsProcessor.dropLoot(loot, player, targetLocation);
+            }
         }
     }
 
@@ -60,7 +64,7 @@ public class CustomBlockDropsListener {
             return;
 
         CustomLoot customLoot = Config.CUSTOM_BLOCKS_DROPS.get(block.getState().getType().getId());
-        if (customLoot != null) {
+        if (customLoot != null && CustomDropsProcessor.fulfillsRequirements(block, customLoot.getRequirements())) {
             CustomDropsProcessor.handleDropItemEvent(event, customLoot);
         }
     }

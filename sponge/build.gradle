@@ -73,3 +73,8 @@ publishing {
         }
     }
 }
+
+if (project.file('local.gradle').exists()) {
+    // in case anyone wants to have additional tasks
+    apply from: 'local.gradle'
+}

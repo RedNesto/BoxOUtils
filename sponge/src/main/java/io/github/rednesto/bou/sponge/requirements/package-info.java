@@ -21,29 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.github.rednesto.bou.sponge;
+@ParametersAreNonnullByDefault
+package io.github.rednesto.bou.sponge.requirements;
 
-import org.spongepowered.api.Platform;
-import org.spongepowered.api.Sponge;
-
-public class SpongeUtils {
-
-    // The implementation ID is always the same for the running instance
-    public static final String SPONGE_IMPL_ID = Sponge.getPlatform().getContainer(Platform.Component.IMPLEMENTATION).getId();
-
-    public static String addMcNamespaceIfNeeded(String id) {
-        return addNamespaceIfNeeded(id, "minecraft");
-    }
-
-    public static String addSpongeImplNamespaceIfNeeded(String id) {
-        return addNamespaceIfNeeded(id, SPONGE_IMPL_ID);
-    }
-
-    public static String addNamespaceIfNeeded(String id, String namespace) {
-        if (!id.contains(":")) {
-            return namespace + ":" + id;
-        }
-
-        return id;
-    }
-}
+import javax.annotation.ParametersAreNonnullByDefault;
