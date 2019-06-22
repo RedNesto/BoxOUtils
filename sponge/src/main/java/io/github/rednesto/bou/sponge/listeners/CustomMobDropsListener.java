@@ -28,12 +28,15 @@ import io.github.rednesto.bou.common.CustomLoot;
 import io.github.rednesto.bou.sponge.CustomDropsProcessor;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.ExperienceOrb;
+import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.cause.entity.damage.source.IndirectEntityDamageSource;
 import org.spongepowered.api.event.entity.DestructEntityEvent;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
+import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.World;
 
 import java.util.Optional;
 
@@ -43,7 +46,8 @@ public class CustomMobDropsListener {
 
     @Listener
     public void onMobDeath(DestructEntityEvent.Death event) {
-        CustomLoot loot = Config.CUSTOM_MOBS_DROPS.get(event.getTargetEntity().getType().getId());
+        Living targetEntity = event.getTargetEntity();
+        CustomLoot loot = Config.CUSTOM_MOBS_DROPS.get(targetEntity.getType().getId());
         if (loot == null)
             return;
 
@@ -58,7 +62,10 @@ public class CustomMobDropsListener {
             return null;
         });
 
-        CustomDropsProcessor.dropLoot(loot, player, event.getTargetEntity().getLocation());
+        Location<World> targetLocation = targetEntity.getLocation();
+        if (CustomDropsProcessor.fulfillsRequirements(targetEntity.createSnapshot(), loot.getRequirements())) {
+            CustomDropsProcessor.dropLoot(loot, player, targetLocation);
+        }
     }
 
     @Listener
@@ -68,7 +75,7 @@ public class CustomMobDropsListener {
             return;
 
         CustomLoot customLoot = Config.CUSTOM_MOBS_DROPS.get(entity.getType().getId());
-        if (customLoot != null) {
+        if (customLoot != null && CustomDropsProcessor.fulfillsRequirements(entity.createSnapshot(), customLoot.getRequirements())) {
             CustomDropsProcessor.handleDropItemEvent(event, customLoot);
         }
     }

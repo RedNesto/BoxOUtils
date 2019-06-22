@@ -31,6 +31,7 @@ import io.github.rednesto.bou.sponge.integration.vanilla.VanillaCustomDropsProvi
 import io.github.rednesto.bou.sponge.requirements.DataByKeyRequirementProvider;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
+import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.inventory.ItemStack;
 
@@ -53,6 +54,7 @@ public final class IntegrationsManager {
     private IntegrationsManager() {
         register(defaultCustomDropsProvider);
         register(new DataByKeyRequirementProvider<>("block_data", BlockSnapshot.class));
+        register(new DataByKeyRequirementProvider<>("entity_data", EntitySnapshot.class));
     }
 
     public void register(ICustomDropsProvider customDropsProvider) {
