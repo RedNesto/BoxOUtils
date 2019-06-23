@@ -1,3 +1,5 @@
+import java.util.function.Consumer
+
 plugins {
     id 'maven-publish'
     id 'com.github.johnrengelman.shadow'
@@ -33,6 +35,7 @@ sponge.plugin.id = 'box-o-utils'
 
 shadowJar {
     classifier = null
+    withIntegrations { proj -> from proj.jar.outputs.files }
 }
 
 license {
@@ -53,6 +56,7 @@ task('sourcesJar', type: Jar) {
     afterEvaluate {
         from sourceSets['main'].allSource
         from project(':common').sourceSets['main'].allSource
+        withIntegrations { proj -> from proj.sourceSets['main'].allSource }
     }
 }
 
@@ -62,6 +66,7 @@ task('javadocJar', type: Jar) {
     archiveClassifier.set('javadoc')
     from javadoc.destinationDir
     from project(':common').javadoc.destinationDir
+    withIntegrations { proj -> from proj.javadoc.destinationDir }
 }
 
 publishing {
@@ -75,6 +80,12 @@ publishing {
             artifact sourcesJar
             artifact javadocJar
         }
+    }
+}
+
+def withIntegrations(Consumer<Project> action) {
+    for (path in project('integrations').subprojects) {
+        action.accept(path)
     }
 }
 

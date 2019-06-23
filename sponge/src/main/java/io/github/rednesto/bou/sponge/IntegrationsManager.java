@@ -100,6 +100,18 @@ public final class IntegrationsManager {
         if (Sponge.getPluginManager().isLoaded("griefprevention")) {
             register(new GriefPreventionRegionRequirement.Provider());
         }
+
+        if (Sponge.getPluginManager().isLoaded("universeguard")) {
+            try {
+                // This integration cannot be on the plugin's classpath, so we must use reflection to get it
+                Class<?> universeguardProvider = Class.forName("io.github.rednesto.bou.sponge.integration.universeguard.UniverseGuardRegionRequirement$Provider");
+                register((CustomLootRequirementProvider) universeguardProvider.newInstance());
+            } catch (InstantiationException | IllegalAccessException e) {
+                BoxOUtils.getInstance().getLogger().error("Could not instantiate UniverseGuardRegionRequirement.Provider", e);
+            } catch (ClassNotFoundException e) {
+                BoxOUtils.getInstance().getLogger().info("UniverseGuard is loaded but its integration could not be found");
+            }
+        }
     }
 
     void initIntegrations(BoxOUtils plugin) {

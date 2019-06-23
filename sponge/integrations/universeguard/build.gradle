@@ -1,0 +1,13 @@
+repositories {
+    maven {
+        url 'https://repo.spongepowered.org/maven/'
+    }
+}
+
+dependencies {
+    compileOnly 'org.spongepowered:spongeapi:7.1.0'
+
+    compileOnly project(':sponge')
+
+    compileOnly fileTree(dir: 'libs', include: '*.jar')
+}

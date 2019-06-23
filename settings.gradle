@@ -2,3 +2,16 @@ rootProject.name = 'BoxOUtils'
 
 include 'common', /*'spigot',*/ 'sponge', 'sponge:example'
 
+for (integration in file('sponge/integrations').listFiles()) {
+    if (!integration.isDirectory()) {
+        continue
+    }
+
+    if (existsAndNonEmpty(new File(integration, "libs"))) {
+        include 'sponge:integrations:' + integration.name
+    }
+}
+
+static def existsAndNonEmpty(File dir) {
+    return dir.exists() && dir.list().size() > 0
+}
