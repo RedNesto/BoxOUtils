@@ -27,6 +27,7 @@ import io.github.rednesto.bou.common.Config;
 import io.github.rednesto.bou.common.requirement.CustomLootRequirementProvider;
 import io.github.rednesto.bou.sponge.integration.ByteItemsCustomDropsProvider;
 import io.github.rednesto.bou.sponge.integration.FileInventoriesCustomDropsProvider;
+import io.github.rednesto.bou.sponge.integration.requirements.GriefPreventionRegionRequirement;
 import io.github.rednesto.bou.sponge.integration.vanilla.VanillaCustomDropsProvider;
 import io.github.rednesto.bou.sponge.requirements.DataByKeyRequirementProvider;
 import org.spongepowered.api.Sponge;
@@ -94,6 +95,10 @@ public final class IntegrationsManager {
 
         if (Sponge.getPluginManager().isLoaded("byte-items")) {
             register(new ByteItemsCustomDropsProvider());
+        }
+
+        if (Sponge.getPluginManager().isLoaded("griefprevention")) {
+            register(new GriefPreventionRegionRequirement.Provider());
         }
     }
 

@@ -48,7 +48,8 @@ import java.nio.file.Path;
         authors = {"RedNesto"},
         dependencies = {
                 @Dependency(id = "file-inventories", version = "[0.3.0,)", optional = true),
-                @Dependency(id = "byte-items", version = "[2.3,)", optional = true)
+                @Dependency(id = "byte-items", version = "[2.3,)", optional = true),
+                @Dependency(id = "griefprevention", optional = true)
         }
 )
 public class BoxOUtils {

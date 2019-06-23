@@ -13,6 +13,9 @@ repositories {
     maven {
         url 'https://jitpack.io'
     }
+    maven {
+        url 'http://files.minecraftforge.net/maven'
+    }
 }
 
 dependencies {
@@ -23,6 +26,7 @@ dependencies {
 
     compileOnly 'com.github.RedNesto:FileInventories:0.3.2'
     compileOnly 'com.github.randombyte-developer:byte-items:v2.3'
+    compileOnly 'me.ryanhamshire:griefprevention:1.12.2-4.3.0.662:api'
 }
 
 sponge.plugin.id = 'box-o-utils'
