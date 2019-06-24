@@ -2,9 +2,9 @@ package io.github.rednesto.bou.sponge.integration.universeguard;
 
 import com.universeguard.region.Region;
 import com.universeguard.utils.RegionUtils;
-import io.github.rednesto.bou.common.requirement.CustomLootRequirement;
-import io.github.rednesto.bou.common.requirement.CustomLootRequirementProvider;
+import io.github.rednesto.bou.common.requirement.Requirement;
 import io.github.rednesto.bou.common.requirement.RequirementConfigurationException;
+import io.github.rednesto.bou.common.requirement.RequirementProvider;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import org.spongepowered.api.data.LocatableSnapshot;
@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-public class UniverseGuardRegionRequirement implements CustomLootRequirement<LocatableSnapshot> {
+public class UniverseGuardRegionRequirement implements Requirement<LocatableSnapshot> {
 
     private final List<Object> regions;
     private final boolean isWhitelist;
@@ -62,7 +62,7 @@ public class UniverseGuardRegionRequirement implements CustomLootRequirement<Loc
         return !isWhitelist;
     }
 
-    public static class Provider implements CustomLootRequirementProvider {
+    public static class Provider implements RequirementProvider {
 
         @Override
         public String getId() {
@@ -70,7 +70,7 @@ public class UniverseGuardRegionRequirement implements CustomLootRequirement<Loc
         }
 
         @Override
-        public CustomLootRequirement<?> provide(ConfigurationNode node) throws RequirementConfigurationException {
+        public Requirement<?> provide(ConfigurationNode node) throws RequirementConfigurationException {
             try {
                 String listType = node.getNode("list-type").getString("whitelist");
                 boolean isWhitelist;

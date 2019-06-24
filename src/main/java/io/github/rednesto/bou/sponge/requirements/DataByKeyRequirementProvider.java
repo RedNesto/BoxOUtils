@@ -23,9 +23,9 @@
  */
 package io.github.rednesto.bou.sponge.requirements;
 
-import io.github.rednesto.bou.common.requirement.CustomLootRequirement;
-import io.github.rednesto.bou.common.requirement.CustomLootRequirementProvider;
+import io.github.rednesto.bou.common.requirement.Requirement;
 import io.github.rednesto.bou.common.requirement.RequirementConfigurationException;
+import io.github.rednesto.bou.common.requirement.RequirementProvider;
 import io.github.rednesto.bou.sponge.SpongeUtils;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
@@ -37,7 +37,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class DataByKeyRequirementProvider<C extends ValueContainer<C>> implements CustomLootRequirementProvider {
+public class DataByKeyRequirementProvider<C extends ValueContainer<C>> implements RequirementProvider {
 
     private final String id;
     private final Class<C> requirementType;
@@ -53,7 +53,7 @@ public class DataByKeyRequirementProvider<C extends ValueContainer<C>> implement
     }
 
     @Override
-    public CustomLootRequirement<?> provide(ConfigurationNode node) throws RequirementConfigurationException {
+    public Requirement<?> provide(ConfigurationNode node) throws RequirementConfigurationException {
         if (!node.hasMapChildren()) {
             throw new RequirementConfigurationException("A data requirement does not have any data keys to check");
         }

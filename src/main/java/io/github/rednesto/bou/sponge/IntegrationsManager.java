@@ -24,7 +24,7 @@
 package io.github.rednesto.bou.sponge;
 
 import io.github.rednesto.bou.common.Config;
-import io.github.rednesto.bou.common.requirement.CustomLootRequirementProvider;
+import io.github.rednesto.bou.common.requirement.RequirementProvider;
 import io.github.rednesto.bou.sponge.integration.ByteItemsCustomDropsProvider;
 import io.github.rednesto.bou.sponge.integration.FileInventoriesCustomDropsProvider;
 import io.github.rednesto.bou.sponge.integration.requirements.GriefPreventionRegionRequirement;
@@ -50,7 +50,7 @@ public final class IntegrationsManager {
     private final CustomDropsProvider defaultCustomDropsProvider = new VanillaCustomDropsProvider();
     private final Map<String, CustomDropsProvider> customDropsProviders = new HashMap<>();
 
-    private final Map<String, CustomLootRequirementProvider> requirementProviders = new HashMap<>();
+    private final Map<String, RequirementProvider> requirementProviders = new HashMap<>();
 
     private IntegrationsManager() {
         register(defaultCustomDropsProvider);
@@ -64,7 +64,7 @@ public final class IntegrationsManager {
             customDropsProvider.init(BoxOUtils.getInstance());
     }
 
-    public void register(CustomLootRequirementProvider requirementProvider) {
+    public void register(RequirementProvider requirementProvider) {
         requirementProviders.put(requirementProvider.getId(), requirementProvider);
     }
 
@@ -84,7 +84,7 @@ public final class IntegrationsManager {
     }
 
     @Nullable
-    public CustomLootRequirementProvider getRequirementProvider(String id) {
+    public RequirementProvider getRequirementProvider(String id) {
         return requirementProviders.get(id);
     }
 
@@ -105,7 +105,7 @@ public final class IntegrationsManager {
             try {
                 // This integration cannot be on the plugin's classpath, so we must use reflection to get it
                 Class<?> universeguardProvider = Class.forName("io.github.rednesto.bou.sponge.integration.universeguard.UniverseGuardRegionRequirement$Provider");
-                register((CustomLootRequirementProvider) universeguardProvider.newInstance());
+                register((RequirementProvider) universeguardProvider.newInstance());
             } catch (InstantiationException | IllegalAccessException e) {
                 BoxOUtils.getInstance().getLogger().error("Could not instantiate UniverseGuardRegionRequirement.Provider", e);
             } catch (ClassNotFoundException e) {

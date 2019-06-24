@@ -23,7 +23,7 @@
  */
 package io.github.rednesto.bou.common.requirement;
 
-public interface CustomLootRequirement<T> {
+public interface Requirement<T> {
 
     Class<T> getApplicableType();
 

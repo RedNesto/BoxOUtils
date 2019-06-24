@@ -23,9 +23,9 @@
  */
 package io.github.rednesto.bou.sponge.integration.requirements;
 
-import io.github.rednesto.bou.common.requirement.CustomLootRequirement;
-import io.github.rednesto.bou.common.requirement.CustomLootRequirementProvider;
+import io.github.rednesto.bou.common.requirement.Requirement;
 import io.github.rednesto.bou.common.requirement.RequirementConfigurationException;
+import io.github.rednesto.bou.common.requirement.RequirementProvider;
 import me.ryanhamshire.griefprevention.GriefPrevention;
 import me.ryanhamshire.griefprevention.api.claim.Claim;
 import me.ryanhamshire.griefprevention.api.claim.ClaimManager;
@@ -40,7 +40,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-public class GriefPreventionRegionRequirement implements CustomLootRequirement<LocatableSnapshot> {
+public class GriefPreventionRegionRequirement implements Requirement<LocatableSnapshot> {
 
     private final List<Object> regions;
     private final boolean isWhitelist;
@@ -88,7 +88,7 @@ public class GriefPreventionRegionRequirement implements CustomLootRequirement<L
         return !isWhitelist;
     }
 
-    public static class Provider implements CustomLootRequirementProvider {
+    public static class Provider implements RequirementProvider {
 
         @Override
         public String getId() {
@@ -96,7 +96,7 @@ public class GriefPreventionRegionRequirement implements CustomLootRequirement<L
         }
 
         @Override
-        public CustomLootRequirement<?> provide(ConfigurationNode node) throws RequirementConfigurationException {
+        public Requirement<?> provide(ConfigurationNode node) throws RequirementConfigurationException {
             try {
                 String listType = node.getNode("list-type").getString("whitelist");
                 boolean isWhitelist;

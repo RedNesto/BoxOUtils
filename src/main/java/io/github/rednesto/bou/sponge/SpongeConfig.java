@@ -30,9 +30,9 @@ import io.github.rednesto.bou.common.lootReuse.SimpleLootReuse;
 import io.github.rednesto.bou.common.quantity.BoundedIntQuantity;
 import io.github.rednesto.bou.common.quantity.FixedIntQuantity;
 import io.github.rednesto.bou.common.quantity.IIntQuantity;
-import io.github.rednesto.bou.common.requirement.CustomLootRequirement;
-import io.github.rednesto.bou.common.requirement.CustomLootRequirementProvider;
+import io.github.rednesto.bou.common.requirement.Requirement;
 import io.github.rednesto.bou.common.requirement.RequirementConfigurationException;
+import io.github.rednesto.bou.common.requirement.RequirementProvider;
 import io.github.rednesto.bou.sponge.listeners.BlockSpawnersListener;
 import io.github.rednesto.bou.sponge.listeners.CustomBlockDropsListener;
 import io.github.rednesto.bou.sponge.listeners.CustomMobDropsListener;
@@ -152,7 +152,7 @@ public class SpongeConfig {
                 }
 
                 ConfigurationNode requirementsNode = node.getNode("requirements");
-                List<CustomLootRequirement<?>> requirements = !requirementsNode.isVirtual() ? readRequirements(plugin, requirementsNode) : Collections.emptyList();
+                List<Requirement<?>> requirements = !requirementsNode.isVirtual() ? readRequirements(plugin, requirementsNode) : Collections.emptyList();
 
                 Config.CUSTOM_BLOCKS_DROPS.put((String) child.getKey(),
                         new CustomLoot(itemLoots, node.getNode("experience").getInt(), node.getNode("overwrite").getBoolean(false),
@@ -182,7 +182,7 @@ public class SpongeConfig {
                 }
 
                 ConfigurationNode requirementsNode = node.getNode("requirements");
-                List<CustomLootRequirement<?>> requirements = !requirementsNode.isVirtual() ? readRequirements(plugin, requirementsNode) : Collections.emptyList();
+                List<Requirement<?>> requirements = !requirementsNode.isVirtual() ? readRequirements(plugin, requirementsNode) : Collections.emptyList();
 
                 Config.CUSTOM_MOBS_DROPS.put((String) child.getKey(), new CustomLoot(itemLoots, node.getNode("experience").getInt(),
                         node.getNode("overwrite").getBoolean(false), node.getNode("exp-overwrite").getBoolean(false), requirements, readMoneyLoot(plugin, node.getNode("money")), reuse));
@@ -263,13 +263,13 @@ public class SpongeConfig {
         return HoconConfigurationLoader.builder().setPath(destFile).build().load();
     }
 
-    private static List<CustomLootRequirement<?>> readRequirements(BoxOUtils plugin, ConfigurationNode requirementsNode) {
-        List<CustomLootRequirement<?>> requirements = new ArrayList<>();
+    private static List<Requirement<?>> readRequirements(BoxOUtils plugin, ConfigurationNode requirementsNode) {
+        List<Requirement<?>> requirements = new ArrayList<>();
         for (Map.Entry<Object, ? extends ConfigurationNode> requirement : requirementsNode.getChildrenMap().entrySet()) {
             String key = requirement.getKey().toString();
             ConfigurationNode value = requirement.getValue();
 
-            CustomLootRequirementProvider requirementProvider = IntegrationsManager.INSTANCE.getRequirementProvider(key);
+            RequirementProvider requirementProvider = IntegrationsManager.INSTANCE.getRequirementProvider(key);
             if (requirementProvider != null) {
                 try {
                     requirements.add(requirementProvider.provide(value));
@@ -294,7 +294,7 @@ public class SpongeConfig {
         }
 
         ConfigurationNode requirementsNode = reuseNode.getNode("requirements");
-        List<CustomLootRequirement<?>> requirements = !requirementsNode.isVirtual() ? readRequirements(plugin, requirementsNode) : Collections.emptyList();
+        List<Requirement<?>> requirements = !requirementsNode.isVirtual() ? readRequirements(plugin, requirementsNode) : Collections.emptyList();
         return new CustomLoot.Reuse(multiplier, reuses, requirements);
     }
 

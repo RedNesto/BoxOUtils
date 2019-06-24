@@ -25,7 +25,7 @@ package io.github.rednesto.bou.common.requirement;
 
 import ninja.leaping.configurate.ConfigurationNode;
 
-public interface CustomLootRequirementProvider {
+public interface RequirementProvider {
 
     /**
      * @return the id used in the 'requirements' part of CustomLoots.
@@ -41,5 +41,5 @@ public interface CustomLootRequirementProvider {
      *
      * @throws RequirementConfigurationException if the configuration is invalid (like missing values)
      */
-    CustomLootRequirement<?> provide(ConfigurationNode node) throws RequirementConfigurationException;
+    Requirement<?> provide(ConfigurationNode node) throws RequirementConfigurationException;
 }

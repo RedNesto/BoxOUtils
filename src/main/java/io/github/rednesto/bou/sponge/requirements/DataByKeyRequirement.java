@@ -23,7 +23,7 @@
  */
 package io.github.rednesto.bou.sponge.requirements;
 
-import io.github.rednesto.bou.common.requirement.CustomLootRequirement;
+import io.github.rednesto.bou.common.requirement.Requirement;
 import io.github.rednesto.bou.sponge.BoxOUtils;
 import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.Sponge;
@@ -34,7 +34,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-public class DataByKeyRequirement<C extends ValueContainer<C>> implements CustomLootRequirement<C> {
+public class DataByKeyRequirement<C extends ValueContainer<C>> implements Requirement<C> {
 
     private final Class<C> applicableType;
     private final Map<String, List<String>> requiredData;

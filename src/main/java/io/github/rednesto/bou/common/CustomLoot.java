@@ -24,7 +24,7 @@
 package io.github.rednesto.bou.common;
 
 import io.github.rednesto.bou.common.lootReuse.LootReuse;
-import io.github.rednesto.bou.common.requirement.CustomLootRequirement;
+import io.github.rednesto.bou.common.requirement.Requirement;
 
 import java.util.Collection;
 import java.util.List;
@@ -38,7 +38,7 @@ public class CustomLoot {
     private int experience;
     private boolean overwrite;
     private boolean expOverwrite;
-    private Collection<CustomLootRequirement<?>> requirements;
+    private Collection<Requirement<?>> requirements;
     @Nullable
     private MoneyLoot moneyLoot;
     @Nullable
@@ -48,7 +48,7 @@ public class CustomLoot {
                       int experience,
                       boolean overwrite,
                       boolean expOverwrite,
-                      Collection<CustomLootRequirement<?>> requirements,
+                      Collection<Requirement<?>> requirements,
                       @Nullable MoneyLoot moneyLoot,
                       @Nullable Reuse reuse) {
         this.itemLoots = itemLoots;
@@ -76,7 +76,7 @@ public class CustomLoot {
         return expOverwrite;
     }
 
-    public Collection<CustomLootRequirement<?>> getRequirements() {
+    public Collection<Requirement<?>> getRequirements() {
         return requirements;
     }
 
@@ -94,9 +94,9 @@ public class CustomLoot {
 
         private float multiplier;
         private Map<String, LootReuse> items;
-        private Collection<CustomLootRequirement<?>> requirements;
+        private Collection<Requirement<?>> requirements;
 
-        public Reuse(float multiplier, Map<String, LootReuse> items, Collection<CustomLootRequirement<?>> requirements) {
+        public Reuse(float multiplier, Map<String, LootReuse> items, Collection<Requirement<?>> requirements) {
             this.multiplier = multiplier;
             this.items = items;
             this.requirements = requirements;
@@ -110,7 +110,7 @@ public class CustomLoot {
             return items;
         }
 
-        public Collection<CustomLootRequirement<?>> getRequirements() {
+        public Collection<Requirement<?>> getRequirements() {
             return requirements;
         }
     }

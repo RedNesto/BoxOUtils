@@ -28,7 +28,7 @@ import io.github.rednesto.bou.common.ItemLoot;
 import io.github.rednesto.bou.common.MoneyLoot;
 import io.github.rednesto.bou.common.lootReuse.LootReuse;
 import io.github.rednesto.bou.common.quantity.IIntQuantity;
-import io.github.rednesto.bou.common.requirement.CustomLootRequirement;
+import io.github.rednesto.bou.common.requirement.Requirement;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.key.Keys;
@@ -83,12 +83,12 @@ public class CustomDropsProcessor {
         }
     }
 
-    public static boolean fulfillsRequirements(Object source, Collection<CustomLootRequirement<?>> requirements) {
+    public static boolean fulfillsRequirements(Object source, Collection<Requirement<?>> requirements) {
         if (requirements.isEmpty()) {
             return true;
         }
 
-        for (CustomLootRequirement value : requirements) {
+        for (Requirement value : requirements) {
             //noinspection unchecked
             if (!value.getApplicableType().isAssignableFrom(source.getClass()) || !value.appliesTo(source)) {
                 continue;
