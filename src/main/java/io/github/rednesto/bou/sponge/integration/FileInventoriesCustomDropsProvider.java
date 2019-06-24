@@ -24,7 +24,7 @@
 package io.github.rednesto.bou.sponge.integration;
 
 import io.github.rednesto.bou.sponge.BoxOUtils;
-import io.github.rednesto.bou.sponge.ICustomDropsProvider;
+import io.github.rednesto.bou.sponge.CustomDropsProvider;
 import io.github.rednesto.fileinventories.api.FileInventoriesService;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
@@ -38,7 +38,7 @@ import java.util.stream.Stream;
 
 import javax.annotation.Nullable;
 
-public class FileInventoriesCustomDropsProvider implements ICustomDropsProvider {
+public class FileInventoriesCustomDropsProvider implements CustomDropsProvider {
 
     @Override
     public void init(BoxOUtils plugin) {

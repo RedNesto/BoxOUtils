@@ -23,7 +23,7 @@
  */
 package io.github.rednesto.bou.sponge.integration.vanilla;
 
-import io.github.rednesto.bou.sponge.ICustomDropsProvider;
+import io.github.rednesto.bou.sponge.CustomDropsProvider;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.ItemType;
@@ -33,7 +33,7 @@ import java.util.Optional;
 
 import javax.annotation.Nullable;
 
-public class VanillaCustomDropsProvider implements ICustomDropsProvider {
+public class VanillaCustomDropsProvider implements CustomDropsProvider {
 
     @Override
     public String getId() {

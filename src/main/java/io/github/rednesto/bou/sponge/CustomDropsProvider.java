@@ -30,7 +30,7 @@ import java.util.Optional;
 
 import javax.annotation.Nullable;
 
-public interface ICustomDropsProvider {
+public interface CustomDropsProvider {
 
     default void init(BoxOUtils plugin) {}
 

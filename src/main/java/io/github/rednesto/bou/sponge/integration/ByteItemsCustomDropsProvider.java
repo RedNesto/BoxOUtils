@@ -25,7 +25,7 @@ package io.github.rednesto.bou.sponge.integration;
 
 import de.randombyte.byteitems.api.ByteItemsService;
 import io.github.rednesto.bou.sponge.BoxOUtils;
-import io.github.rednesto.bou.sponge.ICustomDropsProvider;
+import io.github.rednesto.bou.sponge.CustomDropsProvider;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
@@ -37,7 +37,7 @@ import java.util.Optional;
 
 import javax.annotation.Nullable;
 
-public class ByteItemsCustomDropsProvider implements ICustomDropsProvider {
+public class ByteItemsCustomDropsProvider implements CustomDropsProvider {
 
     @Nullable
     private ByteItemsService backingService;

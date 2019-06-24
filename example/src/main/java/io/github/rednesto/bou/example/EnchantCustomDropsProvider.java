@@ -24,7 +24,7 @@
 package io.github.rednesto.bou.example;
 
 import io.github.rednesto.bou.sponge.BoxOUtils;
-import io.github.rednesto.bou.sponge.ICustomDropsProvider;
+import io.github.rednesto.bou.sponge.CustomDropsProvider;
 import io.github.rednesto.bou.sponge.IntegrationsManager;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.entity.living.player.Player;
@@ -37,7 +37,7 @@ import java.util.Optional;
 
 import javax.annotation.Nullable;
 
-public class EnchantCustomDropsProvider implements ICustomDropsProvider {
+public class EnchantCustomDropsProvider implements CustomDropsProvider {
 
     private final BouIntegrationExample plugin;
 

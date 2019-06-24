@@ -47,8 +47,8 @@ public final class IntegrationsManager {
     public static final IntegrationsManager INSTANCE = new IntegrationsManager();
 
     private boolean customDropsProvidersInit = false;
-    private final ICustomDropsProvider defaultCustomDropsProvider = new VanillaCustomDropsProvider();
-    private final Map<String, ICustomDropsProvider> customDropsProviders = new HashMap<>();
+    private final CustomDropsProvider defaultCustomDropsProvider = new VanillaCustomDropsProvider();
+    private final Map<String, CustomDropsProvider> customDropsProviders = new HashMap<>();
 
     private final Map<String, CustomLootRequirementProvider> requirementProviders = new HashMap<>();
 
@@ -58,7 +58,7 @@ public final class IntegrationsManager {
         register(new DataByKeyRequirementProvider<>("entity_data", EntitySnapshot.class));
     }
 
-    public void register(ICustomDropsProvider customDropsProvider) {
+    public void register(CustomDropsProvider customDropsProvider) {
         customDropsProviders.put(customDropsProvider.getId(), customDropsProvider);
         if (customDropsProvidersInit)
             customDropsProvider.init(BoxOUtils.getInstance());
@@ -68,7 +68,7 @@ public final class IntegrationsManager {
         requirementProviders.put(requirementProvider.getId(), requirementProvider);
     }
 
-    public ICustomDropsProvider getDefaultCustomDropsProvider() {
+    public CustomDropsProvider getDefaultCustomDropsProvider() {
         return defaultCustomDropsProvider;
     }
 
@@ -76,7 +76,7 @@ public final class IntegrationsManager {
         if (providerId == null)
             return defaultCustomDropsProvider.createItemStack(id, targetPlayer);
 
-        ICustomDropsProvider provider = customDropsProviders.get(providerId);
+        CustomDropsProvider provider = customDropsProviders.get(providerId);
         if (provider != null)
             return provider.createItemStack(id, targetPlayer);
 
@@ -125,7 +125,7 @@ public final class IntegrationsManager {
 
         customDropsProvidersInit = true;
         defaultCustomDropsProvider.init(plugin);
-        for (ICustomDropsProvider provider : customDropsProviders.values()) {
+        for (CustomDropsProvider provider : customDropsProviders.values()) {
             provider.init(plugin);
         }
     }
