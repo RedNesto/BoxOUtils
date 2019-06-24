@@ -7,7 +7,7 @@ repositories {
 dependencies {
     compileOnly 'org.spongepowered:spongeapi:7.1.0'
 
-    compileOnly project(':sponge')
+    compileOnly rootProject
 
     compileOnly fileTree(dir: 'libs', include: '*.jar')
 }

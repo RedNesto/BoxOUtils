@@ -1,14 +1,14 @@
 rootProject.name = 'BoxOUtils'
 
-include 'common', 'sponge', 'sponge:example'
+include 'example'
 
-for (integration in file('sponge/integrations').listFiles()) {
+for (integration in file('integrations').listFiles()) {
     if (!integration.isDirectory()) {
         continue
     }
 
     if (existsAndNonEmpty(new File(integration, "libs"))) {
-        include 'sponge:integrations:' + integration.name
+        include 'integrations:' + integration.name
     }
 }
 

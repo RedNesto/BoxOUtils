@@ -4,8 +4,10 @@
 
 !/gradle/
 
-!/common/
-!/sponge/
+!/example/
+!/integrations/
+
+!/src/
 
 !/build.gradle
 !/gradle.properties
@@ -13,6 +15,8 @@
 
 !/gradlew
 !/gradlew.bat
+
+!/calculation.txt
 
 !/LICENSE
 !/README.md
