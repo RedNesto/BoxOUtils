@@ -1,6 +1,6 @@
 rootProject.name = 'BoxOUtils'
 
-include 'common', /*'spigot',*/ 'sponge', 'sponge:example'
+include 'common', 'sponge', 'sponge:example'
 
 for (integration in file('sponge/integrations').listFiles()) {
     if (!integration.isDirectory()) {

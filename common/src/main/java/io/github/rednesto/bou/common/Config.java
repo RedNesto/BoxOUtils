@@ -192,7 +192,7 @@ public class Config {
     public static boolean CUSTOM_BLOCKS_DROPS_ENABLED = false;
 
     /**
-     * A Map which have for key the ID (Spigot: Material, Sponge: Minecraft Item ID) and for value the list of items to loot
+     * A Map which have for key the ID and for value the list of items to loot
      */
     public static Map<String, CustomLoot> CUSTOM_BLOCKS_DROPS = new HashMap<>();
 
@@ -206,7 +206,7 @@ public class Config {
     public static boolean CUSTOM_MOBS_DROPS_ENABLED = false;
 
     /**
-     * A Map which have for key the ID (Spigot: Material, Sponge: Minecraft Item ID) and for value the list of items to loot
+     * A Map which have for key the ID and for value the list of items to loot
      */
     public static Map<String, CustomLoot> CUSTOM_MOBS_DROPS = new HashMap<>();
 
@@ -220,7 +220,7 @@ public class Config {
     public static boolean BLOCK_SPAWNERS_ENABLED = false;
 
     /**
-     * A Map which have for key the ID (Spigot: Material, Sponge: Minecraft Item ID) and for value the list of items to loot
+     * A Map which have for key the ID and for value the list of items to loot
      */
     public static Map<String, List<SpawnedMob>> BLOCK_SPAWNERS_DROPS = new HashMap<>();
 
