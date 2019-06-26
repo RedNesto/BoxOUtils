@@ -23,7 +23,10 @@
  */
 package io.github.rednesto.bou.common;
 
+import com.google.common.base.MoreObjects;
 import io.github.rednesto.bou.common.quantity.IIntQuantity;
+
+import java.util.Objects;
 
 import javax.annotation.Nullable;
 
@@ -59,5 +62,31 @@ public class MoneyLoot {
     @Nullable
     public String getMessage() {
         return message;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof MoneyLoot)) {
+            return false;
+        }
+
+        MoneyLoot moneyLoot = (MoneyLoot) o;
+        return Double.compare(moneyLoot.chance, chance) == 0 &&
+                amount.equals(moneyLoot.amount) &&
+                Objects.equals(currencyId, moneyLoot.currencyId) &&
+                Objects.equals(message, moneyLoot.message);
+    }
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+                .add("amount", amount)
+                .add("currencyId", currencyId)
+                .add("chance", chance)
+                .add("message", message)
+                .toString();
     }
 }

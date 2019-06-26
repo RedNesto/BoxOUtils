@@ -74,6 +74,6 @@ public class DataByKeyRequirementProvider<C extends ValueContainer<C>> implement
         }
 
 
-        return new DataByKeyRequirement<>(this.requirementType, requiredData);
+        return new DataByKeyRequirement<>(getId(), this.requirementType, requiredData);
     }
 }

@@ -1,5 +1,7 @@
 package io.github.rednesto.bou.common;
 
+import com.google.common.base.MoreObjects;
+
 public class FastHarvestCrop {
 
     private int chance;
@@ -34,6 +36,34 @@ public class FastHarvestCrop {
 
     public int getMinimum() {
         return minimum;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof FastHarvestCrop)) {
+            return false;
+        }
+
+        FastHarvestCrop that = (FastHarvestCrop) o;
+        return chance == that.chance &&
+                chanceOf == that.chanceOf &&
+                count == that.count &&
+                fortuneFactor == that.fortuneFactor &&
+                minimum == that.minimum;
+    }
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+                .add("chance", chance)
+                .add("chanceOf", chanceOf)
+                .add("count", count)
+                .add("fortuneFactor", fortuneFactor)
+                .add("minimum", minimum)
+                .toString();
     }
 
     public static FastHarvestCrop createDefault() {

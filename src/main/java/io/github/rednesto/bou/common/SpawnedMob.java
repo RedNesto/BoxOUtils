@@ -23,7 +23,10 @@
  */
 package io.github.rednesto.bou.common;
 
+import com.google.common.base.MoreObjects;
 import io.github.rednesto.bou.common.quantity.IIntQuantity;
+
+import java.util.Objects;
 
 import javax.annotation.Nullable;
 
@@ -51,5 +54,29 @@ public class SpawnedMob {
     @Nullable
     public IIntQuantity getQuantity() {
         return quantity;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof SpawnedMob)) {
+            return false;
+        }
+
+        SpawnedMob that = (SpawnedMob) o;
+        return Double.compare(that.chance, chance) == 0 &&
+                id.equals(that.id) &&
+                Objects.equals(quantity, that.quantity);
+    }
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+                .add("id", id)
+                .add("chance", chance)
+                .add("quantity", quantity)
+                .toString();
     }
 }

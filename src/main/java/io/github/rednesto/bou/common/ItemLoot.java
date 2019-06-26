@@ -23,7 +23,10 @@
  */
 package io.github.rednesto.bou.common;
 
+import com.google.common.base.MoreObjects;
 import io.github.rednesto.bou.common.quantity.IIntQuantity;
+
+import java.util.Objects;
 
 import javax.annotation.Nullable;
 
@@ -59,6 +62,10 @@ public class ItemLoot {
         return providerId;
     }
 
+    public double getChance() {
+        return chance;
+    }
+
     @Nullable
     public String getDisplayname() {
         return displayname;
@@ -67,5 +74,33 @@ public class ItemLoot {
     @Nullable
     public IIntQuantity getQuantity() {
         return quantity;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof ItemLoot)) {
+            return false;
+        }
+
+        ItemLoot itemLoot = (ItemLoot) o;
+        return Double.compare(itemLoot.chance, chance) == 0 &&
+                id.equals(itemLoot.id) &&
+                Objects.equals(providerId, itemLoot.providerId) &&
+                Objects.equals(displayname, itemLoot.displayname) &&
+                Objects.equals(quantity, itemLoot.quantity);
+    }
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+                .add("id", id)
+                .add("providerId", providerId)
+                .add("displayname", displayname)
+                .add("chance", chance)
+                .add("quantity", quantity)
+                .toString();
     }
 }

@@ -11,7 +11,10 @@ import ninja.leaping.configurate.objectmapping.serialize.TypeSerializer;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 public class CustomLootSerializer implements TypeSerializer<CustomLoot> {
 
@@ -26,7 +29,7 @@ public class CustomLootSerializer implements TypeSerializer<CustomLoot> {
 
         ConfigurationNode requirementsNode = value.getNode("requirements");
         Map<String, Requirement<?>> requirementsMap = requirementsNode.getValue(BouTypeTokens.REQUIREMENTS_MAP);
-        Collection<Requirement<?>> requirements = requirementsMap != null ? requirementsMap.values() : new ArrayList<>();
+        List<Requirement<?>> requirements = requirementsMap != null ? new ArrayList<>(requirementsMap.values()) : new ArrayList<>();
 
         ConfigurationNode moneyNode = value.getNode("money");
         MoneyLoot moneyLoot = !moneyNode.isVirtual() ? moneyNode.getValue(BouTypeTokens.MONEY_LOOT) : null;

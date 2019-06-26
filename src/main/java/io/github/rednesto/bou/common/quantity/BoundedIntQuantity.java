@@ -23,6 +23,8 @@
  */
 package io.github.rednesto.bou.common.quantity;
 
+import com.google.common.base.MoreObjects;
+
 import java.util.Random;
 
 public class BoundedIntQuantity implements IIntQuantity {
@@ -57,5 +59,27 @@ public class BoundedIntQuantity implements IIntQuantity {
         int from = Integer.parseInt(bounds[0]);
         int to = Integer.parseInt(bounds[1]);
         return new BoundedIntQuantity(from, to);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof BoundedIntQuantity)) {
+            return false;
+        }
+
+        BoundedIntQuantity that = (BoundedIntQuantity) o;
+        return from == that.from &&
+                to == that.to;
+    }
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+                .add("from", from)
+                .add("to", to)
+                .toString();
     }
 }

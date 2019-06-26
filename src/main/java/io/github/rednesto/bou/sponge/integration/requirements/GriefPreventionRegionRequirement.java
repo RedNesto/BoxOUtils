@@ -23,6 +23,8 @@
  */
 package io.github.rednesto.bou.sponge.integration.requirements;
 
+import com.google.common.base.MoreObjects;
+import io.github.rednesto.bou.common.requirement.AbstractRequirement;
 import io.github.rednesto.bou.common.requirement.Requirement;
 import io.github.rednesto.bou.common.requirement.RequirementConfigurationException;
 import io.github.rednesto.bou.common.requirement.RequirementProvider;
@@ -41,12 +43,13 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-public class GriefPreventionRegionRequirement implements Requirement<LocatableSnapshot> {
+public class GriefPreventionRegionRequirement extends AbstractRequirement<LocatableSnapshot> {
 
     private final List<Object> regions;
     private final boolean isWhitelist;
 
     public GriefPreventionRegionRequirement(List<String> regions, boolean isWhitelist) {
+        super("griefprevention", LocatableSnapshot.class);
         this.regions = regions.stream().map(id -> {
             try {
                 return UUID.fromString(id);
@@ -55,11 +58,6 @@ public class GriefPreventionRegionRequirement implements Requirement<LocatableSn
             }
         }).collect(Collectors.toList());
         this.isWhitelist = isWhitelist;
-    }
-
-    @Override
-    public Class<LocatableSnapshot> getApplicableType() {
-        return LocatableSnapshot.class;
     }
 
     @Override
@@ -87,6 +85,33 @@ public class GriefPreventionRegionRequirement implements Requirement<LocatableSn
         }
 
         return !isWhitelist;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof GriefPreventionRegionRequirement)) {
+            return false;
+        }
+        if (!super.equals(o)) {
+            return false;
+        }
+
+        GriefPreventionRegionRequirement that = (GriefPreventionRegionRequirement) o;
+        return isWhitelist == that.isWhitelist &&
+                regions.equals(that.regions);
+    }
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+                .add("id", getId())
+                .add("applicableType", getApplicableType())
+                .add("regions", regions)
+                .add("isWhitelist", isWhitelist)
+                .toString();
     }
 
     public static class Provider implements RequirementProvider {

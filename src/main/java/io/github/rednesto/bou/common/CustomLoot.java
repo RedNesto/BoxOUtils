@@ -23,12 +23,14 @@
  */
 package io.github.rednesto.bou.common;
 
+import com.google.common.base.MoreObjects;
 import io.github.rednesto.bou.common.lootReuse.LootReuse;
 import io.github.rednesto.bou.common.requirement.Requirement;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import javax.annotation.Nullable;
 
@@ -38,7 +40,7 @@ public class CustomLoot {
     private int experience;
     private boolean overwrite;
     private boolean expOverwrite;
-    private Collection<Requirement<?>> requirements;
+    private List<Requirement<?>> requirements;
     @Nullable
     private MoneyLoot moneyLoot;
     @Nullable
@@ -48,7 +50,7 @@ public class CustomLoot {
                       int experience,
                       boolean overwrite,
                       boolean expOverwrite,
-                      Collection<Requirement<?>> requirements,
+                      List<Requirement<?>> requirements,
                       @Nullable MoneyLoot moneyLoot,
                       @Nullable Reuse reuse) {
         this.itemLoots = itemLoots;
@@ -76,7 +78,7 @@ public class CustomLoot {
         return expOverwrite;
     }
 
-    public Collection<Requirement<?>> getRequirements() {
+    public List<Requirement<?>> getRequirements() {
         return requirements;
     }
 
@@ -88,6 +90,38 @@ public class CustomLoot {
     @Nullable
     public Reuse getReuse() {
         return reuse;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof CustomLoot)) {
+            return false;
+        }
+
+        CustomLoot that = (CustomLoot) o;
+        return experience == that.experience &&
+                overwrite == that.overwrite &&
+                expOverwrite == that.expOverwrite &&
+                itemLoots.equals(that.itemLoots) &&
+                requirements.equals(that.requirements) &&
+                Objects.equals(moneyLoot, that.moneyLoot) &&
+                Objects.equals(reuse, that.reuse);
+    }
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+                .add("itemLoots", itemLoots)
+                .add("experience", experience)
+                .add("overwrite", overwrite)
+                .add("expOverwrite", expOverwrite)
+                .add("requirements", requirements)
+                .add("moneyLoot", moneyLoot)
+                .add("reuse", reuse)
+                .toString();
     }
 
     public static class Reuse {
@@ -112,6 +146,21 @@ public class CustomLoot {
 
         public Collection<Requirement<?>> getRequirements() {
             return requirements;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (!(o instanceof Reuse)) {
+                return false;
+            }
+
+            Reuse reuse = (Reuse) o;
+            return Float.compare(reuse.multiplier, multiplier) == 0 &&
+                    items.equals(reuse.items) &&
+                    requirements.equals(reuse.requirements);
         }
     }
 }

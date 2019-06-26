@@ -23,7 +23,8 @@
  */
 package io.github.rednesto.bou.sponge.requirements;
 
-import io.github.rednesto.bou.common.requirement.Requirement;
+import com.google.common.base.MoreObjects;
+import io.github.rednesto.bou.common.requirement.AbstractRequirement;
 import io.github.rednesto.bou.sponge.BoxOUtils;
 import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.Sponge;
@@ -34,19 +35,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-public class DataByKeyRequirement<C extends ValueContainer<C>> implements Requirement<C> {
+public class DataByKeyRequirement<C extends ValueContainer<C>> extends AbstractRequirement<C> {
 
-    private final Class<C> applicableType;
     private final Map<String, List<String>> requiredData;
 
-    public DataByKeyRequirement(Class<C> applicableType, Map<String, List<String>> requiredData) {
-        this.applicableType = applicableType;
+    public DataByKeyRequirement(String id, Class<C> applicableType, Map<String, List<String>> requiredData) {
+        super(id, applicableType);
         this.requiredData = requiredData;
-    }
-
-    @Override
-    public Class<C> getApplicableType() {
-        return this.applicableType;
     }
 
     @Override
@@ -76,5 +71,30 @@ public class DataByKeyRequirement<C extends ValueContainer<C>> implements Requir
         }
 
         return true;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof DataByKeyRequirement)) {
+            return false;
+        }
+        if (!super.equals(o)) {
+            return false;
+        }
+
+        DataByKeyRequirement<?> that = (DataByKeyRequirement<?>) o;
+        return requiredData.equals(that.requiredData);
+    }
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+                .add("id", getId())
+                .add("applicableType", getApplicableType())
+                .add("requiredData", requiredData)
+                .toString();
     }
 }

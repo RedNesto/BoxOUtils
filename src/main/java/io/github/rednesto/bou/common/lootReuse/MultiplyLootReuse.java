@@ -23,6 +23,8 @@
  */
 package io.github.rednesto.bou.common.lootReuse;
 
+import com.google.common.base.MoreObjects;
+
 public class MultiplyLootReuse implements LootReuse {
 
     private final float multiplier;
@@ -34,5 +36,25 @@ public class MultiplyLootReuse implements LootReuse {
     @Override
     public int computeQuantity(int original) {
         return Math.round(original * this.multiplier);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof MultiplyLootReuse)) {
+            return false;
+        }
+
+        MultiplyLootReuse that = (MultiplyLootReuse) o;
+        return Float.compare(that.multiplier, multiplier) == 0;
+    }
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+                .add("multiplier", multiplier)
+                .toString();
     }
 }

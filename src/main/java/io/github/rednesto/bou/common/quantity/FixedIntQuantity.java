@@ -23,6 +23,8 @@
  */
 package io.github.rednesto.bou.common.quantity;
 
+import com.google.common.base.MoreObjects;
+
 public class FixedIntQuantity implements IIntQuantity {
 
     private final int quantity;
@@ -34,5 +36,25 @@ public class FixedIntQuantity implements IIntQuantity {
     @Override
     public int get() {
         return quantity;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof FixedIntQuantity)) {
+            return false;
+        }
+
+        FixedIntQuantity that = (FixedIntQuantity) o;
+        return quantity == that.quantity;
+    }
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+                .add("quantity", quantity)
+                .toString();
     }
 }

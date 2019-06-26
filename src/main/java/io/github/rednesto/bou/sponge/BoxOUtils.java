@@ -57,11 +57,8 @@ import java.util.HashMap;
 )
 public class BoxOUtils {
 
-    @Inject
     private Logger logger;
 
-    @Inject
-    @ConfigDir(sharedRoot = false)
     private Path configDir;
 
     private Config.BlocksDrops blocksDrops = new Config.BlocksDrops(false, new HashMap<>());
@@ -70,6 +67,12 @@ public class BoxOUtils {
     private Config.FastHarvest fastHarvest = Config.FastHarvest.createDefault();
 
     private static BoxOUtils instance;
+
+    @Inject
+    public BoxOUtils(Logger logger, @ConfigDir(sharedRoot = false) Path configDir) {
+        this.logger = logger;
+        this.configDir = configDir;
+    }
 
     @Listener
     public void onConstruction(GameConstructionEvent event) {

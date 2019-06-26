@@ -25,6 +25,8 @@ package io.github.rednesto.bou.common.requirement;
 
 public interface Requirement<T> {
 
+    String getId();
+
     Class<T> getApplicableType();
 
     /**

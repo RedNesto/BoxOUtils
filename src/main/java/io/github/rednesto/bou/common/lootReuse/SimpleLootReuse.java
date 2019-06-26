@@ -23,6 +23,7 @@
  */
 package io.github.rednesto.bou.common.lootReuse;
 
+import com.google.common.base.MoreObjects;
 import io.github.rednesto.bou.common.quantity.IIntQuantity;
 
 public class SimpleLootReuse implements LootReuse {
@@ -36,5 +37,25 @@ public class SimpleLootReuse implements LootReuse {
     @Override
     public int computeQuantity(int original) {
         return this.quantity.get();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof SimpleLootReuse)) {
+            return false;
+        }
+
+        SimpleLootReuse that = (SimpleLootReuse) o;
+        return quantity.equals(that.quantity);
+    }
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+                .add("quantity", quantity)
+                .toString();
     }
 }
