@@ -35,13 +35,15 @@ import org.spongepowered.api.event.filter.cause.First;
 import org.spongepowered.api.world.World;
 
 import java.util.List;
+import java.util.Map;
 
 public class BlockSpawnersListener {
 
     @Listener
     public void onBlockBreak(ChangeBlockEvent.Break event, @First Player player) {
+        Map<String, List<SpawnedMob>> spawners = Config.getBlockSpawners().spawners;
         event.getTransactions().forEach(transaction -> {
-            List<SpawnedMob> toSpawnMobs = Config.BLOCK_SPAWNERS_DROPS.get(transaction.getOriginal().getState().getType().getId());
+            List<SpawnedMob> toSpawnMobs = spawners.get(transaction.getOriginal().getState().getType().getId());
             if (toSpawnMobs == null)
                 return;
 

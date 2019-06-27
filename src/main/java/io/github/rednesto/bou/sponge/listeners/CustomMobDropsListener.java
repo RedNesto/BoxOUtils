@@ -38,6 +38,7 @@ import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
+import java.util.Map;
 import java.util.Optional;
 
 import javax.annotation.Nullable;
@@ -47,7 +48,8 @@ public class CustomMobDropsListener {
     @Listener
     public void onMobDeath(DestructEntityEvent.Death event) {
         Living targetEntity = event.getTargetEntity();
-        CustomLoot loot = Config.CUSTOM_MOBS_DROPS.get(targetEntity.getType().getId());
+        Map<String, CustomLoot> drops = Config.getMobsDrops().drops;
+        CustomLoot loot = drops.get(targetEntity.getType().getId());
         if (loot == null)
             return;
 
@@ -74,7 +76,8 @@ public class CustomMobDropsListener {
         if (entity == null)
             return;
 
-        CustomLoot customLoot = Config.CUSTOM_MOBS_DROPS.get(entity.getType().getId());
+        Map<String, CustomLoot> drops = Config.getMobsDrops().drops;
+        CustomLoot customLoot = drops.get(entity.getType().getId());
         if (customLoot != null && CustomDropsProcessor.fulfillsRequirements(entity.createSnapshot(), customLoot.getRequirements())) {
             CustomDropsProcessor.handleDropItemEvent(event, customLoot);
         }
@@ -88,7 +91,8 @@ public class CustomMobDropsListener {
 
             for (Object cause : event.getCause().noneOf(ExperienceOrb.class)) {
                 if (cause instanceof Entity) {
-                    CustomLoot customLoot = Config.CUSTOM_MOBS_DROPS.get(((Entity) cause).getType().getId());
+                    Map<String, CustomLoot> drops = Config.getMobsDrops().drops;
+                    CustomLoot customLoot = drops.get(((Entity) cause).getType().getId());
                     if (customLoot != null && customLoot.isExpOverwrite())
                         event.setCancelled(true);
                 }

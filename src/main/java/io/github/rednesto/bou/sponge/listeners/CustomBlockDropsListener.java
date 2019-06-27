@@ -39,13 +39,16 @@ import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
+import java.util.Map;
+
 public class CustomBlockDropsListener {
 
     @Listener
     public void onBlockBreak(ChangeBlockEvent.Break event, @First Player player) {
+        Map<String, CustomLoot> drops = Config.getBlocksDrops().drops;
         for (Transaction<BlockSnapshot> transaction : event.getTransactions()) {
             BlockSnapshot originalBlock = transaction.getOriginal();
-            CustomLoot loot = Config.CUSTOM_BLOCKS_DROPS.get(originalBlock.getState().getType().getId());
+            CustomLoot loot = drops.get(originalBlock.getState().getType().getId());
             if (loot == null) {
                 continue;
             }
@@ -63,7 +66,8 @@ public class CustomBlockDropsListener {
         if (block == null)
             return;
 
-        CustomLoot customLoot = Config.CUSTOM_BLOCKS_DROPS.get(block.getState().getType().getId());
+        Map<String, CustomLoot> drops = Config.getBlocksDrops().drops;
+        CustomLoot customLoot = drops.get(block.getState().getType().getId());
         if (customLoot != null && CustomDropsProcessor.fulfillsRequirements(block, customLoot.getRequirements())) {
             CustomDropsProcessor.handleDropItemEvent(event, customLoot);
         }
@@ -77,7 +81,8 @@ public class CustomBlockDropsListener {
 
             for (Object cause : event.getCause().noneOf(ExperienceOrb.class)) {
                 if (cause instanceof BlockSnapshot) {
-                    CustomLoot customLoot = Config.CUSTOM_BLOCKS_DROPS.get(((BlockSnapshot) cause).getState().getType().getId());
+                    Map<String, CustomLoot> drops = Config.getBlocksDrops().drops;
+                    CustomLoot customLoot = drops.get(((BlockSnapshot) cause).getState().getType().getId());
                     if (customLoot != null && customLoot.isExpOverwrite())
                         event.setCancelled(true);
                 }

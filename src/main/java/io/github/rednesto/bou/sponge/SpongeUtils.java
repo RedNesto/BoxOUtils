@@ -23,13 +23,34 @@
  */
 package io.github.rednesto.bou.sponge;
 
+import ninja.leaping.configurate.ConfigurationNode;
 import org.spongepowered.api.Platform;
 import org.spongepowered.api.Sponge;
+
+import javax.annotation.Nullable;
 
 public class SpongeUtils {
 
     // The implementation ID is always the same for the running instance
-    public static final String SPONGE_IMPL_ID = Sponge.getPlatform().getContainer(Platform.Component.IMPLEMENTATION).getId();
+    public static final String SPONGE_IMPL_ID;
+
+    static {
+        String spongeImplId;
+        try {
+            spongeImplId = Sponge.getPlatform().getContainer(Platform.Component.IMPLEMENTATION).getId();
+        } catch (IllegalStateException e) {
+            // ISE is thrown if Sponge is not initialized, like when unit-testing.
+            // But bou.is_testing is also set for integration tests,
+            // so we have to check for it only when an ISE is thrown here
+            if (Boolean.getBoolean("bou.is_testing")) {
+                spongeImplId = "sponge_impl";
+            } else {
+                throw e;
+            }
+        }
+
+        SPONGE_IMPL_ID = spongeImplId;
+    }
 
     public static String addMcNamespaceIfNeeded(String id) {
         return addNamespaceIfNeeded(id, "minecraft");
@@ -45,5 +66,19 @@ public class SpongeUtils {
         }
 
         return id;
+    }
+
+    @Nullable
+    public static ConfigurationNode getNthParent(ConfigurationNode node, int nth) {
+        ConfigurationNode parent = node.getParent();
+        for (int i = 1; i < nth; i++) {
+            if (parent == null) {
+                return null;
+            }
+
+            parent = parent.getParent();
+        }
+
+        return parent;
     }
 }

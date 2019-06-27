@@ -25,6 +25,7 @@ package io.github.rednesto.bou.sponge.listeners;
 
 import io.github.rednesto.bou.common.Config;
 import io.github.rednesto.bou.common.CropsAlgoritm;
+import io.github.rednesto.bou.common.FastHarvestCrop;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityTypes;
@@ -41,7 +42,7 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import java.util.List;
 import java.util.Optional;
 
-import static io.github.rednesto.bou.common.Config.*;
+import static io.github.rednesto.bou.common.Config.FastHarvest;
 
 public class FastHarvestListener {
 
@@ -50,7 +51,8 @@ public class FastHarvestListener {
 
     @Listener
     public void onSecondaryClick(InteractBlockEvent.Secondary.MainHand event, @First Player player) {
-        if (!FAST_HARVEST_ENABLED)
+        FastHarvest fastHarvest = Config.getFastHarvest();
+        if (!fastHarvest.enabled)
             return;
 
         switch(event.getTargetBlock().getState().getType().getId()) {
@@ -66,30 +68,32 @@ public class FastHarvestListener {
                         .map(Enchantment::getLevel)
                         .findFirst().orElse(0) : 0;
                 int age = event.getTargetBlock().get(Keys.GROWTH_STAGE).orElse(0);
+                FastHarvestCrop seedConfig = fastHarvest.seed;
                 int seedQuantity = CropsAlgoritm.ALG_19.compute(
                         age,
                         7,
-                        SEED_DROP_MINIMUM,
-                        SEED_DROP_COUNT,
+                        seedConfig.getMinimum(),
+                        seedConfig.getCount(),
                         level,
-                        SEED_DROP_FORTUNE_FACTOR,
-                        SEED_DROP_CHANCE,
-                        SEED_DROP_CHANCE_OF) - 1;
+                        seedConfig.getFortuneFactor(),
+                        seedConfig.getChance(),
+                        seedConfig.getChanceOf()) - 1;
                 if(seedQuantity > 0) {
                     seed.offer(Keys.REPRESENTED_ITEM, ItemStack.of(ItemTypes.WHEAT_SEEDS, seedQuantity).createSnapshot());
                     player.getWorld().spawnEntity(seed);
                 }
 
                 Entity wheat = player.getWorld().createEntity(EntityTypes.ITEM, event.getTargetBlock().getLocation().orElse(player.getLocation()).getPosition());
+                FastHarvestCrop wheatConfig = fastHarvest.wheat;
                 int wheatQuantity = CropsAlgoritm.ALG_19.compute(
                         age,
                         7,
-                        WHEAT_DROP_MINIMUM,
-                        WHEAT_DROP_COUNT,
+                        wheatConfig.getMinimum(),
+                        wheatConfig.getCount(),
                         level,
-                        WHEAT_DROP_FORTUNE_FACTOR,
-                        WHEAT_DROP_CHANCE,
-                        WHEAT_DROP_CHANCE_OF);
+                        wheatConfig.getFortuneFactor(),
+                        wheatConfig.getChance(),
+                        wheatConfig.getChanceOf());
                 wheat.offer(Keys.REPRESENTED_ITEM, ItemStack.of(ItemTypes.WHEAT, wheatQuantity).createSnapshot());
                 player.getWorld().spawnEntity(wheat);
 
@@ -107,16 +111,17 @@ public class FastHarvestListener {
                         .map(Enchantment::getLevel)
                         .findFirst().orElse(0) : 0;
                 age = event.getTargetBlock().get(Keys.GROWTH_STAGE).orElse(0);
+                FastHarvestCrop carrotConfig = fastHarvest.carrot;
                 carrot.offer(Keys.REPRESENTED_ITEM, ItemStack.of(ItemTypes.CARROT,
                         CropsAlgoritm.ALG_19.compute(
                                 age,
                                 7,
-                                CARROT_DROP_MINIMUM,
-                                CARROT_DROP_COUNT,
+                                carrotConfig.getMinimum(),
+                                carrotConfig.getCount(),
                                 level,
-                                CARROT_DROP_FORTUNE_FACTOR,
-                                CARROT_DROP_CHANCE,
-                                CARROT_DROP_CHANCE_OF) - 1).createSnapshot());
+                                carrotConfig.getFortuneFactor(),
+                                carrotConfig.getChance(),
+                                carrotConfig.getChanceOf()) - 1).createSnapshot());
                 player.getWorld().spawnEntity(carrot);
 
                 event.getTargetBlock().getLocation().ifPresent(location -> location.setBlock(event.getTargetBlock().getState().with(Keys.GROWTH_STAGE, 0).orElse(event.getTargetBlock().getState())));
@@ -133,16 +138,17 @@ public class FastHarvestListener {
                         .map(Enchantment::getLevel)
                         .findFirst().orElse(0) : 0;
                 age = event.getTargetBlock().get(Keys.GROWTH_STAGE).orElse(0);
+                FastHarvestCrop potatoConfig = fastHarvest.potato;
                 potato.offer(Keys.REPRESENTED_ITEM, ItemStack.of(ItemTypes.POTATO,
                         CropsAlgoritm.ALG_19.compute(
                                 age,
                                 7,
-                                POTATO_DROP_MINIMUM,
-                                POTATO_DROP_COUNT,
+                                potatoConfig.getMinimum(),
+                                potatoConfig.getCount(),
                                 level,
-                                POTATO_DROP_FORTUNE_FACTOR,
-                                POTATO_DROP_CHANCE,
-                                POTATO_DROP_CHANCE_OF) - 1).createSnapshot());
+                                potatoConfig.getFortuneFactor(),
+                                potatoConfig.getChance(),
+                                potatoConfig.getChanceOf()) - 1).createSnapshot());
                 player.getWorld().spawnEntity(potato);
 
                 event.getTargetBlock().getLocation().ifPresent(location -> location.setBlock(event.getTargetBlock().getState().with(Keys.GROWTH_STAGE, 0).orElse(event.getTargetBlock().getState())));
@@ -159,16 +165,17 @@ public class FastHarvestListener {
                         .map(Enchantment::getLevel)
                         .findFirst().orElse(0) : 0;
                 age = event.getTargetBlock().get(Keys.GROWTH_STAGE).orElse(0);
+                FastHarvestCrop beetrootSeedConfig = fastHarvest.beetrootSeed;
                 beetrootSeed.offer(Keys.REPRESENTED_ITEM, ItemStack.of(ItemTypes.BEETROOT_SEEDS,
                         CropsAlgoritm.ALG_19.compute(
                                 age,
                                 3,
-                                BEETROOT_SEED_DROP_MINIMUM,
-                                BEETROOT_SEED_DROP_COUNT,
+                                beetrootSeedConfig.getMinimum(),
+                                beetrootSeedConfig.getCount(),
                                 level,
-                                BEETROOT_SEED_DROP_FORTUNE_FACTOR,
-                                BEETROOT_SEED_DROP_CHANCE,
-                                BEETROOT_SEED_DROP_CHANCE_OF) - 1).createSnapshot());
+                                beetrootSeedConfig.getFortuneFactor(),
+                                beetrootSeedConfig.getChance(),
+                                beetrootSeedConfig.getChanceOf()) - 1).createSnapshot());
                 player.getWorld().spawnEntity(beetrootSeed);
 
                 Entity beetroot = player.getWorld().createEntity(EntityTypes.ITEM, event.getTargetBlock().getLocation().orElse(player.getLocation()).getPosition());
@@ -178,16 +185,17 @@ public class FastHarvestListener {
                         .map(Enchantment::getLevel)
                         .findFirst().orElse(0) : 0;
                 age = event.getTargetBlock().get(Keys.GROWTH_STAGE).orElse(0);
+                FastHarvestCrop beetrootConfig = fastHarvest.beetroot;
                 beetroot.offer(Keys.REPRESENTED_ITEM, ItemStack.of(ItemTypes.BEETROOT,
                         CropsAlgoritm.ALG_19.compute(
                                 age,
                                 3,
-                                BEETROOT_DROP_MINIMUM,
-                                BEETROOT_DROP_COUNT,
+                                beetrootConfig.getMinimum(),
+                                beetrootConfig.getCount(),
                                 level,
-                                BEETROOT_DROP_FORTUNE_FACTOR,
-                                BEETROOT_DROP_CHANCE,
-                                BEETROOT_DROP_CHANCE_OF)).createSnapshot());
+                                beetrootConfig.getFortuneFactor(),
+                                beetrootConfig.getChance(),
+                                beetrootConfig.getChanceOf())).createSnapshot());
                 player.getWorld().spawnEntity(beetroot);
 
                 event.getTargetBlock().getLocation().ifPresent(location -> location.setBlock(event.getTargetBlock().getState().with(Keys.GROWTH_STAGE, 0).orElse(event.getTargetBlock().getState())));

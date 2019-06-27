@@ -12,6 +12,7 @@ import org.spongepowered.api.util.TypeTokens;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -87,7 +88,7 @@ public class UniverseGuardRegionRequirement implements Requirement<LocatableSnap
                     throw new RequirementConfigurationException("Regions list regions is missing");
                 }
 
-                List<String> regions = regionsNode.getList(TypeTokens.STRING_TOKEN);
+                List<String> regions = new ArrayList<>(regionsNode.getList(TypeTokens.STRING_TOKEN));
                 if (regions.isEmpty()) {
                     throw new RequirementConfigurationException("Regions list is empty");
                 }

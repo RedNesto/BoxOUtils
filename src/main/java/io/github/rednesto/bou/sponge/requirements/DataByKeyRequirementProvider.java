@@ -32,10 +32,7 @@ import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.util.TypeTokens;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class DataByKeyRequirementProvider<C extends ValueContainer<C>> implements RequirementProvider {
 
@@ -66,7 +63,8 @@ public class DataByKeyRequirementProvider<C extends ValueContainer<C>> implement
             String expandedId = SpongeUtils.addSpongeImplNamespaceIfNeeded(keyId);
             if (valueNode.hasListChildren()) {
                 try {
-                    requiredData.put(expandedId, valueNode.getList(TypeTokens.STRING_TOKEN));
+                    ArrayList<String> requiredKeys = new ArrayList<>(valueNode.getList(TypeTokens.STRING_TOKEN));
+                    requiredData.put(expandedId, requiredKeys);
                 } catch (ObjectMappingException e) {
                     throw new RequirementConfigurationException(e);
                 }

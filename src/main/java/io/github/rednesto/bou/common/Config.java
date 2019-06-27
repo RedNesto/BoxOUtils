@@ -23,212 +23,142 @@
  */
 package io.github.rednesto.bou.common;
 
+import io.github.rednesto.bou.sponge.BoxOUtils;
+import ninja.leaping.configurate.objectmapping.Setting;
+import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
+
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class Config {
+public final class Config {
 
     // TODO add a way to enable/disable the removal of a seed due to seeding
-
-    /*
-     * FAST HARVEST
-     */
-
-    /**
-     * True if the Fast Harvest is enabled
-     */
-    public static boolean FAST_HARVEST_ENABLED = false;
-
-    /**
-     * Minimum amount of seeds which will be dropped
-     */
-    public static int SEED_DROP_MINIMUM = 0;
-    /**
-     * Count of seeds which will pass through a random calculation to have a chance to be dropped
-     */
-    public static int SEED_DROP_COUNT = 3;
-    /**
-     * The factor used to multiply the quantity of every seed added via the fortune enchantment
-     */
-    public static int SEED_DROP_FORTUNE_FACTOR = 1;
-    /**
-     * Chances the seed processed will be dropped
-     */
-    public static int SEED_DROP_CHANCE = -1;
-    /**
-     * Value used by the random calculation to know if a seed will be droppped
-     */
-    public static int SEED_DROP_CHANCE_OF = -1;
-
-    /**
-     * Minimum amount of wheat which will be dropped
-     */
-    public static int WHEAT_DROP_MINIMUM = 1;
-    /**
-     * Count of wheat which will pass through a random calculation to have a chance to be dropped
-     */
-    public static int WHEAT_DROP_COUNT = 0;
-    /**
-     * The factor used to multiply the quantity of every wheat added via the fortune enchantment
-     */
-    public static int WHEAT_DROP_FORTUNE_FACTOR = 1;
-    /**
-     * Chances the wheat processed will be dropped
-     */
-    public static int WHEAT_DROP_CHANCE = -1;
-    /**
-     * Value used by the random calculation to know if a wheat will be droppped
-     */
-    public static int WHEAT_DROP_CHANCE_OF = -1;
-
-    /**
-     * Minimum amount of carrots which will be dropped
-     */
-    public static int CARROT_DROP_MINIMUM = 1;
-    /**
-     * Count of carrots which will pass through a random calculation to have a chance to be dropped
-     */
-    public static int CARROT_DROP_COUNT = 3;
-    /**
-     * The factor used to multiply the quantity of every carrot added via the fortune enchantment
-     */
-    public static int CARROT_DROP_FORTUNE_FACTOR = 1;
-    /**
-     * Chances the carrot processed will be dropped
-     */
-    public static int CARROT_DROP_CHANCE = -1;
-    /**
-     * Value used by the random calculation to know if a carrot will be droppped
-     */
-    public static int CARROT_DROP_CHANCE_OF = -1;
-
-    /**
-     * Minimum amount of potatoes which will be dropped
-     */
-    public static int POTATO_DROP_MINIMUM = 1;
-    /**
-     * Count of potatoes which will pass through a random calculation to have a chance to be dropped
-     */
-    public static int POTATO_DROP_COUNT = 3;
-    /**
-     * The factor used to multiply the quantity of every potato added via the fortune enchantment
-     */
-    public static int POTATO_DROP_FORTUNE_FACTOR = 1;
-    /**
-     * Chances the potato processed will be dropped
-     */
-    public static int POTATO_DROP_CHANCE = -1;
-    /**
-     * Value used by the random calculation to know if a potato will be droppped
-     */
-    public static int POTATO_DROP_CHANCE_OF = -1;
-
-    /**
-     * Minimum amount of beetroot seeds which will be dropped
-     */
-    public static int BEETROOT_SEED_DROP_MINIMUM = 1;
-    /**
-     * Count of beetroot seeds which will pass through a random calculation to have a chance to be dropped
-     */
-    public static int BEETROOT_SEED_DROP_COUNT = 3;
-    /**
-     * The factor used to multiply the quantity of every beetroot seed added via the fortune enchantment
-     */
-    public static int BEETROOT_SEED_DROP_FORTUNE_FACTOR = 1;
-    /**
-     * Chances the beetroot seed processed will be dropped
-     */
-    public static int BEETROOT_SEED_DROP_CHANCE = -1;
-    /**
-     * Value used by the random calculation to know if a beetroot seed will be droppped
-     */
-    public static int BEETROOT_SEED_DROP_CHANCE_OF = -1;
-
-    /**
-     * Minimum amount of beetroots which will be dropped
-     */
-    public static int BEETROOT_DROP_MINIMUM = 1;
-    /**
-     * Count of beetroots which will pass through a random calculation to have a chance to be dropped
-     */
-    public static int BEETROOT_DROP_COUNT = 0;
-    /**
-     * The factor used to multiply the quantity of every beetroot added via the fortune enchantment
-     */
-    public static int BEETROOT_DROP_FORTUNE_FACTOR = 1;
-    /**
-     * Chances the beetroot processed will be dropped
-     */
-    public static int BEETROOT_DROP_CHANCE = -1;
-    /**
-     * Value used by the random calculation to know if a beetroot will be droppped
-     */
-    public static int BEETROOT_DROP_CHANCE_OF = -1;
-
-    /**
-     * If the plugin use the given list of tools to restrict fast harvest
-     */
-    public static boolean HARVEST_LIST_ENABLED = false;
-
-    /**
-     * If the harvest list is a whitelist or a blacklist
-     */
-    public static boolean HARVEST_LIST_IS_WHITELIST = true;
-
-    /**
-     * A list of all the whitelisted/blacklisted items used to harvest crops
-     */
-    public static List<String> HARVEST_TOOLS = new ArrayList<>();
-
-    /*
-     * CUSTOM MOBS DROPS
-     */
-
-    /**
-     * True if the custom blocks drops are enabled
-     */
-    public static boolean CUSTOM_BLOCKS_DROPS_ENABLED = false;
-
-    /**
-     * A Map which have for key the ID and for value the list of items to loot
-     */
-    public static Map<String, CustomLoot> CUSTOM_BLOCKS_DROPS = new HashMap<>();
-
-    /*
-     * CUSTOM BLOCKS DROPS
-     */
-
-    /**
-     * True if the custom mobs drops are enabled
-     */
-    public static boolean CUSTOM_MOBS_DROPS_ENABLED = false;
-
-    /**
-     * A Map which have for key the ID and for value the list of items to loot
-     */
-    public static Map<String, CustomLoot> CUSTOM_MOBS_DROPS = new HashMap<>();
-
-    /*
-     * BLOCK SPAWNERS
-     */
-
-    /**
-     * True if the block spawners are enabled
-     */
-    public static boolean BLOCK_SPAWNERS_ENABLED = false;
-
-    /**
-     * A Map which have for key the ID and for value the list of items to loot
-     */
-    public static Map<String, List<SpawnedMob>> BLOCK_SPAWNERS_DROPS = new HashMap<>();
 
     private Config() {}
 
     public static boolean canHarvest(String item) {
-        return !HARVEST_LIST_ENABLED
-                || HARVEST_LIST_IS_WHITELIST && HARVEST_TOOLS.contains(item)
-                || !HARVEST_LIST_IS_WHITELIST && !HARVEST_TOOLS.contains(item);
+        FastHarvestTools tools = getFastHarvest().tools;
+        return !tools.isEnabled()
+                || tools.isWhitelist() && tools.getToolsIds().contains(item)
+                || !tools.isWhitelist() && !tools.getToolsIds().contains(item);
+    }
+
+    public static BlocksDrops getBlocksDrops() {
+        return BoxOUtils.getInstance().getBlocksDrops();
+    }
+
+    public static MobsDrops getMobsDrops() {
+        return BoxOUtils.getInstance().getMobsDrops();
+    }
+
+    public static BlockSpawners getBlockSpawners() {
+        return BoxOUtils.getInstance().getBlockSpawners();
+    }
+
+    public static FastHarvest getFastHarvest() {
+        return BoxOUtils.getInstance().getFastHarvest();
+    }
+
+    @ConfigSerializable
+    public static class BlocksDrops {
+
+        @Setting("enabled")
+        public boolean enabled;
+        @Setting("blocks")
+        public Map<String, CustomLoot> drops;
+
+        public BlocksDrops() {}
+
+        public BlocksDrops(boolean enabled, Map<String, CustomLoot> drops) {
+            this.enabled = enabled;
+            this.drops = drops;
+        }
+    }
+
+    @ConfigSerializable
+    public static class MobsDrops {
+
+        @Setting("enabled")
+        public boolean enabled;
+        @Setting("mobs")
+        public Map<String, CustomLoot> drops;
+
+        public MobsDrops() {}
+
+        public MobsDrops(boolean enabled, Map<String, CustomLoot> drops) {
+            this.enabled = enabled;
+            this.drops = drops;
+        }
+    }
+
+    @ConfigSerializable
+    public static class BlockSpawners {
+
+        @Setting("enabled")
+        public boolean enabled;
+        @Setting("blocks")
+        public Map<String, List<SpawnedMob>> spawners;
+
+        public BlockSpawners() {}
+
+        public BlockSpawners(boolean enabled, Map<String, List<SpawnedMob>> spawners) {
+            this.enabled = enabled;
+            this.spawners = spawners;
+        }
+    }
+
+    @ConfigSerializable
+    public static class FastHarvest {
+
+        @Setting("enabled")
+        public boolean enabled;
+
+        @Setting("beetroot")
+        public FastHarvestCrop beetroot;
+        @Setting("beetroot_seed")
+        public FastHarvestCrop beetrootSeed;
+        @Setting("carrot")
+        public FastHarvestCrop carrot;
+        @Setting("potato")
+        public FastHarvestCrop potato;
+        @Setting("seed")
+        public FastHarvestCrop seed;
+        @Setting("wheat")
+        public FastHarvestCrop wheat;
+
+        @Setting("list")
+        public FastHarvestTools tools;
+
+        public FastHarvest() {}
+
+        public FastHarvest(boolean enabled,
+                           FastHarvestCrop beetroot,
+                           FastHarvestCrop beetrootSeed,
+                           FastHarvestCrop carrot,
+                           FastHarvestCrop potato,
+                           FastHarvestCrop seed,
+                           FastHarvestCrop wheat,
+                           FastHarvestTools tools) {
+            this.enabled = enabled;
+            this.beetroot = beetroot;
+            this.beetrootSeed = beetrootSeed;
+            this.carrot = carrot;
+            this.potato = potato;
+            this.seed = seed;
+            this.wheat = wheat;
+            this.tools = tools;
+        }
+
+        public static FastHarvest createDefault() {
+            return new FastHarvest(false,
+                    FastHarvestCrop.createDefault(),
+                    FastHarvestCrop.createDefault(),
+                    FastHarvestCrop.createDefault(),
+                    FastHarvestCrop.createDefault(),
+                    FastHarvestCrop.createDefault(),
+                    FastHarvestCrop.createDefault(),
+                    new FastHarvestTools(false, true, new ArrayList<>()));
+        }
     }
 }

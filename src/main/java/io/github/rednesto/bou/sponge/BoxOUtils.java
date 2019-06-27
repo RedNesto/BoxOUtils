@@ -24,6 +24,7 @@
 package io.github.rednesto.bou.sponge;
 
 import com.google.inject.Inject;
+import io.github.rednesto.bou.common.Config;
 import org.slf4j.Logger;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.source.ConsoleSource;
@@ -39,6 +40,7 @@ import org.spongepowered.api.text.format.TextColors;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.HashMap;
 
 @Plugin(
         id = "box-o-utils",
@@ -61,6 +63,11 @@ public class BoxOUtils {
     @Inject
     @ConfigDir(sharedRoot = false)
     private Path configDir;
+
+    private Config.BlocksDrops blocksDrops = new Config.BlocksDrops(false, new HashMap<>());
+    private Config.MobsDrops mobsDrops = new Config.MobsDrops(false, new HashMap<>());
+    private Config.BlockSpawners blockSpawners = new Config.BlockSpawners(false, new HashMap<>());
+    private Config.FastHarvest fastHarvest = Config.FastHarvest.createDefault();
 
     private static BoxOUtils instance;
 
@@ -104,5 +111,37 @@ public class BoxOUtils {
 
     public Path getConfigDir() {
         return configDir;
+    }
+
+    public Config.BlocksDrops getBlocksDrops() {
+        return blocksDrops;
+    }
+
+    public void setBlocksDrops(Config.BlocksDrops blocksDrops) {
+        this.blocksDrops = blocksDrops;
+    }
+
+    public Config.MobsDrops getMobsDrops() {
+        return mobsDrops;
+    }
+
+    public void setMobsDrops(Config.MobsDrops mobsDrops) {
+        this.mobsDrops = mobsDrops;
+    }
+
+    public Config.BlockSpawners getBlockSpawners() {
+        return blockSpawners;
+    }
+
+    public void setBlockSpawners(Config.BlockSpawners blockSpawners) {
+        this.blockSpawners = blockSpawners;
+    }
+
+    public Config.FastHarvest getFastHarvest() {
+        return fastHarvest;
+    }
+
+    public void setFastHarvest(Config.FastHarvest fastHarvest) {
+        this.fastHarvest = fastHarvest;
     }
 }

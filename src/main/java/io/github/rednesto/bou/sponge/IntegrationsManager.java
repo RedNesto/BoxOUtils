@@ -23,7 +23,6 @@
  */
 package io.github.rednesto.bou.sponge;
 
-import io.github.rednesto.bou.common.Config;
 import io.github.rednesto.bou.common.requirement.RequirementProvider;
 import io.github.rednesto.bou.sponge.integration.ByteItemsCustomDropsProvider;
 import io.github.rednesto.bou.sponge.integration.FileInventoriesCustomDropsProvider;
@@ -115,8 +114,9 @@ public final class IntegrationsManager {
     }
 
     void initIntegrations(BoxOUtils plugin) {
-        if (Config.CUSTOM_BLOCKS_DROPS_ENABLED || Config.CUSTOM_MOBS_DROPS_ENABLED)
+        if (plugin.getBlocksDrops().enabled || plugin.getMobsDrops().enabled) {
             initCustomDropsProviders(plugin);
+        }
     }
 
     private void initCustomDropsProviders(BoxOUtils plugin) {
