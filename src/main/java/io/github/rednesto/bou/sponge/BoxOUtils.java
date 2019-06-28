@@ -31,7 +31,6 @@ import org.spongepowered.api.command.source.ConsoleSource;
 import org.spongepowered.api.config.ConfigDir;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.game.GameReloadEvent;
-import org.spongepowered.api.event.game.state.GameConstructionEvent;
 import org.spongepowered.api.event.game.state.GamePostInitializationEvent;
 import org.spongepowered.api.plugin.Dependency;
 import org.spongepowered.api.plugin.Plugin;
@@ -72,10 +71,6 @@ public class BoxOUtils {
     public BoxOUtils(Logger logger, @ConfigDir(sharedRoot = false) Path configDir) {
         this.logger = logger;
         this.configDir = configDir;
-    }
-
-    @Listener
-    public void onConstruction(GameConstructionEvent event) {
         instance = this;
     }
 

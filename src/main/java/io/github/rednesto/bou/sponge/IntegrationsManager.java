@@ -45,6 +45,8 @@ public final class IntegrationsManager {
 
     public static final IntegrationsManager INSTANCE = new IntegrationsManager();
 
+    private final boolean isTesting;
+
     private boolean customDropsProvidersInit = false;
     private final CustomDropsProvider defaultCustomDropsProvider = new VanillaCustomDropsProvider();
     private final Map<String, CustomDropsProvider> customDropsProviders = new HashMap<>();
@@ -55,6 +57,10 @@ public final class IntegrationsManager {
         register(defaultCustomDropsProvider);
         register(new DataByKeyRequirementProvider<>("block_data", BlockSnapshot.class));
         register(new DataByKeyRequirementProvider<>("entity_data", EntitySnapshot.class));
+        isTesting = Boolean.getBoolean("bou.is_testing");
+        if (isTesting) {
+            loadBuiltins();
+        }
     }
 
     public void register(CustomDropsProvider customDropsProvider) {
@@ -88,19 +94,19 @@ public final class IntegrationsManager {
     }
 
     void loadBuiltins() {
-        if (Sponge.getPluginManager().isLoaded("file-inventories")) {
+        if (isTesting || Sponge.getPluginManager().isLoaded("file-inventories")) {
             register(new FileInventoriesCustomDropsProvider());
         }
 
-        if (Sponge.getPluginManager().isLoaded("byte-items")) {
+        if (isTesting || Sponge.getPluginManager().isLoaded("byte-items")) {
             register(new ByteItemsCustomDropsProvider());
         }
 
-        if (Sponge.getPluginManager().isLoaded("griefprevention")) {
+        if (isTesting || Sponge.getPluginManager().isLoaded("griefprevention")) {
             register(new GriefPreventionRegionRequirement.Provider());
         }
 
-        if (Sponge.getPluginManager().isLoaded("universeguard")) {
+        if (isTesting || Sponge.getPluginManager().isLoaded("universeguard")) {
             try {
                 // This integration cannot be on the plugin's classpath, so we must use reflection to get it
                 Class<?> universeguardProvider = Class.forName("io.github.rednesto.bou.sponge.integration.universeguard.UniverseGuardRegionRequirement$Provider");

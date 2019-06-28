@@ -27,7 +27,6 @@ import com.google.common.base.MoreObjects;
 import io.github.rednesto.bou.common.lootReuse.LootReuse;
 import io.github.rednesto.bou.common.requirement.Requirement;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -128,9 +127,9 @@ public class CustomLoot {
 
         private float multiplier;
         private Map<String, LootReuse> items;
-        private Collection<Requirement<?>> requirements;
+        private List<Requirement<?>> requirements;
 
-        public Reuse(float multiplier, Map<String, LootReuse> items, Collection<Requirement<?>> requirements) {
+        public Reuse(float multiplier, Map<String, LootReuse> items, List<Requirement<?>> requirements) {
             this.multiplier = multiplier;
             this.items = items;
             this.requirements = requirements;
@@ -144,7 +143,7 @@ public class CustomLoot {
             return items;
         }
 
-        public Collection<Requirement<?>> getRequirements() {
+        public List<Requirement<?>> getRequirements() {
             return requirements;
         }
 
@@ -161,6 +160,15 @@ public class CustomLoot {
             return Float.compare(reuse.multiplier, multiplier) == 0 &&
                     items.equals(reuse.items) &&
                     requirements.equals(reuse.requirements);
+        }
+
+        @Override
+        public String toString() {
+            return MoreObjects.toStringHelper(this)
+                    .add("multiplier", multiplier)
+                    .add("items", items)
+                    .add("requirements", requirements)
+                    .toString();
         }
     }
 }
