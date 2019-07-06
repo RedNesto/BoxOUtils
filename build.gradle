@@ -88,7 +88,7 @@ test {
 license {
     header = rootProject.file('LICENSE')
 
-    include '**/*.java'
+    include '**/*.java', '**/*.kt'
 
     newLine = false
 }
