@@ -29,6 +29,8 @@ import io.github.rednesto.bou.sponge.integration.FileInventoriesCustomDropsProvi
 import io.github.rednesto.bou.sponge.integration.requirements.GriefPreventionRegionRequirement;
 import io.github.rednesto.bou.sponge.integration.vanilla.VanillaCustomDropsProvider;
 import io.github.rednesto.bou.sponge.requirements.DataByKeyRequirementProvider;
+import io.github.rednesto.bou.sponge.requirements.PermissionsRequirement;
+import io.github.rednesto.bou.sponge.requirements.WorldsRequirement;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.entity.EntitySnapshot;
@@ -57,6 +59,8 @@ public final class IntegrationsManager {
         register(defaultCustomDropsProvider);
         register(new DataByKeyRequirementProvider<>("block_data", BlockSnapshot.class));
         register(new DataByKeyRequirementProvider<>("entity_data", EntitySnapshot.class));
+        register(new PermissionsRequirement.Provider());
+        register(new WorldsRequirement.Provider());
         isTesting = Boolean.getBoolean("bou.is_testing");
         if (isTesting) {
             loadBuiltins();
