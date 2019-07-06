@@ -34,6 +34,7 @@ import me.ryanhamshire.griefprevention.api.claim.ClaimManager;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import org.spongepowered.api.data.LocatableSnapshot;
+import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.util.TypeTokens;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
@@ -61,7 +62,7 @@ public class GriefPreventionRegionRequirement extends AbstractRequirement<Locata
     }
 
     @Override
-    public boolean fulfills(LocatableSnapshot source) {
+    public boolean fulfills(LocatableSnapshot source, Cause cause) {
         if (!source.getLocation().isPresent()) {
             return false;
         }

@@ -30,6 +30,7 @@ import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.value.ValueContainer;
+import org.spongepowered.api.event.cause.Cause;
 
 import java.util.List;
 import java.util.Map;
@@ -45,7 +46,7 @@ public class DataByKeyRequirement<C extends ValueContainer<C>> extends AbstractR
     }
 
     @Override
-    public boolean fulfills(C source) {
+    public boolean fulfills(C source, Cause cause) {
         for (Map.Entry<String, List<String>> entry : this.requiredData.entrySet()) {
             String keyId = entry.getKey();
             List<String> expectedValues = entry.getValue();

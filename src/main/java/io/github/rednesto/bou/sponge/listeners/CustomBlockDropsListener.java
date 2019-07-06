@@ -54,7 +54,7 @@ public class CustomBlockDropsListener {
             }
 
             Location<World> targetLocation = originalBlock.getLocation().orElse(player.getLocation());
-            if (CustomDropsProcessor.fulfillsRequirements(originalBlock, loot.getRequirements())) {
+            if (CustomDropsProcessor.fulfillsRequirements(originalBlock, event.getCause(), loot.getRequirements())) {
                 CustomDropsProcessor.dropLoot(loot, player, targetLocation);
             }
         }
@@ -68,7 +68,7 @@ public class CustomBlockDropsListener {
 
         Map<String, CustomLoot> drops = Config.getBlocksDrops().drops;
         CustomLoot customLoot = drops.get(block.getState().getType().getId());
-        if (customLoot != null && CustomDropsProcessor.fulfillsRequirements(block, customLoot.getRequirements())) {
+        if (customLoot != null && CustomDropsProcessor.fulfillsRequirements(block, event.getCause(), customLoot.getRequirements())) {
             CustomDropsProcessor.handleDropItemEvent(event, customLoot);
         }
     }

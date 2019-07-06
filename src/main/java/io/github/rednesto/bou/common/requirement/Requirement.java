@@ -23,6 +23,8 @@
  */
 package io.github.rednesto.bou.common.requirement;
 
+import org.spongepowered.api.event.cause.Cause;
+
 public interface Requirement<T> {
 
     String getId();
@@ -33,10 +35,10 @@ public interface Requirement<T> {
      * Indicates whether this requirement can be used for the given source.
      *
      * @param source the thing for which loot will be dropped
-     *
+     * @param cause the cause
      * @return {@code true} if this requirement can be applied to the source, {@code false} otherwise
      */
-    default boolean appliesTo(T source) {
+    default boolean appliesTo(T source, Cause cause) {
         return true;
     }
 
@@ -44,8 +46,8 @@ public interface Requirement<T> {
      * Indicates if the given source fulfills this requirement.
      *
      * @param source the source to check
-     *
+     * @param cause the cause
      * @return {@code true} if the source fulfills this requirement, {@code false} otherwise
      */
-    boolean fulfills(T source);
+    boolean fulfills(T source, Cause cause);
 }

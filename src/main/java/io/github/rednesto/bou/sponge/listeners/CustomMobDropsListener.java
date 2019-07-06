@@ -65,7 +65,7 @@ public class CustomMobDropsListener {
         });
 
         Location<World> targetLocation = targetEntity.getLocation();
-        if (CustomDropsProcessor.fulfillsRequirements(targetEntity.createSnapshot(), loot.getRequirements())) {
+        if (CustomDropsProcessor.fulfillsRequirements(targetEntity.createSnapshot(), event.getCause(), loot.getRequirements())) {
             CustomDropsProcessor.dropLoot(loot, player, targetLocation);
         }
     }
@@ -78,7 +78,7 @@ public class CustomMobDropsListener {
 
         Map<String, CustomLoot> drops = Config.getMobsDrops().drops;
         CustomLoot customLoot = drops.get(entity.getType().getId());
-        if (customLoot != null && CustomDropsProcessor.fulfillsRequirements(entity.createSnapshot(), customLoot.getRequirements())) {
+        if (customLoot != null && CustomDropsProcessor.fulfillsRequirements(entity.createSnapshot(), event.getCause(), customLoot.getRequirements())) {
             CustomDropsProcessor.handleDropItemEvent(event, customLoot);
         }
     }

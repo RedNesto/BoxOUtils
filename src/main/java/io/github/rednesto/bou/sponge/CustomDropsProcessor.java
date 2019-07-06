@@ -69,7 +69,7 @@ public class CustomDropsProcessor {
         CustomLoot.Reuse reuse = customLoot.getReuse();
         if (reuse != null) {
             BlockSnapshot block = event.getCause().first(BlockSnapshot.class).orElse(null);
-            if (block != null && !CustomDropsProcessor.fulfillsRequirements(block, reuse.getRequirements())) {
+            if (block != null && !CustomDropsProcessor.fulfillsRequirements(block, event.getCause(), reuse.getRequirements())) {
                 return;
             }
 
@@ -83,19 +83,19 @@ public class CustomDropsProcessor {
         }
     }
 
-    public static boolean fulfillsRequirements(Object source, Collection<Requirement<?>> requirements) {
+    public static boolean fulfillsRequirements(Object source, Cause cause, Collection<Requirement<?>> requirements) {
         if (requirements.isEmpty()) {
             return true;
         }
 
         for (Requirement value : requirements) {
             //noinspection unchecked
-            if (!value.getApplicableType().isAssignableFrom(source.getClass()) || !value.appliesTo(source)) {
+            if (!value.getApplicableType().isAssignableFrom(source.getClass()) || !value.appliesTo(source, cause)) {
                 continue;
             }
 
             //noinspection unchecked
-            if (!value.fulfills(source)) {
+            if (!value.fulfills(source, cause)) {
                 return false;
             }
         }
