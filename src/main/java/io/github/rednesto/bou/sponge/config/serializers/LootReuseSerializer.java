@@ -27,7 +27,7 @@ import com.google.common.reflect.TypeToken;
 import io.github.rednesto.bou.common.lootReuse.LootReuse;
 import io.github.rednesto.bou.common.lootReuse.MultiplyLootReuse;
 import io.github.rednesto.bou.common.lootReuse.SimpleLootReuse;
-import io.github.rednesto.bou.common.quantity.IIntQuantity;
+import io.github.rednesto.bou.common.quantity.IntQuantity;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import ninja.leaping.configurate.objectmapping.serialize.TypeSerializer;
@@ -45,7 +45,7 @@ public class LootReuseSerializer implements TypeSerializer<LootReuse> {
 
         ConfigurationNode quantityNode = value.getNode("quantity");
         if (!quantityNode.isVirtual()) {
-            IIntQuantity quantity = quantityNode.getValue(BouTypeTokens.INT_QUANTITY);
+            IntQuantity quantity = quantityNode.getValue(BouTypeTokens.INT_QUANTITY);
             if (quantity == null) {
                 return null;
             }

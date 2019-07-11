@@ -25,7 +25,7 @@ package io.github.rednesto.bou.common.quantity;
 
 import com.google.common.base.MoreObjects;
 
-public class FixedIntQuantity implements IIntQuantity {
+public class FixedIntQuantity implements IntQuantity {
 
     private final int quantity;
 

@@ -23,7 +23,7 @@
  */
 package io.github.rednesto.bou.common.quantity;
 
-public interface IIntQuantity {
+public interface IntQuantity {
 
     int get();
 }

@@ -24,13 +24,13 @@
 package io.github.rednesto.bou.common.lootReuse;
 
 import com.google.common.base.MoreObjects;
-import io.github.rednesto.bou.common.quantity.IIntQuantity;
+import io.github.rednesto.bou.common.quantity.IntQuantity;
 
 public class SimpleLootReuse implements LootReuse {
 
-    private final IIntQuantity quantity;
+    private final IntQuantity quantity;
 
-    public SimpleLootReuse(IIntQuantity quantity) {
+    public SimpleLootReuse(IntQuantity quantity) {
         this.quantity = quantity;
     }
 

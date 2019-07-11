@@ -27,7 +27,7 @@ import com.google.common.base.MoreObjects;
 
 import java.util.Random;
 
-public class BoundedIntQuantity implements IIntQuantity {
+public class BoundedIntQuantity implements IntQuantity {
 
     private int from;
     private int to;

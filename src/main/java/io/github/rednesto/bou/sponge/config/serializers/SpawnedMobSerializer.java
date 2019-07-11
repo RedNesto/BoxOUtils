@@ -26,7 +26,7 @@ package io.github.rednesto.bou.sponge.config.serializers;
 import com.google.common.reflect.TypeToken;
 import io.github.rednesto.bou.common.SpawnedMob;
 import io.github.rednesto.bou.common.quantity.BoundedIntQuantity;
-import io.github.rednesto.bou.common.quantity.IIntQuantity;
+import io.github.rednesto.bou.common.quantity.IntQuantity;
 import io.github.rednesto.bou.sponge.SpongeUtils;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
@@ -44,7 +44,7 @@ public class SpawnedMobSerializer implements TypeSerializer<SpawnedMob> {
             throw new ObjectMappingException(message);
         }
 
-        IIntQuantity quantity = null;
+        IntQuantity quantity = null;
         ConfigurationNode quantityNode = value.getNode("quantity");
         if (!quantityNode.isVirtual()) {
             quantity = quantityNode.getValue(BouTypeTokens.INT_QUANTITY);

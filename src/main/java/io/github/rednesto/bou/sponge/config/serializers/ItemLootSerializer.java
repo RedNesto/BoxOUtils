@@ -26,7 +26,7 @@ package io.github.rednesto.bou.sponge.config.serializers;
 import com.google.common.reflect.TypeToken;
 import io.github.rednesto.bou.common.ItemLoot;
 import io.github.rednesto.bou.common.quantity.BoundedIntQuantity;
-import io.github.rednesto.bou.common.quantity.IIntQuantity;
+import io.github.rednesto.bou.common.quantity.IntQuantity;
 import io.github.rednesto.bou.sponge.BoxOUtils;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
@@ -58,7 +58,7 @@ public class ItemLootSerializer implements TypeSerializer<ItemLoot> {
         }
 
         ConfigurationNode quantityNode = value.getNode("quantity");
-        IIntQuantity quantity = !quantityNode.isVirtual() ? quantityNode.getValue(BouTypeTokens.INT_QUANTITY) : null;
+        IntQuantity quantity = !quantityNode.isVirtual() ? quantityNode.getValue(BouTypeTokens.INT_QUANTITY) : null;
 
         if (quantity instanceof BoundedIntQuantity) {
             BoundedIntQuantity boundedQuantity = (BoundedIntQuantity) quantity;

@@ -24,7 +24,7 @@
 package io.github.rednesto.bou.common;
 
 import com.google.common.base.MoreObjects;
-import io.github.rednesto.bou.common.quantity.IIntQuantity;
+import io.github.rednesto.bou.common.quantity.IntQuantity;
 
 import java.util.Objects;
 
@@ -35,9 +35,9 @@ public class SpawnedMob {
     private String id;
     private double chance;
     @Nullable
-    private IIntQuantity quantity;
+    private IntQuantity quantity;
 
-    public SpawnedMob(String id, double chance, @Nullable IIntQuantity quantity) {
+    public SpawnedMob(String id, double chance, @Nullable IntQuantity quantity) {
         this.id = id;
         this.chance = chance / 100;
         this.quantity = quantity;
@@ -52,7 +52,7 @@ public class SpawnedMob {
     }
 
     @Nullable
-    public IIntQuantity getQuantity() {
+    public IntQuantity getQuantity() {
         return quantity;
     }
 

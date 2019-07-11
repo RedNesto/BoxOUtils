@@ -24,7 +24,7 @@
 package io.github.rednesto.bou.common;
 
 import com.google.common.base.MoreObjects;
-import io.github.rednesto.bou.common.quantity.IIntQuantity;
+import io.github.rednesto.bou.common.quantity.IntQuantity;
 
 import java.util.Objects;
 
@@ -32,14 +32,14 @@ import javax.annotation.Nullable;
 
 public class MoneyLoot {
 
-    private IIntQuantity amount;
+    private IntQuantity amount;
     @Nullable
     private String currencyId;
     private double chance;
     @Nullable
     private String message;
 
-    public MoneyLoot(IIntQuantity amount, @Nullable String currencyId, double chance, @Nullable String message) {
+    public MoneyLoot(IntQuantity amount, @Nullable String currencyId, double chance, @Nullable String message) {
         this.amount = amount;
         this.currencyId = currencyId;
         this.chance = chance / 100;
@@ -50,7 +50,7 @@ public class MoneyLoot {
         return chance <= 0 || Math.random() <= chance;
     }
 
-    public IIntQuantity getAmount() {
+    public IntQuantity getAmount() {
         return amount;
     }
 

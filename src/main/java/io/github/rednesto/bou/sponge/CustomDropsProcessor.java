@@ -27,7 +27,7 @@ import io.github.rednesto.bou.common.CustomLoot;
 import io.github.rednesto.bou.common.ItemLoot;
 import io.github.rednesto.bou.common.MoneyLoot;
 import io.github.rednesto.bou.common.lootReuse.LootReuse;
-import io.github.rednesto.bou.common.quantity.IIntQuantity;
+import io.github.rednesto.bou.common.quantity.IntQuantity;
 import io.github.rednesto.bou.common.requirement.Requirement;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
@@ -163,7 +163,7 @@ public class CustomDropsProcessor {
             if (itemStack == null)
                 continue;
 
-            IIntQuantity quantity = itemLoot.getQuantity();
+            IntQuantity quantity = itemLoot.getQuantity();
             if (quantity != null)
                 itemStack.setQuantity(quantity.get());
 

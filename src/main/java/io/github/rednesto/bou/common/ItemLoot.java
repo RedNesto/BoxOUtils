@@ -24,7 +24,7 @@
 package io.github.rednesto.bou.common;
 
 import com.google.common.base.MoreObjects;
-import io.github.rednesto.bou.common.quantity.IIntQuantity;
+import io.github.rednesto.bou.common.quantity.IntQuantity;
 
 import java.util.Objects;
 
@@ -39,9 +39,9 @@ public class ItemLoot {
     private String displayname;
     private double chance;
     @Nullable
-    private IIntQuantity quantity;
+    private IntQuantity quantity;
 
-    public ItemLoot(String id, @Nullable String providerId, @Nullable String displayname, double chance, @Nullable IIntQuantity quantity) {
+    public ItemLoot(String id, @Nullable String providerId, @Nullable String displayname, double chance, @Nullable IntQuantity quantity) {
         this.id = id;
         this.providerId = providerId;
         this.displayname = displayname;
@@ -72,7 +72,7 @@ public class ItemLoot {
     }
 
     @Nullable
-    public IIntQuantity getQuantity() {
+    public IntQuantity getQuantity() {
         return quantity;
     }
 

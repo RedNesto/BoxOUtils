@@ -26,7 +26,7 @@ package io.github.rednesto.bou.sponge.config.serializers;
 import com.google.common.reflect.TypeToken;
 import io.github.rednesto.bou.common.MoneyLoot;
 import io.github.rednesto.bou.common.quantity.BoundedIntQuantity;
-import io.github.rednesto.bou.common.quantity.IIntQuantity;
+import io.github.rednesto.bou.common.quantity.IntQuantity;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import ninja.leaping.configurate.objectmapping.serialize.TypeSerializer;
@@ -47,7 +47,7 @@ public class MoneyLootSerializer implements TypeSerializer<MoneyLoot> {
             throw new ObjectMappingException(message);
         }
 
-        IIntQuantity quantity = amountNode.getValue(BouTypeTokens.INT_QUANTITY);
+        IntQuantity quantity = amountNode.getValue(BouTypeTokens.INT_QUANTITY);
         if (quantity == null) {
             return null;
         }
