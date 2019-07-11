@@ -1,3 +1,7 @@
+plugins {
+    id 'net.minecrell.licenser'
+}
+
 repositories {
     maven {
         url 'https://repo.spongepowered.org/maven/'
@@ -10,4 +14,12 @@ dependencies {
     compileOnly rootProject
 
     compileOnly fileTree(dir: 'libs', include: '*.jar')
+}
+
+license {
+    header = rootProject.file('LICENSE')
+
+    include '**/*.java'
+
+    newLine = false
 }
