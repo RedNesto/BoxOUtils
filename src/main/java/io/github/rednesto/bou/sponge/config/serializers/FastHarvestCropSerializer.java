@@ -26,7 +26,6 @@ package io.github.rednesto.bou.sponge.config.serializers;
 import com.google.common.reflect.TypeToken;
 import io.github.rednesto.bou.common.FastHarvestCrop;
 import ninja.leaping.configurate.ConfigurationNode;
-import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import ninja.leaping.configurate.objectmapping.serialize.TypeSerializer;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -34,7 +33,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 public class FastHarvestCropSerializer implements TypeSerializer<FastHarvestCrop> {
 
     @Override
-    public @Nullable FastHarvestCrop deserialize(@NonNull TypeToken<?> type, @NonNull ConfigurationNode value) throws ObjectMappingException {
+    public @Nullable FastHarvestCrop deserialize(@NonNull TypeToken<?> type, @NonNull ConfigurationNode value) {
         int chance = value.getNode("chance").getInt(-1);
         int chanceOf = value.getNode("chance_of").getInt(-1);
         int count = value.getNode("count").getInt();
@@ -44,7 +43,7 @@ public class FastHarvestCropSerializer implements TypeSerializer<FastHarvestCrop
     }
 
     @Override
-    public void serialize(@NonNull TypeToken<?> type, @Nullable FastHarvestCrop obj, @NonNull ConfigurationNode value) throws ObjectMappingException {
+    public void serialize(@NonNull TypeToken<?> type, @Nullable FastHarvestCrop obj, @NonNull ConfigurationNode value) {
         throw new UnsupportedOperationException();
     }
 }

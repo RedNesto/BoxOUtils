@@ -57,7 +57,7 @@ public class LootReuseSerializer implements TypeSerializer<LootReuse> {
     }
 
     @Override
-    public void serialize(@NonNull TypeToken<?> type, @Nullable LootReuse obj, @NonNull ConfigurationNode value) throws ObjectMappingException {
+    public void serialize(@NonNull TypeToken<?> type, @Nullable LootReuse obj, @NonNull ConfigurationNode value) {
         throw new UnsupportedOperationException();
     }
 }

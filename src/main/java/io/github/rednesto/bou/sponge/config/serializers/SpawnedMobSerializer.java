@@ -80,7 +80,7 @@ public class SpawnedMobSerializer implements TypeSerializer<SpawnedMob> {
     }
 
     @Override
-    public void serialize(@NonNull TypeToken<?> type, @Nullable SpawnedMob obj, @NonNull ConfigurationNode value) throws ObjectMappingException {
+    public void serialize(@NonNull TypeToken<?> type, @Nullable SpawnedMob obj, @NonNull ConfigurationNode value) {
         throw new UnsupportedOperationException();
     }
 

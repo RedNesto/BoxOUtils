@@ -53,7 +53,7 @@ public class ConfigBlockSpawnerSerializer implements TypeSerializer<Config.Block
     }
 
     @Override
-    public void serialize(@NonNull TypeToken<?> type, Config.@Nullable BlockSpawners obj, @NonNull ConfigurationNode value) throws ObjectMappingException {
+    public void serialize(@NonNull TypeToken<?> type, Config.@Nullable BlockSpawners obj, @NonNull ConfigurationNode value) {
         throw new UnsupportedOperationException();
     }
 }

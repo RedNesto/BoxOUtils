@@ -50,7 +50,7 @@ public class RequirementsMapSerializer implements TypeSerializer<Map<String, Req
     }
 
     @Override
-    public void serialize(@NonNull TypeToken<?> type, @Nullable Map<String, Requirement<?>> obj, @NonNull ConfigurationNode value) throws ObjectMappingException {
+    public void serialize(@NonNull TypeToken<?> type, @Nullable Map<String, Requirement<?>> obj, @NonNull ConfigurationNode value) {
         throw new UnsupportedOperationException();
     }
 }

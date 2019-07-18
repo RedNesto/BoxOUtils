@@ -62,7 +62,7 @@ public class CustomLootReuseSerializer implements TypeSerializer<CustomLoot.Reus
     }
 
     @Override
-    public void serialize(@NonNull TypeToken<?> type, CustomLoot.@Nullable Reuse obj, @NonNull ConfigurationNode value) throws ObjectMappingException {
+    public void serialize(@NonNull TypeToken<?> type, CustomLoot.@Nullable Reuse obj, @NonNull ConfigurationNode value) {
         throw new UnsupportedOperationException();
     }
 }

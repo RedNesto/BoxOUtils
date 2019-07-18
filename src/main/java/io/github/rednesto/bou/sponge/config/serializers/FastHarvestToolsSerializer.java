@@ -46,7 +46,7 @@ public class FastHarvestToolsSerializer implements TypeSerializer<FastHarvestToo
     }
 
     @Override
-    public void serialize(@NonNull TypeToken<?> type, @Nullable FastHarvestTools obj, @NonNull ConfigurationNode value) throws ObjectMappingException {
+    public void serialize(@NonNull TypeToken<?> type, @Nullable FastHarvestTools obj, @NonNull ConfigurationNode value) {
         throw new UnsupportedOperationException();
     }
 }

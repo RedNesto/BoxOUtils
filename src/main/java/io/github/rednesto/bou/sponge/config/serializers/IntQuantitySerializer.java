@@ -56,7 +56,7 @@ public class IntQuantitySerializer implements TypeSerializer<IntQuantity> {
     }
 
     @Override
-    public void serialize(@NonNull TypeToken<?> type, @Nullable IntQuantity obj, @NonNull ConfigurationNode value) throws ObjectMappingException {
+    public void serialize(@NonNull TypeToken<?> type, @Nullable IntQuantity obj, @NonNull ConfigurationNode value) {
         throw new UnsupportedOperationException();
     }
 }
