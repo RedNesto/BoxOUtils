@@ -25,6 +25,7 @@ package io.github.rednesto.bou.common;
 
 import com.google.common.base.MoreObjects;
 import io.github.rednesto.bou.common.lootReuse.LootReuse;
+import io.github.rednesto.bou.common.quantity.IntQuantity;
 import io.github.rednesto.bou.common.requirement.Requirement;
 
 import java.util.List;
@@ -36,7 +37,8 @@ import javax.annotation.Nullable;
 public class CustomLoot {
 
     private List<ItemLoot> itemLoots;
-    private int experience;
+    @Nullable
+    private IntQuantity experience;
     private boolean overwrite;
     private boolean expOverwrite;
     private List<Requirement<?>> requirements;
@@ -46,7 +48,7 @@ public class CustomLoot {
     private Reuse reuse;
 
     public CustomLoot(List<ItemLoot> itemLoots,
-                      int experience,
+                      @Nullable IntQuantity experience,
                       boolean overwrite,
                       boolean expOverwrite,
                       List<Requirement<?>> requirements,
@@ -65,7 +67,8 @@ public class CustomLoot {
         return itemLoots;
     }
 
-    public int getExperience() {
+    @Nullable
+    public IntQuantity getExperience() {
         return experience;
     }
 

@@ -27,6 +27,7 @@ import com.google.common.reflect.TypeToken;
 import io.github.rednesto.bou.common.CustomLoot;
 import io.github.rednesto.bou.common.ItemLoot;
 import io.github.rednesto.bou.common.MoneyLoot;
+import io.github.rednesto.bou.common.quantity.IntQuantity;
 import io.github.rednesto.bou.common.requirement.Requirement;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
@@ -57,7 +58,7 @@ public class CustomLootSerializer implements TypeSerializer<CustomLoot> {
         ConfigurationNode moneyNode = value.getNode("money");
         MoneyLoot moneyLoot = !moneyNode.isVirtual() ? moneyNode.getValue(BouTypeTokens.MONEY_LOOT) : null;
 
-        int experience = value.getNode("experience").getInt();
+        IntQuantity experience = value.getNode("experience").getValue(BouTypeTokens.INT_QUANTITY);
         boolean overwrite = value.getNode("overwrite").getBoolean(false);
         boolean expOverwrite = value.getNode("exp-overwrite").getBoolean(false);
 

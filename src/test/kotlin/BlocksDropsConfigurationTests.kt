@@ -53,7 +53,7 @@ class BlocksDropsConfigurationTests {
         val leaves = run {
             val drops = listOf(ItemLoot("minecraft:coal", null, null, 25.0, FixedIntQuantity(1)))
             val money  = MoneyLoot(BoundedIntQuantity(10, 30), "economylite:coin", 25.0, "&aYou earned {money_amount}")
-            CustomLoot(drops, 0, true, false, emptyList(), money, null)
+            CustomLoot(drops, null, true, false, emptyList(), money, null)
         }
 
         val leaves2 = run {
@@ -61,20 +61,20 @@ class BlocksDropsConfigurationTests {
                     ItemLoot("minecraft:coal", null, null, 25.0, FixedIntQuantity(1)),
                     ItemLoot("minecraft:dirt", null, null, 25.0, FixedIntQuantity(1)))
             val money  = MoneyLoot(BoundedIntQuantity(10, 30), "economylite:coin", 25.0, "&aYou earned {money_amount}")
-            CustomLoot(drops, 0, true, false, emptyList(), money, null)
+            CustomLoot(drops, null, true, false, emptyList(), money, null)
         }
 
         val ironOre = run {
             val reuse = CustomLoot.Reuse(2f, mapOf("minecraft:iron_ore" to SimpleLootReuse(BoundedIntQuantity(1, 3))), emptyList())
             val money = MoneyLoot(BoundedIntQuantity(1, 15), null, 25.0, "&aYou earned {money_amount}")
             val drops = listOf(ItemLoot("minecraft:cobblestone", null, null, 25.0, null))
-            CustomLoot(drops, 0, false, false, emptyList(), money, reuse)
+            CustomLoot(drops, null, false, false, emptyList(), money, reuse)
         }
 
         val skull = run {
             val requirements = listOf(GriefPreventionRegionRequirement(listOf("test region"), true))
             val reuse = CustomLoot.Reuse(2f, emptyMap(), listOf(DataByKeyRequirement("block_data", BlockSnapshot::class.java, mapOf("sponge_impl:skull_type" to listOf("minecraft:ender_dragon")))))
-            CustomLoot(emptyList(), 0, false, false, requirements, null, reuse)
+            CustomLoot(emptyList(), null, false, false, requirements, null, reuse)
         }
 
         val wheat = run {
@@ -83,7 +83,7 @@ class BlocksDropsConfigurationTests {
                     "minecraft:wheat" to SimpleLootReuse(BoundedIntQuantity(1, 5))
             )
             val reuse = CustomLoot.Reuse(1f, reuseItems, emptyList())
-            CustomLoot(emptyList(), 0, false, false, emptyList(), null, reuse)
+            CustomLoot(emptyList(), null, false, false, emptyList(), null, reuse)
         }
 
         val expected = mapOf(
@@ -103,7 +103,7 @@ class BlocksDropsConfigurationTests {
         val (_, config) = prepare("requirements1")
 
         val requirements = listOf(DataByKeyRequirement("block_data", BlockSnapshot::class.java, mapOf("sponge_impl:skull_type" to listOf("minecraft:ender_dragon"))))
-        val customLoot = CustomLoot(emptyList(), 0, false, false, requirements, null, null)
+        val customLoot = CustomLoot(emptyList(), null, false, false, requirements, null, null)
         val expected = mutableMapOf("minecraft:skull" to customLoot)
 
         assertTrue(config.enabled)
@@ -115,7 +115,7 @@ class BlocksDropsConfigurationTests {
         val (_, config) = prepare("simple1")
 
         val itemLoots = listOf(ItemLoot("minecraft:cobblestone", null, null, 25.0, null))
-        val customLoot = CustomLoot(itemLoots, 0, false, false, emptyList(), null, null)
+        val customLoot = CustomLoot(itemLoots, null, false, false, emptyList(), null, null)
         val expected = mapOf("minecraft:iron_ore" to customLoot)
 
         assertTrue(config.enabled)
@@ -128,7 +128,7 @@ class BlocksDropsConfigurationTests {
 
         val moneyLoot = MoneyLoot(BoundedIntQuantity(10, 30), "economylite:coin", 25.0, "&aYou earned {money_amount}")
         val itemLoots = listOf(ItemLoot("minecraft:coal", null, null, 25.0, FixedIntQuantity(1)))
-        val customLoot = CustomLoot(itemLoots, 0, true, false, emptyList(), moneyLoot, null)
+        val customLoot = CustomLoot(itemLoots, null, true, false, emptyList(), moneyLoot, null)
         val expected = mapOf("minecraft:leaves" to customLoot)
 
         assertTrue(config.enabled)

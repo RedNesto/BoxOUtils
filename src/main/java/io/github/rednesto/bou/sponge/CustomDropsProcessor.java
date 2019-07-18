@@ -148,10 +148,14 @@ public class CustomDropsProcessor {
         if (targetLocation == null)
             return;
 
-        if (loot.getExperience() > 0) {
-            Entity experienceOrb = targetLocation.createEntity(EntityTypes.EXPERIENCE_ORB);
-            experienceOrb.offer(Keys.CONTAINED_EXPERIENCE, loot.getExperience());
-            targetLocation.spawnEntity(experienceOrb);
+        IntQuantity experience = loot.getExperience();
+        if (experience != null) {
+            int experienceAmount = experience.get();
+            if (experienceAmount > 0) {
+                Entity experienceOrb = targetLocation.createEntity(EntityTypes.EXPERIENCE_ORB);
+                experienceOrb.offer(Keys.CONTAINED_EXPERIENCE, experienceAmount);
+                targetLocation.spawnEntity(experienceOrb);
+            }
         }
 
         for (ItemLoot itemLoot : loot.getItemLoots()) {

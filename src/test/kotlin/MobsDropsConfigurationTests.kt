@@ -61,12 +61,12 @@ class MobsDropsConfigurationTests {
             val drops = listOf(
                     ItemLoot("waw_sword", "byte-items", null, 0.0, null),
                     ItemLoot("test", "file-inv", null, 0.0, BoundedIntQuantity(0, 2)))
-            CustomLoot(drops, 0, true, false, requirements, money, reuse)
+            CustomLoot(drops, null, true, false, requirements, money, reuse)
         }
 
         val bat = run {
             val drops = listOf(ItemLoot("minecraft:ghast_tear", null, null, 33.33, null))
-            CustomLoot(drops, 0, false, false, emptyList(), null, null)
+            CustomLoot(drops, null, false, false, emptyList(), null, null)
         }
 
         val expected = mapOf(
