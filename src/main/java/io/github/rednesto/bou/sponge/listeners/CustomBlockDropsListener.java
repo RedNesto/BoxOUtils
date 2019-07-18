@@ -63,8 +63,9 @@ public class CustomBlockDropsListener {
     @Listener
     public void onItemDrop(DropItemEvent.Destruct event, @First Player player) {
         BlockSnapshot block = event.getCause().first(BlockSnapshot.class).orElse(null);
-        if (block == null)
+        if (block == null) {
             return;
+        }
 
         Map<String, CustomLoot> drops = Config.getBlocksDrops().drops;
         CustomLoot customLoot = drops.get(block.getState().getType().getId());
@@ -76,15 +77,17 @@ public class CustomBlockDropsListener {
     @Listener
     public void onExpOrbSpawn(SpawnEntityEvent event) {
         for (Entity entity : event.getEntities()) {
-            if (!(entity instanceof ExperienceOrb))
+            if (!(entity instanceof ExperienceOrb)) {
                 continue;
+            }
 
             for (Object cause : event.getCause().noneOf(ExperienceOrb.class)) {
                 if (cause instanceof BlockSnapshot) {
                     Map<String, CustomLoot> drops = Config.getBlocksDrops().drops;
                     CustomLoot customLoot = drops.get(((BlockSnapshot) cause).getState().getType().getId());
-                    if (customLoot != null && customLoot.isExpOverwrite())
+                    if (customLoot != null && customLoot.isExpOverwrite()) {
                         event.setCancelled(true);
+                    }
                 }
             }
         }

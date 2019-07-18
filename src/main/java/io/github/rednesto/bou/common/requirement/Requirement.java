@@ -36,6 +36,7 @@ public interface Requirement<T> {
      *
      * @param source the thing for which loot will be dropped
      * @param cause the cause
+     *
      * @return {@code true} if this requirement can be applied to the source, {@code false} otherwise
      */
     default boolean appliesTo(T source, Cause cause) {
@@ -47,6 +48,7 @@ public interface Requirement<T> {
      *
      * @param source the source to check
      * @param cause the cause
+     *
      * @return {@code true} if the source fulfills this requirement, {@code false} otherwise
      */
     boolean fulfills(T source, Cause cause);

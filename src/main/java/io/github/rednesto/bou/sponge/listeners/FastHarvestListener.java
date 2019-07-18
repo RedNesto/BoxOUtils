@@ -52,14 +52,16 @@ public class FastHarvestListener {
     @Listener
     public void onSecondaryClick(InteractBlockEvent.Secondary.MainHand event, @First Player player) {
         FastHarvest fastHarvest = Config.getFastHarvest();
-        if (!fastHarvest.enabled)
+        if (!fastHarvest.enabled) {
             return;
+        }
 
-        switch(event.getTargetBlock().getState().getType().getId()) {
+        switch (event.getTargetBlock().getState().getType().getId()) {
             case "minecraft:wheat":
                 ItemStack maybeItemInHand = player.getItemInHand(event.getHandType()).orElse(ItemStack.empty());
-                if(!Config.canHarvest(maybeItemInHand.getType().getId()) || event.getTargetBlock().get(Keys.GROWTH_STAGE).orElse(0) != 7)
+                if (!Config.canHarvest(maybeItemInHand.getType().getId()) || event.getTargetBlock().get(Keys.GROWTH_STAGE).orElse(0) != 7) {
                     break;
+                }
 
                 Entity seed = player.getWorld().createEntity(EntityTypes.ITEM, event.getTargetBlock().getLocation().orElse(player.getLocation()).getPosition());
                 Optional<List<Enchantment>> maybeEnchantements = event.getContext().get(EventContextKeys.USED_ITEM).get().get(Keys.ITEM_ENCHANTMENTS);
@@ -78,7 +80,7 @@ public class FastHarvestListener {
                         seedConfig.getFortuneFactor(),
                         seedConfig.getChance(),
                         seedConfig.getChanceOf()) - 1;
-                if(seedQuantity > 0) {
+                if (seedQuantity > 0) {
                     seed.offer(Keys.REPRESENTED_ITEM, ItemStack.of(ItemTypes.WHEAT_SEEDS, seedQuantity).createSnapshot());
                     player.getWorld().spawnEntity(seed);
                 }
@@ -101,8 +103,9 @@ public class FastHarvestListener {
                 break;
             case "minecraft:carrots":
                 maybeItemInHand = player.getItemInHand(event.getHandType()).orElse(ItemStack.empty());
-                if(!Config.canHarvest(maybeItemInHand.getType().getId()) || event.getTargetBlock().get(Keys.GROWTH_STAGE).orElse(0) != 7)
+                if (!Config.canHarvest(maybeItemInHand.getType().getId()) || event.getTargetBlock().get(Keys.GROWTH_STAGE).orElse(0) != 7) {
                     break;
+                }
 
                 Entity carrot = player.getWorld().createEntity(EntityTypes.ITEM, event.getTargetBlock().getLocation().orElse(player.getLocation()).getPosition());
                 maybeEnchantements = event.getContext().get(EventContextKeys.USED_ITEM).get().get(Keys.ITEM_ENCHANTMENTS);
@@ -128,8 +131,9 @@ public class FastHarvestListener {
                 break;
             case "minecraft:potatoes":
                 maybeItemInHand = player.getItemInHand(event.getHandType()).orElse(ItemStack.empty());
-                if(!Config.canHarvest(maybeItemInHand.getType().getId()) || event.getTargetBlock().get(Keys.GROWTH_STAGE).orElse(0) != 7)
+                if (!Config.canHarvest(maybeItemInHand.getType().getId()) || event.getTargetBlock().get(Keys.GROWTH_STAGE).orElse(0) != 7) {
                     break;
+                }
 
                 Entity potato = player.getWorld().createEntity(EntityTypes.ITEM, event.getTargetBlock().getLocation().orElse(player.getLocation()).getPosition());
                 maybeEnchantements = event.getContext().get(EventContextKeys.USED_ITEM).get().get(Keys.ITEM_ENCHANTMENTS);
@@ -155,8 +159,9 @@ public class FastHarvestListener {
                 break;
             case "minecraft:beetroots":
                 maybeItemInHand = player.getItemInHand(event.getHandType()).orElse(ItemStack.empty());
-                if(!Config.canHarvest(maybeItemInHand.getType().getId()) || event.getTargetBlock().get(Keys.GROWTH_STAGE).orElse(0) != 3)
+                if (!Config.canHarvest(maybeItemInHand.getType().getId()) || event.getTargetBlock().get(Keys.GROWTH_STAGE).orElse(0) != 3) {
                     break;
+                }
 
                 Entity beetrootSeed = player.getWorld().createEntity(EntityTypes.ITEM, event.getTargetBlock().getLocation().orElse(player.getLocation()).getPosition());
                 maybeEnchantements = event.getContext().get(EventContextKeys.USED_ITEM).get().get(Keys.ITEM_ENCHANTMENTS);

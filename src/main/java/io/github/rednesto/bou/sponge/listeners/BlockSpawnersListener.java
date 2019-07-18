@@ -44,21 +44,25 @@ public class BlockSpawnersListener {
         Map<String, List<SpawnedMob>> spawners = Config.getBlockSpawners().spawners;
         event.getTransactions().forEach(transaction -> {
             List<SpawnedMob> toSpawnMobs = spawners.get(transaction.getOriginal().getState().getType().getId());
-            if (toSpawnMobs == null)
+            if (toSpawnMobs == null) {
                 return;
+            }
 
             World world = Sponge.getServer().getWorld(transaction.getOriginal().getWorldUniqueId()).orElse(null);
-            if (world == null)
+            if (world == null) {
                 return;
+            }
 
             Vector3i spawnPosition = transaction.getOriginal().getPosition();
             toSpawnMobs.forEach(toSpawn -> {
-                if (!toSpawn.shouldSpawn())
+                if (!toSpawn.shouldSpawn()) {
                     return;
+                }
 
                 EntityType entityType = Sponge.getRegistry().getType(EntityType.class, toSpawn.getId()).orElse(null);
-                if (entityType == null)
+                if (entityType == null) {
                     return;
+                }
 
                 int quantityToSpawn = toSpawn.getQuantity() != null ? toSpawn.getQuantity().get() : 1;
                 for (int i = 0; i < quantityToSpawn; i++) {

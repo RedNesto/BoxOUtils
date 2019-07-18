@@ -69,8 +69,9 @@ public final class IntegrationsManager {
 
     public void register(CustomDropsProvider customDropsProvider) {
         customDropsProviders.put(customDropsProvider.getId(), customDropsProvider);
-        if (customDropsProvidersInit)
+        if (customDropsProvidersInit) {
             customDropsProvider.init(BoxOUtils.getInstance());
+        }
     }
 
     public void register(RequirementProvider requirementProvider) {
@@ -82,12 +83,14 @@ public final class IntegrationsManager {
     }
 
     public Optional<ItemStack> createCustomDropStack(@Nullable String providerId, String id, @Nullable Player targetPlayer) {
-        if (providerId == null)
+        if (providerId == null) {
             return defaultCustomDropsProvider.createItemStack(id, targetPlayer);
+        }
 
         CustomDropsProvider provider = customDropsProviders.get(providerId);
-        if (provider != null)
+        if (provider != null) {
             return provider.createItemStack(id, targetPlayer);
+        }
 
         return Optional.empty();
     }
@@ -130,8 +133,9 @@ public final class IntegrationsManager {
     }
 
     private void initCustomDropsProviders(BoxOUtils plugin) {
-        if (customDropsProvidersInit)
+        if (customDropsProvidersInit) {
             return;
+        }
 
         customDropsProvidersInit = true;
         defaultCustomDropsProvider.init(plugin);

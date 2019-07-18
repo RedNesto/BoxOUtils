@@ -55,15 +55,17 @@ public class ByteItemsCustomDropsProvider implements CustomDropsProvider {
 
     @Override
     public Optional<ItemStack> createItemStack(String id, @Nullable Player targetPlayer) {
-        if (backingService == null)
+        if (backingService == null) {
             return Optional.empty();
+        }
 
         return backingService.get(id).map(ItemStackSnapshot::createStack);
     }
 
     @Listener
     public void onServiceProviderChange(ChangeServiceProviderEvent event) {
-        if (event.getService().equals(ByteItemsService.class))
+        if (event.getService().equals(ByteItemsService.class)) {
             backingService = (ByteItemsService) event.getNewProvider();
+        }
     }
 }

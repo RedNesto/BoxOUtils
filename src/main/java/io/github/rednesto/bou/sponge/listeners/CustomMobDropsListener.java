@@ -50,15 +50,17 @@ public class CustomMobDropsListener {
         Living targetEntity = event.getTargetEntity();
         Map<String, CustomLoot> drops = Config.getMobsDrops().drops;
         CustomLoot loot = drops.get(targetEntity.getType().getId());
-        if (loot == null)
+        if (loot == null) {
             return;
+        }
 
         @Nullable Player player = event.getCause().first(Player.class).orElseGet(() -> {
             Optional<IndirectEntityDamageSource> maybeIndirectSource = event.getCause().first(IndirectEntityDamageSource.class);
             if (maybeIndirectSource.isPresent()) {
                 Entity indirectSource = maybeIndirectSource.get().getIndirectSource();
-                if (indirectSource instanceof Player)
+                if (indirectSource instanceof Player) {
                     return (Player) indirectSource;
+                }
             }
 
             return null;
@@ -73,8 +75,9 @@ public class CustomMobDropsListener {
     @Listener
     public void onItemDrop(DropItemEvent.Destruct event) {
         Entity entity = event.getCause().first(Entity.class).orElse(null);
-        if (entity == null)
+        if (entity == null) {
             return;
+        }
 
         Map<String, CustomLoot> drops = Config.getMobsDrops().drops;
         CustomLoot customLoot = drops.get(entity.getType().getId());
@@ -86,15 +89,17 @@ public class CustomMobDropsListener {
     @Listener
     public void onExpOrbSpawn(SpawnEntityEvent event) {
         for (Entity entity : event.getEntities()) {
-            if (!(entity instanceof ExperienceOrb))
+            if (!(entity instanceof ExperienceOrb)) {
                 continue;
+            }
 
             for (Object cause : event.getCause().noneOf(ExperienceOrb.class)) {
                 if (cause instanceof Entity) {
                     Map<String, CustomLoot> drops = Config.getMobsDrops().drops;
                     CustomLoot customLoot = drops.get(((Entity) cause).getType().getId());
-                    if (customLoot != null && customLoot.isExpOverwrite())
+                    if (customLoot != null && customLoot.isExpOverwrite()) {
                         event.setCancelled(true);
+                    }
                 }
             }
         }

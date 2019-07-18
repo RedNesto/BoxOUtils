@@ -49,8 +49,9 @@ public class FileInventoriesCustomDropsProvider implements CustomDropsProvider {
         }
 
         Path fileitems = plugin.getConfigDir().resolve("fileitems");
-        if (!Files.isDirectory(fileitems))
+        if (!Files.isDirectory(fileitems)) {
             return;
+        }
 
         try (Stream<Path> files = Files.walk(fileitems)) {
             files.filter(path -> Files.isRegularFile(path) && path.getFileName().toString().endsWith(".json"))
@@ -80,8 +81,9 @@ public class FileInventoriesCustomDropsProvider implements CustomDropsProvider {
         }
 
         Optional<ItemStack> item = maybeService.get().getItem(id, targetPlayer);
-        if (!item.isPresent())
+        if (!item.isPresent()) {
             BoxOUtils.getInstance().getLogger().error("The FileItem for ID " + id + " cannot be found");
+        }
 
         return item;
     }

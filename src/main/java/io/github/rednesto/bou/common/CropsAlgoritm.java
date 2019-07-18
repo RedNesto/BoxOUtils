@@ -33,15 +33,17 @@ public enum CropsAlgoritm {
             int potentialDrops = potentialDropCount + fortune * fortuneFactor;
             int dropsCount = minimumDrop;
 
-            for(int i = 0; i < potentialDrops; i++) {
-                if(chance < 0 || chanceOf < 0) {
+            for (int i = 0; i < potentialDrops; i++) {
+                if (chance < 0 || chanceOf < 0) {
                     // we use the Minecraft's chance
-                    if(random.nextInt(15) <= age)
+                    if (random.nextInt(15) <= age) {
                         dropsCount++;
+                    }
                 } else {
                     // we use a custom chance
-                    if(random.nextInt(chanceOf) <= chance)
+                    if (random.nextInt(chanceOf) <= chance) {
                         dropsCount++;
+                    }
                 }
             }
 
@@ -54,15 +56,17 @@ public enum CropsAlgoritm {
             int potentialDrops = potentialDropCount + fortune * fortuneFactor;
             int dropsCount = minimumDrop;
 
-            for(int i = 0; i < potentialDrops; i++) {
-                if(chance < 0 || chanceOf < 0) {
+            for (int i = 0; i < potentialDrops; i++) {
+                if (chance < 0 || chanceOf < 0) {
                     // we use the Minecraft's chance
-                    if(random.nextInt(maxAge * 2) <= age)
+                    if (random.nextInt(maxAge * 2) <= age) {
                         dropsCount++;
+                    }
                 } else {
                     // we use a custom chance
-                    if(random.nextInt(chanceOf) <= chance)
+                    if (random.nextInt(chanceOf) <= chance) {
                         dropsCount++;
+                    }
                 }
             }
 

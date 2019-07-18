@@ -109,8 +109,9 @@ public class CustomDropsProcessor {
             int randomQuantity = moneyLoot.getAmount().get();
             Sponge.getServiceManager().provide(EconomyService.class).ifPresent(economyService -> {
                 UniqueAccount account = economyService.getOrCreateAccount(targetPlayer.getUniqueId()).orElse(null);
-                if (account == null)
+                if (account == null) {
                     return;
+                }
 
                 Currency usedCurrency;
                 if (moneyLoot.getCurrencyId() == null) {
@@ -119,8 +120,9 @@ public class CustomDropsProcessor {
                     usedCurrency = Sponge.getGame().getRegistry().getType(Currency.class, moneyLoot.getCurrencyId()).orElse(null);
                 }
 
-                if (usedCurrency == null)
+                if (usedCurrency == null) {
                     return;
+                }
 
                 Cause cause = Cause.of(EventContext.empty(), BoxOUtils.getInstance());
                 TransactionResult transactionResult = account.deposit(usedCurrency, BigDecimal.valueOf(randomQuantity), cause);
@@ -145,8 +147,9 @@ public class CustomDropsProcessor {
             });
         }
 
-        if (targetLocation == null)
+        if (targetLocation == null) {
             return;
+        }
 
         IntQuantity experience = loot.getExperience();
         if (experience != null) {
@@ -159,20 +162,24 @@ public class CustomDropsProcessor {
         }
 
         for (ItemLoot itemLoot : loot.getItemLoots()) {
-            if (!itemLoot.shouldLoot())
+            if (!itemLoot.shouldLoot()) {
                 continue;
+            }
 
             Entity itemEntity = targetLocation.createEntity(EntityTypes.ITEM);
             ItemStack itemStack = IntegrationsManager.INSTANCE.createCustomDropStack(itemLoot.getProviderId(), itemLoot.getId(), targetPlayer).orElse(null);
-            if (itemStack == null)
+            if (itemStack == null) {
                 continue;
+            }
 
             IntQuantity quantity = itemLoot.getQuantity();
-            if (quantity != null)
+            if (quantity != null) {
                 itemStack.setQuantity(quantity.get());
+            }
 
-            if (itemLoot.getDisplayname() != null)
+            if (itemLoot.getDisplayname() != null) {
                 itemStack.offer(Keys.DISPLAY_NAME, TextSerializers.FORMATTING_CODE.deserialize(itemLoot.getDisplayname()));
+            }
 
             itemEntity.offer(Keys.REPRESENTED_ITEM, itemStack.createSnapshot());
             targetLocation.spawnEntity(itemEntity);

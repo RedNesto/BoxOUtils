@@ -40,8 +40,9 @@ public class BoundedIntQuantity implements IntQuantity {
     }
 
     public int get() {
-        if(from == to)
+        if (from == to) {
             return to;
+        }
 
         return RANDOM.nextInt(to + 1 - from) + from;
     }
