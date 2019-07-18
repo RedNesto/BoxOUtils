@@ -56,6 +56,10 @@ public class BoundedIntQuantity implements IntQuantity {
 
     public static BoundedIntQuantity parse(String toParse) {
         String[] bounds = toParse.split("-", 2);
+        if (bounds.length != 2) {
+            throw new IllegalArgumentException();
+        }
+
         int from = Integer.parseInt(bounds[0]);
         int to = Integer.parseInt(bounds[1]);
         return new BoundedIntQuantity(from, to);

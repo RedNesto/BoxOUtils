@@ -37,28 +37,21 @@ public class IntQuantitySerializer implements TypeSerializer<IntQuantity> {
 
     @Override
     public @Nullable IntQuantity deserialize(@NonNull TypeToken<?> type, @NonNull ConfigurationNode value) throws ObjectMappingException {
-        int amount = value.getInt();
-        // 0 means the value cannot be read as int, so we assume it is a bounded quantity
-        if (amount == 0) {
-            String bounds = value.getString();
-            if (bounds == null) {
-                String message = String.format("Invalid bounded amount for '%s'.", value.getPath()[1]);
-                throw new ObjectMappingException(message);
-            }
+        String stringValue = value.getString();
+        if (stringValue == null) {
+            throw new ObjectMappingException("Could not read value");
+        }
 
-            try {
-                return BoundedIntQuantity.parse(bounds);
-            } catch (NumberFormatException e) {
-                String message = String.format("Invalid bounded amount for '%s'.", value.getPath()[1]);
-                throw new ObjectMappingException(message);
-            }
-        } else {
-            if (amount < 0) {
-                String message = String.format("Invalid fixed amount for '%s'.", value.getPath()[1]);
-                throw new ObjectMappingException(message);
-            }
+        try {
+            return new FixedIntQuantity(Integer.parseInt(stringValue));
+        } catch (NumberFormatException ignore) {
+            // The value is not a simple int, so it should be a bounded quantity
+        }
 
-            return new FixedIntQuantity(amount);
+        try {
+            return BoundedIntQuantity.parse(stringValue);
+        } catch (IllegalArgumentException e) {
+            throw new ObjectMappingException("Invalid amount.", e);
         }
     }
 

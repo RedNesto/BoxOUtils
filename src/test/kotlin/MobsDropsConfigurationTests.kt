@@ -74,14 +74,6 @@ class MobsDropsConfigurationTests {
                 "minecraft:bat" to bat
         )
 
-        println(sheep)
-        println(config.drops["minecraft:sheep"])
-        println(sheep == config.drops["minecraft:sheep"])
-
-        println(bat)
-        println(config.drops["minecraft:bat"])
-        println(bat == config.drops["minecraft:bat"])
-
         assertTrue(config.enabled)
         assertEquals(expected, config.drops)
     }
