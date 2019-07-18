@@ -1,0 +1,39 @@
+buildscript {
+    ext.shadow_version = '4.0.4'
+    repositories {
+        mavenCentral()
+        maven {
+            url 'https://repo.spongepowered.org/maven/'
+        }
+        maven {
+            url 'https://files.minecraftforge.net/maven/'
+        }
+    }
+    dependencies {
+        classpath 'net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT'
+        classpath 'org.spongepowered:mctester:0.10.9-SNAPSHOT'
+    }
+}
+
+apply plugin: 'net.minecraftforge.gradle.forge'
+apply plugin: 'org.spongepowered.mctester'
+
+repositories {
+    mavenLocal()
+    maven {
+        url 'https://repo.spongepowered.org/maven/'
+    }
+}
+
+dependencies {
+    compile 'io.github.rednesto:box-o-utils:0.8'
+}
+
+minecraft {
+    version = '1.12.2-14.23.5.2838'
+    mappings = 'stable_39'
+
+    runDir = 'run'
+
+    makeObfSourceJar = false
+}
