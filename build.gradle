@@ -128,8 +128,11 @@ publishing {
 }
 
 def withIntegrations(Consumer<Project> action) {
-    for (path in project('integrations').subprojects) {
-        action.accept(path)
+    try {
+        for (path in project('integrations').subprojects) {
+            action.accept(path)
+        }
+    } catch (UnknownProjectException ignore) {
     }
 }
 

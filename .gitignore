@@ -9,6 +9,8 @@
 
 !/src/
 
+!/.travis.yml
+
 !/build.gradle
 !/gradle.properties
 !/settings.gradle
