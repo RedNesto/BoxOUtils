@@ -55,7 +55,6 @@ import static io.github.rednesto.bou.common.Config.FastHarvest;
 
 public class FastHarvestListener {
 
-    // TODO find a way to cleanup this file, this is an horrible mess right now
     // TODO support cocoa beans (and chorus maybe ?)
 
     private static final Map<String, CropDefinition> DEFINITIONS = new HashMap<>();
