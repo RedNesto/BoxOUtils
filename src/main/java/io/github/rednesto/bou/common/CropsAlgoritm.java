@@ -95,16 +95,21 @@ public enum CropsAlgoritm {
     /**
      * Computes the amount of drops for crops, usually seeds (wheat, beetroot), carrots and potatoes
      *
+     * @param cropConfig the configuration to use
      * @param age the actual age of the crop
      * @param maxAge the maximum age this crops can have, ignored in the 1.8 algorithm
-     * @param minimumDrop the amount of drop we are sure to have at the end
-     * @param potentialDropCount the number of potential drops
      * @param fortune the level of fortune of the tool used
-     * @param fortuneFactor the number which will be multiplied to the fortune param
      *
      * @return the total amount of drops
      */
-    public int compute(int age, int maxAge, int minimumDrop, int potentialDropCount, int fortune, int fortuneFactor) {
-        return compute(age, maxAge, minimumDrop, potentialDropCount, fortune, fortuneFactor, -1, -1);
+    public int compute(FastHarvestCrop cropConfig, int age, int maxAge, int fortune) {
+        return compute(age,
+                maxAge,
+                cropConfig.getMinimum(),
+                cropConfig.getCount(),
+                fortune,
+                cropConfig.getFortuneFactor(),
+                cropConfig.getChance(),
+                cropConfig.getChanceOf());
     }
 }

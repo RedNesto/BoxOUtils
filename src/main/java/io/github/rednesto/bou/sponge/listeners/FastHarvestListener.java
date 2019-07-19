@@ -26,6 +26,8 @@ package io.github.rednesto.bou.sponge.listeners;
 import io.github.rednesto.bou.common.Config;
 import io.github.rednesto.bou.common.CropsAlgoritm;
 import io.github.rednesto.bou.common.FastHarvestCrop;
+import org.spongepowered.api.block.BlockSnapshot;
+import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityTypes;
@@ -39,11 +41,12 @@ import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.enchantment.Enchantment;
 import org.spongepowered.api.item.enchantment.EnchantmentTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.item.inventory.ItemStackSnapshot;
+import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.World;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.Function;
 
 import javax.annotation.Nullable;
@@ -75,57 +78,60 @@ public class FastHarvestListener {
             return;
         }
 
-        CropDefinition cropDefinition = DEFINITIONS.get(event.getTargetBlock().getState().getType().getId());
+        BlockSnapshot targetBlock = event.getTargetBlock();
+        CropDefinition cropDefinition = DEFINITIONS.get(targetBlock.getState().getType().getId());
         if (cropDefinition == null) {
             return;
         }
 
         ItemStack maybeItemInHand = player.getItemInHand(event.getHandType()).orElse(ItemStack.empty());
-        if (!Config.canHarvest(maybeItemInHand.getType().getId()) || event.getTargetBlock().get(Keys.GROWTH_STAGE).orElse(0) != cropDefinition.maxAge) {
+        int age = targetBlock.get(Keys.GROWTH_STAGE).orElse(0);
+        if (!Config.canHarvest(maybeItemInHand.getType().getId()) || age != cropDefinition.maxAge) {
             return;
         }
 
+        int fortuneLevel = event.getContext().get(EventContextKeys.USED_ITEM)
+                .flatMap(item -> item.get(Keys.ITEM_ENCHANTMENTS))
+                .flatMap(enchantments -> enchantments.stream()
+                        .filter(enchantment -> enchantment.getType().equals(EnchantmentTypes.FORTUNE))
+                        .map(Enchantment::getLevel)
+                        .findFirst())
+                .orElse(0);
+
+        Location<World> entitiesSpawnLocation = targetBlock.getLocation().orElse(player.getLocation());
+
         FastHarvestCrop seedConfig = cropDefinition.seedConfigProvider.apply(fastHarvest);
-        Entity seed = player.getWorld().createEntity(EntityTypes.ITEM, event.getTargetBlock().getLocation().orElse(player.getLocation()).getPosition());
-        Optional<List<Enchantment>> maybeEnchantements = event.getContext().get(EventContextKeys.USED_ITEM).get().get(Keys.ITEM_ENCHANTMENTS);
-        int level = maybeEnchantements.isPresent() ? maybeEnchantements.get().stream()
-                .filter(enchantment -> enchantment.getType().equals(EnchantmentTypes.FORTUNE))
-                .map(Enchantment::getLevel)
-                .findFirst().orElse(0) : 0;
-        int age = event.getTargetBlock().get(Keys.GROWTH_STAGE).orElse(0);
-        int seedQuantity = CropsAlgoritm.ALG_19.compute(
-                age,
-                cropDefinition.maxAge,
-                seedConfig.getMinimum(),
-                seedConfig.getCount(),
-                level,
-                seedConfig.getFortuneFactor(),
-                seedConfig.getChance(),
-                seedConfig.getChanceOf()) - 1;
-        if (seedQuantity > 0) {
-            seed.offer(Keys.REPRESENTED_ITEM, ItemStack.of(cropDefinition.seed, seedQuantity).createSnapshot());
-            player.getWorld().spawnEntity(seed);
-        }
+        // We decrement because we consume the seed to plant it again
+        createAndSpawnEntity(cropDefinition, age, fortuneLevel, entitiesSpawnLocation, seedConfig, cropDefinition.seed, true);
 
         Function<FastHarvest, FastHarvestCrop> productConfigProvider = cropDefinition.productConfigProvider;
         ItemType productType = cropDefinition.product;
         if (productConfigProvider != null && productType != null ) {
-            FastHarvestCrop wheatConfig = productConfigProvider.apply(fastHarvest);
-            int productQuantity = CropsAlgoritm.ALG_19.compute(
-                    age,
-                    cropDefinition.maxAge,
-                    wheatConfig.getMinimum(),
-                    wheatConfig.getCount(),
-                    level,
-                    wheatConfig.getFortuneFactor(),
-                    wheatConfig.getChance(),
-                    wheatConfig.getChanceOf());
-            Entity product = player.getWorld().createEntity(EntityTypes.ITEM, event.getTargetBlock().getLocation().orElse(player.getLocation()).getPosition());
-            product.offer(Keys.REPRESENTED_ITEM, ItemStack.of(productType, productQuantity).createSnapshot());
-            player.getWorld().spawnEntity(product);
+            FastHarvestCrop productConfig = productConfigProvider.apply(fastHarvest);
+            createAndSpawnEntity(cropDefinition, age, fortuneLevel, entitiesSpawnLocation, productConfig, cropDefinition.product, false);
         }
 
-        event.getTargetBlock().getLocation().ifPresent(location -> location.setBlock(event.getTargetBlock().getState().with(Keys.GROWTH_STAGE, 0).orElse(event.getTargetBlock().getState())));
+        targetBlock.getLocation().ifPresent(location -> {
+            BlockState oldState = targetBlock.getState();
+            BlockState newState = oldState.with(Keys.GROWTH_STAGE, 0).orElse(oldState);
+            location.setBlock(newState);
+        });
+    }
+
+    private void createAndSpawnEntity(CropDefinition cropDefinition, int age, int fortuneLevel,
+                                     Location<World> entitiesSpawnLocation, FastHarvestCrop cropConfig, ItemType itemType,
+                                     boolean decrementQuantity) {
+        int quantity = CropsAlgoritm.ALG_19.compute(cropConfig, age, cropDefinition.maxAge, fortuneLevel);
+        if (decrementQuantity) {
+            quantity--;
+        }
+
+        if (quantity > 0) {
+            ItemStackSnapshot representedItem = ItemStack.of(itemType, quantity).createSnapshot();
+            Entity entity = entitiesSpawnLocation.createEntity(EntityTypes.ITEM);
+            entity.offer(Keys.REPRESENTED_ITEM, representedItem);
+            entitiesSpawnLocation.spawnEntity(entity);
+        }
     }
 
     private static class CropDefinition {
