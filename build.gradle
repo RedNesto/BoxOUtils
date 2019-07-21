@@ -38,9 +38,6 @@ repositories {
     maven {
         url 'https://jitpack.io'
     }
-    maven {
-        url 'http://files.minecraftforge.net/maven'
-    }
     mavenCentral()
 }
 
@@ -48,15 +45,13 @@ dependencies {
     compileOnly 'org.spongepowered:spongeapi:7.1.0'
     annotationProcessor 'org.spongepowered:spongeapi:7.1.0'
 
-    compileOnly 'com.github.RedNesto:FileInventories:0.3.2'
-    compileOnly 'com.github.randombyte-developer:byte-items:v2.3'
-    compileOnly 'me.ryanhamshire:griefprevention:1.12.2-4.3.0.662:api'
-
     testCompile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
     testCompile 'org.junit.jupiter:junit-jupiter-api:5.4.2'
     testRuntime 'org.junit.jupiter:junit-jupiter-engine:5.4.2'
 
     testCompile 'org.spongepowered:spongeapi:7.1.0'
+
+    gradle.ext.alwaysIncludedIntegrations.each { testCompile(project("integrations:$it")) }
 
     testRuntime 'org.slf4j:slf4j-simple:1.7.25'
 }

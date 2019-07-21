@@ -1,0 +1,28 @@
+plugins {
+    id 'net.minecrell.licenser'
+}
+
+repositories {
+    maven {
+        url 'https://repo.spongepowered.org/maven/'
+    }
+    maven {
+        url 'https://jitpack.io'
+    }
+}
+
+dependencies {
+    compileOnly 'org.spongepowered:spongeapi:7.1.0'
+
+    compileOnly rootProject
+
+    compileOnly 'com.github.RedNesto:FileInventories:0.3.2'
+}
+
+license {
+    header = rootProject.file('LICENSE')
+
+    include '**/*.java'
+
+    newLine = false
+}

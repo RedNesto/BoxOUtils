@@ -1,0 +1,28 @@
+plugins {
+    id 'net.minecrell.licenser'
+}
+
+repositories {
+    maven {
+        url 'https://repo.spongepowered.org/maven/'
+    }
+    maven {
+        url 'http://files.minecraftforge.net/maven'
+    }
+}
+
+dependencies {
+    compileOnly 'org.spongepowered:spongeapi:7.1.0'
+
+    compileOnly rootProject
+
+    compileOnly 'me.ryanhamshire:griefprevention:1.12.2-4.3.0.662:api'
+}
+
+license {
+    header = rootProject.file('LICENSE')
+
+    include '**/*.java'
+
+    newLine = false
+}

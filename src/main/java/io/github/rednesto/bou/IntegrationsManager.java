@@ -24,9 +24,6 @@
 package io.github.rednesto.bou;
 
 import io.github.rednesto.bou.customdrops.CustomDropsProvider;
-import io.github.rednesto.bou.integration.ByteItemsCustomDropsProvider;
-import io.github.rednesto.bou.integration.FileInventoriesCustomDropsProvider;
-import io.github.rednesto.bou.integration.requirements.GriefPreventionRegionRequirement;
 import io.github.rednesto.bou.integration.vanilla.VanillaCustomDropsProvider;
 import io.github.rednesto.bou.requirement.RequirementProvider;
 import io.github.rednesto.bou.requirements.DataByKeyRequirementProvider;
@@ -41,6 +38,7 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 import javax.annotation.Nullable;
 
@@ -103,27 +101,35 @@ public final class IntegrationsManager {
 
     void loadBuiltins() {
         if (isTesting || Sponge.getPluginManager().isLoaded("file-inventories")) {
-            register(new FileInventoriesCustomDropsProvider());
+            reflectiveRegistration("io.github.rednesto.bou.integration.fileinventories.FileInventoriesCustomDropsProvider",
+                    (Consumer<CustomDropsProvider>) this::register, "FileInventoriesCustomDropsProvider", "FileInventories");
         }
 
         if (isTesting || Sponge.getPluginManager().isLoaded("byte-items")) {
-            register(new ByteItemsCustomDropsProvider());
+            reflectiveRegistration("io.github.rednesto.bou.integration.byteitems.ByteItemsCustomDropsProvider",
+                    (Consumer<CustomDropsProvider>) this::register, "ByteItemsCustomDropsProvider", "ByteItems");
         }
 
         if (isTesting || Sponge.getPluginManager().isLoaded("griefprevention")) {
-            register(new GriefPreventionRegionRequirement.Provider());
+            reflectiveRegistration("io.github.rednesto.bou.integration.griefprevention.GriefPreventionRegionRequirement$Provider",
+                    (Consumer<RequirementProvider>) this::register, "GriefPreventionRegionRequirement.Provider", "GriefPrevention");
         }
 
-        if (isTesting || Sponge.getPluginManager().isLoaded("universeguard")) {
-            try {
-                // This integration cannot be on the plugin's classpath, so we must use reflection to get it
-                Class<?> universeguardProvider = Class.forName("io.github.rednesto.bou.integration.universeguard.UniverseGuardRegionRequirement$Provider");
-                register((RequirementProvider) universeguardProvider.newInstance());
-            } catch (InstantiationException | IllegalAccessException e) {
-                BoxOUtils.getInstance().getLogger().error("Could not instantiate UniverseGuardRegionRequirement.Provider", e);
-            } catch (ClassNotFoundException e) {
-                BoxOUtils.getInstance().getLogger().info("UniverseGuard is loaded but its integration could not be found");
-            }
+        if (Sponge.getPluginManager().isLoaded("universeguard")) {
+            reflectiveRegistration("io.github.rednesto.bou.integration.universeguard.UniverseGuardRegionRequirement$Provider",
+                    (Consumer<RequirementProvider>) this::register, "UniverseGuardRegionRequirement.Provider", "UniverseGuard");
+        }
+    }
+
+    // Integrations are not on the plugin's classpath, so we use reflection to get them
+    private <T> void reflectiveRegistration(String className, Consumer<T> registration, String friendlyClassName, String integrationName) {
+        try {
+            Class<T> clazz = (Class<T>) Class.forName(className);
+            registration.accept(clazz.newInstance());
+        } catch (InstantiationException | IllegalAccessException e) {
+            BoxOUtils.getInstance().getLogger().error("Could not instantiate {}", friendlyClassName, e);
+        } catch (ClassNotFoundException e) {
+            BoxOUtils.getInstance().getLogger().info("{} is loaded but its integration could not be found", integrationName);
         }
     }
 

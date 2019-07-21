@@ -27,7 +27,7 @@ import io.github.rednesto.bou.BoxOUtils
 import io.github.rednesto.bou.Config
 import io.github.rednesto.bou.SpongeConfig
 import io.github.rednesto.bou.config.serializers.BouTypeTokens
-import io.github.rednesto.bou.integration.requirements.GriefPreventionRegionRequirement
+import io.github.rednesto.bou.integration.griefprevention.GriefPreventionRegionRequirement
 import io.github.rednesto.bou.lootReuse.MultiplyLootReuse
 import io.github.rednesto.bou.lootReuse.SimpleLootReuse
 import io.github.rednesto.bou.models.CustomLoot

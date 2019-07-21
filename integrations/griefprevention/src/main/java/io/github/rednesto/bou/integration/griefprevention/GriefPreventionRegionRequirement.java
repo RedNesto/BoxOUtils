@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.github.rednesto.bou.integration.requirements;
+package io.github.rednesto.bou.integration.griefprevention;
 
 import com.google.common.base.MoreObjects;
 import io.github.rednesto.bou.requirement.AbstractRequirement;

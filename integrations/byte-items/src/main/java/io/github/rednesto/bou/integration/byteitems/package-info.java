@@ -22,6 +22,6 @@
  * SOFTWARE.
  */
 @ParametersAreNonnullByDefault
-package io.github.rednesto.bou.integration.requirements;
+package io.github.rednesto.bou.integration.byteitems;
 
 import javax.annotation.ParametersAreNonnullByDefault;

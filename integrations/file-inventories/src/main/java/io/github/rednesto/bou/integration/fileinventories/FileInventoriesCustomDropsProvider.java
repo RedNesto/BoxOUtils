@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.github.rednesto.bou.integration;
+package io.github.rednesto.bou.integration.fileinventories;
 
 import io.github.rednesto.bou.BoxOUtils;
 import io.github.rednesto.bou.customdrops.CustomDropsProvider;
