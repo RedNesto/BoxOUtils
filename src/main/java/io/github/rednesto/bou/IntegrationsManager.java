@@ -115,7 +115,7 @@ public final class IntegrationsManager {
                     (Consumer<RequirementProvider>) this::register, "GriefPreventionRegionRequirement.Provider", "GriefPrevention");
         }
 
-        if (Sponge.getPluginManager().isLoaded("universeguard")) {
+        if (isTesting || Sponge.getPluginManager().isLoaded("universeguard")) {
             reflectiveRegistration("io.github.rednesto.bou.integration.universeguard.UniverseGuardRegionRequirement$Provider",
                     (Consumer<RequirementProvider>) this::register, "UniverseGuardRegionRequirement.Provider", "UniverseGuard");
         }
