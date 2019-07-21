@@ -43,8 +43,8 @@ import java.util.HashMap;
 @Plugin(
         id = "box-o-utils",
         name = "Box O' Utils",
-        url = "https://ore.spongepowered.org/RedNesto/Box-O'-Utils",
-        description = "Control what blocks/mobs can loot (items, experience, money), right-click to harvest; more to come",
+        url = "https://ore.spongepowered.org/RedNesto/Box-O%27-Utils",
+        description = "Control blocks and mobs loots, right-click to harvest and more",
         authors = {"RedNesto"},
         dependencies = {
                 @Dependency(id = "file-inventories", version = "[0.3.0,)", optional = true),
