@@ -50,9 +50,9 @@ class MobsDropsConfigurationTests {
         val (_, config) = prepare("complex1")
 
         val sheep = run {
-            val requirements = listOf(
+            val requirements = listOf(listOf(
                     GriefPreventionRegionRequirement(listOf("test region"), false),
-                    DataByKeyRequirement("entity_data", EntitySnapshot::class.java, mapOf("sponge_impl:dye_color" to listOf("minecraft:red"))))
+                    DataByKeyRequirement("entity_data", EntitySnapshot::class.java, mapOf("sponge_impl:dye_color" to listOf("minecraft:red")))))
             val reuseItems = mapOf(
                     "minecraft:wool" to MultiplyLootReuse(3f),
                     "minecraft:mutton" to SimpleLootReuse(BoundedIntQuantity(2, 5)))

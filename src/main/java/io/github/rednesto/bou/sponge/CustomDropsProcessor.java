@@ -53,7 +53,6 @@ import org.spongepowered.api.world.World;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import javax.annotation.Nullable;
@@ -69,7 +68,7 @@ public class CustomDropsProcessor {
         CustomLoot.Reuse reuse = customLoot.getReuse();
         if (reuse != null) {
             BlockSnapshot block = event.getCause().first(BlockSnapshot.class).orElse(null);
-            if (block != null && !CustomDropsProcessor.fulfillsRequirements(block, event.getCause(), reuse.getRequirements())) {
+            if (block != null && !fulfillsRequirements(block, event.getCause(), reuse.getRequirements())) {
                 return;
             }
 
@@ -83,24 +82,30 @@ public class CustomDropsProcessor {
         }
     }
 
-    public static boolean fulfillsRequirements(Object source, Cause cause, Collection<Requirement<?>> requirements) {
+    public static boolean fulfillsRequirements(Object source, Cause cause, List<List<Requirement<?>>> requirements) {
         if (requirements.isEmpty()) {
             return true;
         }
 
-        for (Requirement value : requirements) {
-            //noinspection unchecked
-            if (!value.getApplicableType().isAssignableFrom(source.getClass()) || !value.appliesTo(source, cause)) {
-                continue;
+        for (List<Requirement<?>> requirementsList : requirements) {
+            boolean failed = false;
+            for (Requirement value : requirementsList) {
+                //noinspection unchecked
+                if (value.getApplicableType().isAssignableFrom(source.getClass()) && value.appliesTo(source, cause)) {
+                    //noinspection unchecked
+                    if (!value.fulfills(source, cause)) {
+                        failed = true;
+                        break;
+                    }
+                }
             }
 
-            //noinspection unchecked
-            if (!value.fulfills(source, cause)) {
-                return false;
+            if (!failed) {
+                return true;
             }
         }
 
-        return true;
+        return false;
     }
 
     public static void dropLoot(CustomLoot loot, @Nullable Player targetPlayer, @Nullable Location<World> targetLocation) {

@@ -34,6 +34,10 @@ import ninja.leaping.configurate.objectmapping.serialize.TypeSerializer;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 public class RequirementSerializer implements TypeSerializer<Requirement<?>> {
 
     @Override
@@ -54,5 +58,16 @@ public class RequirementSerializer implements TypeSerializer<Requirement<?>> {
     @Override
     public void serialize(@NonNull TypeToken<?> type, @Nullable Requirement<?> obj, @NonNull ConfigurationNode value) {
         throw new UnsupportedOperationException();
+    }
+
+    public static List<List<Requirement<?>>> getRequirementGroups(ConfigurationNode requirementsNode) throws ObjectMappingException {
+        List<Map<String, Requirement<?>>> requirementsMaps = requirementsNode.getList(BouTypeTokens.REQUIREMENTS_MAP);
+        ArrayList<List<Requirement<?>>> lists = new ArrayList<>();
+        for (Map<String, Requirement<?>> requirementsMap : requirementsMaps) {
+            ArrayList<Requirement<?>> requirements = new ArrayList<>(requirementsMap.values());
+            lists.add(requirements);
+        }
+
+        return lists;
     }
 }

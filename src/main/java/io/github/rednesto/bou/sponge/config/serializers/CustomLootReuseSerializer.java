@@ -34,7 +34,6 @@ import ninja.leaping.configurate.objectmapping.serialize.TypeSerializer;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -55,8 +54,7 @@ public class CustomLootReuseSerializer implements TypeSerializer<CustomLoot.Reus
         }
 
         ConfigurationNode requirementsNode = value.getNode("requirements");
-        Map<String, Requirement<?>> requirementsMap = requirementsNode.getValue(BouTypeTokens.REQUIREMENTS_MAP);
-        List<Requirement<?>> requirements = requirementsMap != null ? new ArrayList<>(requirementsMap.values()) : new ArrayList<>();
+        List<List<Requirement<?>>> requirements = RequirementSerializer.getRequirementGroups(requirementsNode);
 
         return new CustomLoot.Reuse(multiplier, reuses, requirements);
     }

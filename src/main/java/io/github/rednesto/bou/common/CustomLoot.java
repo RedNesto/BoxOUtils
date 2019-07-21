@@ -41,7 +41,7 @@ public class CustomLoot {
     private IntQuantity experience;
     private boolean overwrite;
     private boolean expOverwrite;
-    private List<Requirement<?>> requirements;
+    private List<List<Requirement<?>>> requirements;
     @Nullable
     private MoneyLoot moneyLoot;
     @Nullable
@@ -51,7 +51,7 @@ public class CustomLoot {
                       @Nullable IntQuantity experience,
                       boolean overwrite,
                       boolean expOverwrite,
-                      List<Requirement<?>> requirements,
+                      List<List<Requirement<?>>> requirements,
                       @Nullable MoneyLoot moneyLoot,
                       @Nullable Reuse reuse) {
         this.itemLoots = itemLoots;
@@ -80,7 +80,7 @@ public class CustomLoot {
         return expOverwrite;
     }
 
-    public List<Requirement<?>> getRequirements() {
+    public List<List<Requirement<?>>> getRequirements() {
         return requirements;
     }
 
@@ -130,9 +130,9 @@ public class CustomLoot {
 
         private float multiplier;
         private Map<String, LootReuse> items;
-        private List<Requirement<?>> requirements;
+        private List<List<Requirement<?>>> requirements;
 
-        public Reuse(float multiplier, Map<String, LootReuse> items, List<Requirement<?>> requirements) {
+        public Reuse(float multiplier, Map<String, LootReuse> items, List<List<Requirement<?>>> requirements) {
             this.multiplier = multiplier;
             this.items = items;
             this.requirements = requirements;
@@ -146,7 +146,7 @@ public class CustomLoot {
             return items;
         }
 
-        public List<Requirement<?>> getRequirements() {
+        public List<List<Requirement<?>>> getRequirements() {
             return requirements;
         }
 
