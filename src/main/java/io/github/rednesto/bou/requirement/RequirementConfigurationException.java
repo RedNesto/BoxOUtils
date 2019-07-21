@@ -21,11 +21,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.github.rednesto.bou.tests.requirements
+package io.github.rednesto.bou.requirement;
 
-import io.github.rednesto.bou.requirement.AbstractRequirement
-import org.spongepowered.api.event.cause.Cause
+public class RequirementConfigurationException extends Exception {
 
-class ConstantRequirement(private val value: Boolean, id: String = "constant") : AbstractRequirement<Any>(id, Any::class.java) {
-    override fun fulfills(source: Any, cause: Cause): Boolean = value
+    public RequirementConfigurationException() {
+        super();
+    }
+
+    public RequirementConfigurationException(String message) {
+        super(message);
+    }
+
+    public RequirementConfigurationException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    public RequirementConfigurationException(Throwable cause) {
+        super(cause);
+    }
 }

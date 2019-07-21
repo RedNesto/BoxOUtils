@@ -21,11 +21,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.github.rednesto.bou.tests.requirements
+package io.github.rednesto.bou.requirement;
 
-import io.github.rednesto.bou.requirement.AbstractRequirement
-import org.spongepowered.api.event.cause.Cause
+import org.spongepowered.api.event.cause.Cause;
 
-class ConstantRequirement(private val value: Boolean, id: String = "constant") : AbstractRequirement<Any>(id, Any::class.java) {
-    override fun fulfills(source: Any, cause: Cause): Boolean = value
+public interface Requirement<T> {
+
+    String getId();
+
+    Class<T> getApplicableType();
+
+    /**
+     * Indicates whether this requirement can be used for the given source.
+     *
+     * @param source the thing for which loot will be dropped
+     * @param cause the cause
+     *
+     * @return {@code true} if this requirement can be applied to the source, {@code false} otherwise
+     */
+    default boolean appliesTo(T source, Cause cause) {
+        return true;
+    }
+
+    /**
+     * Indicates if the given source fulfills this requirement.
+     *
+     * @param source the source to check
+     * @param cause the cause
+     *
+     * @return {@code true} if the source fulfills this requirement, {@code false} otherwise
+     */
+    boolean fulfills(T source, Cause cause);
 }

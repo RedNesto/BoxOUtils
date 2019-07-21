@@ -21,11 +21,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.github.rednesto.bou.tests.requirements
+package io.github.rednesto.bou.requirement;
 
-import io.github.rednesto.bou.requirement.AbstractRequirement
-import org.spongepowered.api.event.cause.Cause
+import ninja.leaping.configurate.ConfigurationNode;
 
-class ConstantRequirement(private val value: Boolean, id: String = "constant") : AbstractRequirement<Any>(id, Any::class.java) {
-    override fun fulfills(source: Any, cause: Cause): Boolean = value
+public interface RequirementProvider {
+
+    /**
+     * @return the id used in the 'requirements' part of CustomLoots.
+     */
+    String getId();
+
+    /**
+     * Creates a requirement from the given configuration.
+     *
+     * @param node the configuration node of this requirement. Its key will always be this {@link #getId()}
+     *
+     * @return the created requirement
+     *
+     * @throws RequirementConfigurationException if the configuration is invalid (like missing values)
+     */
+    Requirement<?> provide(ConfigurationNode node) throws RequirementConfigurationException;
 }

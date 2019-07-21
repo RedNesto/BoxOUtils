@@ -21,11 +21,40 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.github.rednesto.bou.tests.requirements
+package io.github.rednesto.bou.quantity;
 
-import io.github.rednesto.bou.requirement.AbstractRequirement
-import org.spongepowered.api.event.cause.Cause
+import com.google.common.base.MoreObjects;
 
-class ConstantRequirement(private val value: Boolean, id: String = "constant") : AbstractRequirement<Any>(id, Any::class.java) {
-    override fun fulfills(source: Any, cause: Cause): Boolean = value
+public class FixedIntQuantity implements IntQuantity {
+
+    private final int quantity;
+
+    public FixedIntQuantity(int quantity) {
+        this.quantity = quantity;
+    }
+
+    @Override
+    public int get() {
+        return quantity;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof FixedIntQuantity)) {
+            return false;
+        }
+
+        FixedIntQuantity that = (FixedIntQuantity) o;
+        return quantity == that.quantity;
+    }
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+                .add("quantity", quantity)
+                .toString();
+    }
 }

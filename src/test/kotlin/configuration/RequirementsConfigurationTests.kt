@@ -24,13 +24,13 @@
 package io.github.rednesto.bou.tests.configuration
 
 import com.google.common.base.MoreObjects
-import io.github.rednesto.bou.common.requirement.AbstractRequirement
-import io.github.rednesto.bou.common.requirement.Requirement
-import io.github.rednesto.bou.common.requirement.RequirementProvider
-import io.github.rednesto.bou.sponge.IntegrationsManager
-import io.github.rednesto.bou.sponge.config.serializers.BouTypeTokens
-import io.github.rednesto.bou.sponge.config.serializers.RequirementSerializer
-import io.github.rednesto.bou.sponge.config.serializers.RequirementsMapSerializer
+import io.github.rednesto.bou.IntegrationsManager
+import io.github.rednesto.bou.config.serializers.BouTypeTokens
+import io.github.rednesto.bou.config.serializers.RequirementSerializer
+import io.github.rednesto.bou.config.serializers.RequirementsMapSerializer
+import io.github.rednesto.bou.requirement.AbstractRequirement
+import io.github.rednesto.bou.requirement.Requirement
+import io.github.rednesto.bou.requirement.RequirementProvider
 import ninja.leaping.configurate.ConfigurationNode
 import ninja.leaping.configurate.ConfigurationOptions
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader

@@ -21,11 +21,41 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.github.rednesto.bou.tests.requirements
+package io.github.rednesto.bou.lootReuse;
 
-import io.github.rednesto.bou.requirement.AbstractRequirement
-import org.spongepowered.api.event.cause.Cause
+import com.google.common.base.MoreObjects;
+import io.github.rednesto.bou.quantity.IntQuantity;
 
-class ConstantRequirement(private val value: Boolean, id: String = "constant") : AbstractRequirement<Any>(id, Any::class.java) {
-    override fun fulfills(source: Any, cause: Cause): Boolean = value
+public class SimpleLootReuse implements LootReuse {
+
+    private final IntQuantity quantity;
+
+    public SimpleLootReuse(IntQuantity quantity) {
+        this.quantity = quantity;
+    }
+
+    @Override
+    public int computeQuantity(int original) {
+        return this.quantity.get();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof SimpleLootReuse)) {
+            return false;
+        }
+
+        SimpleLootReuse that = (SimpleLootReuse) o;
+        return quantity.equals(that.quantity);
+    }
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+                .add("quantity", quantity)
+                .toString();
+    }
 }

@@ -21,27 +21,49 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.github.rednesto.bou.example;
+package io.github.rednesto.bou.requirement;
 
-import com.google.inject.Inject;
-import io.github.rednesto.bou.IntegrationsManager;
-import org.slf4j.Logger;
-import org.spongepowered.api.event.Listener;
-import org.spongepowered.api.event.game.state.GameInitializationEvent;
-import org.spongepowered.api.plugin.Dependency;
-import org.spongepowered.api.plugin.Plugin;
+import com.google.common.base.MoreObjects;
 
-@Plugin(id = "bou-integration-example",
-        description = "An example plugin showing how to register Box O' Utils integrations",
-        dependencies = @Dependency(id = "box-o-utils"))
-public class BouIntegrationExample {
+public abstract class AbstractRequirement<T> implements Requirement<T> {
 
-    @Inject
-    public Logger logger;
+    private final String id;
+    private final Class<T> applicableType;
 
-    @Listener
-    public void onInit(GameInitializationEvent event) {
-        logger.info("Registering example CustomDropsProvider");
-        IntegrationsManager.INSTANCE.register(new EnchantCustomDropsProvider(this));
+    protected AbstractRequirement(String id, Class<T> applicableType) {
+        this.id = id;
+        this.applicableType = applicableType;
+    }
+
+    @Override
+    public String getId() {
+        return this.id;
+    }
+
+    @Override
+    public Class<T> getApplicableType() {
+        return this.applicableType;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof AbstractRequirement)) {
+            return false;
+        }
+
+        AbstractRequirement<?> that = (AbstractRequirement<?>) o;
+        return id.equals(that.id) &&
+                applicableType.equals(that.applicableType);
+    }
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+                .add("id", id)
+                .add("applicableType", applicableType)
+                .toString();
     }
 }

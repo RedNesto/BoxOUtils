@@ -23,19 +23,19 @@
  */
 package io.github.rednesto.bou.tests
 
-import io.github.rednesto.bou.common.Config
-import io.github.rednesto.bou.common.CustomLoot
-import io.github.rednesto.bou.common.ItemLoot
-import io.github.rednesto.bou.common.MoneyLoot
-import io.github.rednesto.bou.common.lootReuse.MultiplyLootReuse
-import io.github.rednesto.bou.common.lootReuse.SimpleLootReuse
-import io.github.rednesto.bou.common.quantity.BoundedIntQuantity
-import io.github.rednesto.bou.common.quantity.FixedIntQuantity
-import io.github.rednesto.bou.sponge.BoxOUtils
-import io.github.rednesto.bou.sponge.SpongeConfig
-import io.github.rednesto.bou.sponge.config.serializers.BouTypeTokens
-import io.github.rednesto.bou.sponge.integration.requirements.GriefPreventionRegionRequirement
-import io.github.rednesto.bou.sponge.requirements.DataByKeyRequirement
+import io.github.rednesto.bou.BoxOUtils
+import io.github.rednesto.bou.Config
+import io.github.rednesto.bou.SpongeConfig
+import io.github.rednesto.bou.config.serializers.BouTypeTokens
+import io.github.rednesto.bou.integration.requirements.GriefPreventionRegionRequirement
+import io.github.rednesto.bou.lootReuse.MultiplyLootReuse
+import io.github.rednesto.bou.lootReuse.SimpleLootReuse
+import io.github.rednesto.bou.models.CustomLoot
+import io.github.rednesto.bou.models.ItemLoot
+import io.github.rednesto.bou.models.MoneyLoot
+import io.github.rednesto.bou.quantity.BoundedIntQuantity
+import io.github.rednesto.bou.quantity.FixedIntQuantity
+import io.github.rednesto.bou.requirements.DataByKeyRequirement
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test

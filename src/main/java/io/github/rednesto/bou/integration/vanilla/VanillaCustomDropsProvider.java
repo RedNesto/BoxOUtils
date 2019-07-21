@@ -21,48 +21,27 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.github.rednesto.bou.example;
+package io.github.rednesto.bou.integration.vanilla;
 
-import io.github.rednesto.bou.BoxOUtils;
-import io.github.rednesto.bou.IntegrationsManager;
 import io.github.rednesto.bou.customdrops.CustomDropsProvider;
-import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.item.enchantment.Enchantment;
-import org.spongepowered.api.item.enchantment.EnchantmentTypes;
+import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
 
-import java.util.Collections;
 import java.util.Optional;
 
 import javax.annotation.Nullable;
 
-public class EnchantCustomDropsProvider implements CustomDropsProvider {
-
-    private final BouIntegrationExample plugin;
-
-    public EnchantCustomDropsProvider(BouIntegrationExample plugin) {
-        this.plugin = plugin;
-    }
-
-    @Override
-    public void init(BoxOUtils plugin) {
-        this.plugin.logger.info("Initializing EnchantCustomDropsProvider");
-    }
+public class VanillaCustomDropsProvider implements CustomDropsProvider {
 
     @Override
     public String getId() {
-        return "auto-enchant";
+        return "vanilla";
     }
 
     @Override
     public Optional<ItemStack> createItemStack(String id, @Nullable Player targetPlayer) {
-        return IntegrationsManager.INSTANCE.getDefaultCustomDropsProvider().createItemStack(id, targetPlayer)
-                .map(item -> {
-                    Enchantment enchant = Enchantment.of(EnchantmentTypes.KNOCKBACK, 1);
-                    item.offer(Keys.ITEM_ENCHANTMENTS, Collections.singletonList(enchant));
-
-                    return item;
-                });
+        return Sponge.getRegistry().getType(ItemType.class, id).map(ItemStack::of);
     }
 }
