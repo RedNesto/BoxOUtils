@@ -29,7 +29,6 @@ import io.github.rednesto.bou.requirement.RequirementProvider;
 import io.github.rednesto.bou.requirements.DataByKeyRequirementProvider;
 import io.github.rednesto.bou.requirements.PermissionsRequirement;
 import io.github.rednesto.bou.requirements.WorldsRequirement;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.living.player.Player;
@@ -38,33 +37,18 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Consumer;
 
 import javax.annotation.Nullable;
 
 public final class IntegrationsManager {
 
-    public static final IntegrationsManager INSTANCE = new IntegrationsManager();
-
-    private final boolean isTesting;
+    private boolean vanillaBuiltinsLoaded = false;
 
     private boolean customDropsProvidersInit = false;
     private final CustomDropsProvider defaultCustomDropsProvider = new VanillaCustomDropsProvider();
     private final Map<String, CustomDropsProvider> customDropsProviders = new HashMap<>();
 
     private final Map<String, RequirementProvider> requirementProviders = new HashMap<>();
-
-    private IntegrationsManager() {
-        register(defaultCustomDropsProvider);
-        register(new DataByKeyRequirementProvider<>("block_data", BlockSnapshot.class));
-        register(new DataByKeyRequirementProvider<>("entity_data", EntitySnapshot.class));
-        register(new PermissionsRequirement.Provider());
-        register(new WorldsRequirement.Provider());
-        isTesting = Boolean.getBoolean("bou.is_testing");
-        if (isTesting) {
-            loadBuiltins();
-        }
-    }
 
     public void register(CustomDropsProvider customDropsProvider) {
         customDropsProviders.put(customDropsProvider.getId(), customDropsProvider);
@@ -99,38 +83,18 @@ public final class IntegrationsManager {
         return requirementProviders.get(id);
     }
 
-    void loadBuiltins() {
-        if (isTesting || Sponge.getPluginManager().isLoaded("file-inventories")) {
-            reflectiveRegistration("io.github.rednesto.bou.integration.fileinventories.FileInventoriesCustomDropsProvider",
-                    (Consumer<CustomDropsProvider>) this::register, "FileInventoriesCustomDropsProvider", "FileInventories");
+    public void loadVanillaBuiltins() {
+        if (vanillaBuiltinsLoaded) {
+            return;
         }
 
-        if (isTesting || Sponge.getPluginManager().isLoaded("byte-items")) {
-            reflectiveRegistration("io.github.rednesto.bou.integration.byteitems.ByteItemsCustomDropsProvider",
-                    (Consumer<CustomDropsProvider>) this::register, "ByteItemsCustomDropsProvider", "ByteItems");
-        }
+        vanillaBuiltinsLoaded = true;
 
-        if (isTesting || Sponge.getPluginManager().isLoaded("griefprevention")) {
-            reflectiveRegistration("io.github.rednesto.bou.integration.griefprevention.GriefPreventionRegionRequirement$Provider",
-                    (Consumer<RequirementProvider>) this::register, "GriefPreventionRegionRequirement.Provider", "GriefPrevention");
-        }
-
-        if (isTesting || Sponge.getPluginManager().isLoaded("universeguard")) {
-            reflectiveRegistration("io.github.rednesto.bou.integration.universeguard.UniverseGuardRegionRequirement$Provider",
-                    (Consumer<RequirementProvider>) this::register, "UniverseGuardRegionRequirement.Provider", "UniverseGuard");
-        }
-    }
-
-    // Integrations are not on the plugin's classpath, so we use reflection to get them
-    private <T> void reflectiveRegistration(String className, Consumer<T> registration, String friendlyClassName, String integrationName) {
-        try {
-            Class<T> clazz = (Class<T>) Class.forName(className);
-            registration.accept(clazz.newInstance());
-        } catch (InstantiationException | IllegalAccessException e) {
-            BoxOUtils.getInstance().getLogger().error("Could not instantiate {}", friendlyClassName, e);
-        } catch (ClassNotFoundException e) {
-            BoxOUtils.getInstance().getLogger().info("{} is loaded but its integration could not be found", integrationName);
-        }
+        register(defaultCustomDropsProvider);
+        register(new DataByKeyRequirementProvider<>("block_data", BlockSnapshot.class));
+        register(new DataByKeyRequirementProvider<>("entity_data", EntitySnapshot.class));
+        register(new PermissionsRequirement.Provider());
+        register(new WorldsRequirement.Provider());
     }
 
     void initIntegrations(BoxOUtils plugin) {
@@ -149,5 +113,9 @@ public final class IntegrationsManager {
         for (CustomDropsProvider provider : customDropsProviders.values()) {
             provider.init(plugin);
         }
+    }
+
+    public static IntegrationsManager getInstance() {
+        return BoxOUtils.getInstance().getIntegrationsManager();
     }
 }

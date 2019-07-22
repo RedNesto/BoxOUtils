@@ -23,9 +23,7 @@
  */
 package io.github.rednesto.bou.tests
 
-import io.github.rednesto.bou.BoxOUtils
-import io.github.rednesto.bou.Config
-import io.github.rednesto.bou.SpongeConfig
+import io.github.rednesto.bou.*
 import io.github.rednesto.bou.config.serializers.BouTypeTokens
 import io.github.rednesto.bou.integration.griefprevention.GriefPreventionRegionRequirement
 import io.github.rednesto.bou.lootReuse.MultiplyLootReuse
@@ -138,7 +136,11 @@ class BlocksDropsConfigurationTests {
     private fun prepare(testName: String): Pair<BoxOUtils, Config.BlocksDrops> {
         val folderUri = javaClass.getResource("/configurationTests/blocksdrops") ?: fail { "config folder does not exist" }
         val configDir = Paths.get(folderUri.toURI())
-        val plugin = BoxOUtils(LoggerFactory.getLogger(BoxOUtils::class.java), configDir)
+        val plugin = BoxOUtils(LoggerFactory.getLogger(BoxOUtils::class.java), configDir, IntegrationsManager())
+        BoxOUtils.setInstance(plugin)
+        val integrationsManager = plugin.integrationsManager
+        integrationsManager.loadVanillaBuiltins()
+        BouUtils.registerIntegrations(integrationsManager, true)
         val node = SpongeConfig.loader(configDir.resolve("$testName.conf")).load()
         return Pair(plugin, node.getValue(BouTypeTokens.CONFIG_BLOCKS_DROPS)!!)
     }

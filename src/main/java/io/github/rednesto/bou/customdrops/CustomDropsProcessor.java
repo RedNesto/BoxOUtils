@@ -174,7 +174,7 @@ public class CustomDropsProcessor {
             }
 
             Entity itemEntity = targetLocation.createEntity(EntityTypes.ITEM);
-            ItemStack itemStack = IntegrationsManager.INSTANCE.createCustomDropStack(itemLoot.getProviderId(), itemLoot.getId(), targetPlayer).orElse(null);
+            ItemStack itemStack = IntegrationsManager.getInstance().createCustomDropStack(itemLoot.getProviderId(), itemLoot.getId(), targetPlayer).orElse(null);
             if (itemStack == null) {
                 continue;
             }

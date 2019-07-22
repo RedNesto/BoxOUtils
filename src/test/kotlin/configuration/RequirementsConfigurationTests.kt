@@ -115,13 +115,13 @@ requirements=[
         @JvmStatic
         @BeforeAll
         private fun setUp() {
-            IntegrationsManager.INSTANCE.register(TestRequirement.Provider("req1") { node ->
+            IntegrationsManager.getInstance().register(TestRequirement.Provider("req1") { node ->
                 return@Provider node.string!!
             })
-            IntegrationsManager.INSTANCE.register(TestRequirement.Provider("req2") { node ->
+            IntegrationsManager.getInstance().register(TestRequirement.Provider("req2") { node ->
                 ArrayList(node.getList(TypeTokens.STRING_TOKEN))
             })
-            IntegrationsManager.INSTANCE.register(TestRequirement.Provider("req3") { node ->
+            IntegrationsManager.getInstance().register(TestRequirement.Provider("req3") { node ->
                 RequirementDataStruct(node.getNode("str").string!!, node.getNode("int").int)
             })
         }

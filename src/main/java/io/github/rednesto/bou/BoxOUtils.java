@@ -30,7 +30,8 @@ import org.spongepowered.api.command.source.ConsoleSource;
 import org.spongepowered.api.config.ConfigDir;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.game.GameReloadEvent;
-import org.spongepowered.api.event.game.state.GamePostInitializationEvent;
+import org.spongepowered.api.event.game.state.GameConstructionEvent;
+import org.spongepowered.api.event.game.state.GamePreInitializationEvent;
 import org.spongepowered.api.plugin.Dependency;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.text.Text;
@@ -55,9 +56,10 @@ import java.util.HashMap;
 )
 public class BoxOUtils {
 
-    private Logger logger;
+    private final Logger logger;
 
-    private Path configDir;
+    private final Path configDir;
+    private final IntegrationsManager integrationsManager;
 
     private Config.BlocksDrops blocksDrops = new Config.BlocksDrops(false, new HashMap<>());
     private Config.MobsDrops mobsDrops = new Config.MobsDrops(false, new HashMap<>());
@@ -68,16 +70,26 @@ public class BoxOUtils {
 
     @Inject
     public BoxOUtils(Logger logger, @ConfigDir(sharedRoot = false) Path configDir) {
+        this(logger, configDir, new IntegrationsManager());
+    }
+
+    public BoxOUtils(Logger logger, Path configDir, IntegrationsManager integrationsManager) {
         this.logger = logger;
         this.configDir = configDir;
+        this.integrationsManager = integrationsManager;
+    }
+
+    @Listener
+    public void onConstruct(GameConstructionEvent event) {
         instance = this;
     }
 
     @Listener
-    public void onPostInit(GamePostInitializationEvent event) {
+    public void onPreInit(GamePreInitializationEvent event) {
         this.logger.info("Loading built-in integrations");
-        IntegrationsManager.INSTANCE.loadBuiltins();
-        IntegrationsManager.INSTANCE.initIntegrations(this);
+        integrationsManager.loadVanillaBuiltins();
+        BouUtils.registerIntegrations(integrationsManager, false);
+        integrationsManager.initIntegrations(this);
 
         try {
             SpongeConfig.loadConf(this);
@@ -98,16 +110,16 @@ public class BoxOUtils {
         }
     }
 
-    public static BoxOUtils getInstance() {
-        return instance;
-    }
-
     public Logger getLogger() {
         return logger;
     }
 
     public Path getConfigDir() {
         return configDir;
+    }
+
+    public IntegrationsManager getIntegrationsManager() {
+        return integrationsManager;
     }
 
     public Config.BlocksDrops getBlocksDrops() {
@@ -140,5 +152,13 @@ public class BoxOUtils {
 
     public void setFastHarvest(Config.FastHarvest fastHarvest) {
         this.fastHarvest = fastHarvest;
+    }
+
+    public static BoxOUtils getInstance() {
+        return instance;
+    }
+
+    public static void setInstance(BoxOUtils instance) {
+        BoxOUtils.instance = instance;
     }
 }

@@ -42,7 +42,7 @@ public class SpongeUtils {
             // ISE is thrown if Sponge is not initialized, like when unit-testing.
             // But bou.is_testing is also set for integration tests,
             // so we have to check for it only when an ISE is thrown here
-            if (Boolean.getBoolean("bou.is_testing")) {
+            if (BouUtils.isTesting()) {
                 spongeImplId = "sponge_impl";
             } else {
                 throw e;

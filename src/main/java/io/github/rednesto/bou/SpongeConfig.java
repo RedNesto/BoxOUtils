@@ -46,7 +46,7 @@ import java.util.function.Consumer;
 
 public class SpongeConfig {
 
-    private static final boolean IS_TESTING = Boolean.getBoolean("bou.is_testing");
+    private static final boolean IS_TESTING = BouUtils.isTesting();
 
     private static boolean fastHarvestListenersRegistered = false;
     private static boolean blockDropsListenersRegistered = false;
@@ -61,7 +61,7 @@ public class SpongeConfig {
         loadMobsDrops(plugin);
         loadBlockSpawners(plugin);
 
-        IntegrationsManager.INSTANCE.initIntegrations(plugin);
+        IntegrationsManager.getInstance().initIntegrations(plugin);
     }
 
     private static void loadFastHarvest(BoxOUtils plugin) throws IOException {

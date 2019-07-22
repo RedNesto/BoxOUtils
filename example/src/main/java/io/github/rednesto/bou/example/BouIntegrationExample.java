@@ -42,6 +42,6 @@ public class BouIntegrationExample {
     @Listener
     public void onInit(GameInitializationEvent event) {
         logger.info("Registering example CustomDropsProvider");
-        IntegrationsManager.INSTANCE.register(new EnchantCustomDropsProvider(this));
+        IntegrationsManager.getInstance().register(new EnchantCustomDropsProvider(this));
     }
 }

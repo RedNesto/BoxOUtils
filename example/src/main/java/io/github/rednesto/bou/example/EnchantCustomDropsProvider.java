@@ -57,7 +57,7 @@ public class EnchantCustomDropsProvider implements CustomDropsProvider {
 
     @Override
     public Optional<ItemStack> createItemStack(String id, @Nullable Player targetPlayer) {
-        return IntegrationsManager.INSTANCE.getDefaultCustomDropsProvider().createItemStack(id, targetPlayer)
+        return IntegrationsManager.getInstance().getDefaultCustomDropsProvider().createItemStack(id, targetPlayer)
                 .map(item -> {
                     Enchantment enchant = Enchantment.of(EnchantmentTypes.KNOCKBACK, 1);
                     item.offer(Keys.ITEM_ENCHANTMENTS, Collections.singletonList(enchant));

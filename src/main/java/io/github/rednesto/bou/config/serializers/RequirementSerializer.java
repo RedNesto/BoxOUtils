@@ -43,7 +43,7 @@ public class RequirementSerializer implements TypeSerializer<Requirement<?>> {
     @Override
     public @Nullable Requirement<?> deserialize(@NonNull TypeToken<?> type, @NonNull ConfigurationNode value) throws ObjectMappingException {
         String key = (String) value.getKey();
-        RequirementProvider requirementProvider = IntegrationsManager.INSTANCE.getRequirementProvider(key);
+        RequirementProvider requirementProvider = IntegrationsManager.getInstance().getRequirementProvider(key);
         if (requirementProvider == null) {
             return null;
         }
