@@ -24,26 +24,31 @@
 package io.github.rednesto.bou.tests.configuration
 
 import com.google.common.base.MoreObjects
-import io.github.rednesto.bou.IntegrationsManager
+import com.google.common.reflect.TypeToken
 import io.github.rednesto.bou.config.serializers.BouTypeTokens
 import io.github.rednesto.bou.config.serializers.RequirementSerializer
 import io.github.rednesto.bou.config.serializers.RequirementsMapSerializer
 import io.github.rednesto.bou.requirement.AbstractRequirement
 import io.github.rednesto.bou.requirement.Requirement
 import io.github.rednesto.bou.requirement.RequirementProvider
+import io.github.rednesto.bou.tests.framework.BouFixture
+import io.github.rednesto.bou.tests.framework.ConfigurationTestCase
 import ninja.leaping.configurate.ConfigurationNode
-import ninja.leaping.configurate.ConfigurationOptions
-import ninja.leaping.configurate.hocon.HoconConfigurationLoader
-import ninja.leaping.configurate.objectmapping.serialize.TypeSerializers
+import ninja.leaping.configurate.objectmapping.serialize.TypeSerializerCollection
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.spongepowered.api.event.cause.Cause
 import org.spongepowered.api.util.TypeTokens
+import java.nio.file.Paths
 import java.util.*
 import kotlin.collections.ArrayList
 
-class RequirementsConfigurationTests {
+private val TOKEN = object : TypeToken<MutableList<MutableList<Requirement<*>>>>() {}
+
+class RequirementsConfigurationTests : ConfigurationTestCase<MutableList<MutableList<Requirement<*>>>>("requirements", TOKEN) {
+
+    val pluginFixture = BouFixture { Paths.get("config") }
 
     @Test
     fun `single requirement`() {
@@ -53,7 +58,7 @@ requirements {
 }
 """
         val expected = listOf(listOf(TestRequirement("req1", "some string")))
-        assertEquals(expected, load(config))
+        assertEquals(expected, loadConfig(config))
     }
 
     @Test
@@ -67,7 +72,7 @@ requirements {
         val expected = listOf(listOf(
                 TestRequirement("req1", "some string"),
                 TestRequirement("req2", listOf("yes", "no", "maybe"))))
-        assertEquals(expected, load(config))
+        assertEquals(expected, loadConfig(config))
     }
 
     @Test
@@ -90,41 +95,33 @@ requirements=[
                 listOf(TestRequirement("req1", "some string")),
                 listOf(TestRequirement("req2", listOf("wow", "many choices")),
                         TestRequirement("req3", RequirementDataStruct("text", 5))))
-        val loaded = load(config)
+        val loaded = loadConfig(config)
         // We sort those requirements to have the same order than the expected one
-        loaded?.get(1)?.sortBy { it.id }
+        loaded[1].sortBy { it.id }
         assertEquals(expected, loaded)
     }
 
-    private val loaderOptions = ConfigurationOptions.defaults()
-            .setSerializers(TypeSerializers.newCollection()
-                    .registerType(BouTypeTokens.REQUIREMENT, RequirementSerializer())
-                    .registerType(BouTypeTokens.REQUIREMENTS_MAP, RequirementsMapSerializer()))
+    override fun populateSerializers(serializers: TypeSerializerCollection) {
+        serializers.registerType(BouTypeTokens.REQUIREMENT, RequirementSerializer())
+                .registerType(BouTypeTokens.REQUIREMENTS_MAP, RequirementsMapSerializer())
+    }
 
-    private fun load(configuration: String): MutableList<MutableList<Requirement<*>>>? {
-        val loader = HoconConfigurationLoader.builder()
-                .setDefaultOptions(loaderOptions)
-                .setSource { configuration.reader().buffered() }
-                .build()
-
-        val rootNode = loader.load()
+    override fun loadConfig(configuration: String): MutableList<MutableList<Requirement<*>>> {
+        val rootNode = loadNode(configuration)
         return RequirementSerializer.getRequirementGroups(rootNode.getNode("requirements"))
     }
 
-    companion object {
-        @JvmStatic
-        @BeforeAll
-        private fun setUp() {
-            IntegrationsManager.getInstance().register(TestRequirement.Provider("req1") { node ->
-                return@Provider node.string!!
-            })
-            IntegrationsManager.getInstance().register(TestRequirement.Provider("req2") { node ->
-                ArrayList(node.getList(TypeTokens.STRING_TOKEN))
-            })
-            IntegrationsManager.getInstance().register(TestRequirement.Provider("req3") { node ->
-                RequirementDataStruct(node.getNode("str").string!!, node.getNode("int").int)
-            })
-        }
+    @BeforeEach
+    private fun setUp() {
+        pluginFixture.setUp()
+        val integrationsManager = pluginFixture.plugin.integrationsManager
+        integrationsManager.register(TestRequirement.Provider("req1") { it.string!! })
+        integrationsManager.register(TestRequirement.Provider("req2") {
+            ArrayList(it.getList(TypeTokens.STRING_TOKEN))
+        })
+        integrationsManager.register(TestRequirement.Provider("req3") {
+            RequirementDataStruct(it.getNode("str").string!!, it.getNode("int").int)
+        })
     }
 }
 
@@ -152,7 +149,7 @@ private class TestRequirement(id: String, val configurationValue: Any) : Abstrac
                 .add("id", id)
                 .add("applicableType", applicableType)
                 .add("configurationValue", configurationValue)
-                .toString();
+                .toString()
     }
 
     class Provider(private val id: String, private val configLoader: (node: ConfigurationNode) -> Any) : RequirementProvider {

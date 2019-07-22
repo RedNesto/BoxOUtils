@@ -28,45 +28,35 @@ import io.github.rednesto.bou.config.serializers.IntQuantitySerializer
 import io.github.rednesto.bou.quantity.BoundedIntQuantity
 import io.github.rednesto.bou.quantity.FixedIntQuantity
 import io.github.rednesto.bou.quantity.IntQuantity
-import ninja.leaping.configurate.ConfigurationOptions
-import ninja.leaping.configurate.hocon.HoconConfigurationLoader
+import io.github.rednesto.bou.tests.framework.ConfigurationTestCase
 import ninja.leaping.configurate.objectmapping.ObjectMappingException
-import ninja.leaping.configurate.objectmapping.serialize.TypeSerializers
+import ninja.leaping.configurate.objectmapping.serialize.TypeSerializerCollection
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
-class IntQuantityTests {
+class IntQuantityTests : ConfigurationTestCase<IntQuantity>("quantity", BouTypeTokens.INT_QUANTITY) {
 
     @Test
-    fun `fixed quantity`() = assertEquals(load("quantity=1"), FixedIntQuantity(1))
+    fun `fixed quantity`() = assertEquals(loadConfig("quantity=1"), FixedIntQuantity(1))
 
     @Test
-    fun `bounded quantity`() = assertEquals(load("quantity=2-10"), BoundedIntQuantity(2, 10))
+    fun `bounded quantity`() = assertEquals(loadConfig("quantity=2-10"), BoundedIntQuantity(2, 10))
 
     @Test
     fun `invalid quantity`() {
-        val thrown = assertThrows<ObjectMappingException> { load("quantity=invalid") }
+        val thrown = assertThrows<ObjectMappingException> { loadConfig("quantity=invalid") }
         assertTrue(thrown.cause is IllegalArgumentException)
     }
 
     @Test
     fun `invalid bounded quantity`() {
-        val thrown = assertThrows<ObjectMappingException> { load("quantity=2-a3") }
+        val thrown = assertThrows<ObjectMappingException> { loadConfig("quantity=2-a3") }
         assertTrue(thrown.cause is NumberFormatException)
     }
 
-    private val loaderOptions = ConfigurationOptions.defaults()
-            .setSerializers(TypeSerializers.newCollection().registerType(BouTypeTokens.INT_QUANTITY, IntQuantitySerializer()))
-
-    private fun load(configuration: String): IntQuantity? {
-        val loader = HoconConfigurationLoader.builder()
-                .setDefaultOptions(loaderOptions)
-                .setSource { configuration.reader().buffered() }
-                .build()
-
-        val rootNode = loader.load()
-        return rootNode.getNode("quantity").getValue(BouTypeTokens.INT_QUANTITY)
+    override fun populateSerializers(serializers: TypeSerializerCollection) {
+        serializers.registerType(BouTypeTokens.INT_QUANTITY, IntQuantitySerializer())
     }
 }

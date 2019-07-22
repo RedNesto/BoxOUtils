@@ -23,7 +23,7 @@
  */
 package io.github.rednesto.bou.tests
 
-import io.github.rednesto.bou.*
+import io.github.rednesto.bou.Config
 import io.github.rednesto.bou.config.serializers.BouTypeTokens
 import io.github.rednesto.bou.integration.griefprevention.GriefPreventionRegionRequirement
 import io.github.rednesto.bou.lootReuse.MultiplyLootReuse
@@ -33,19 +33,17 @@ import io.github.rednesto.bou.models.ItemLoot
 import io.github.rednesto.bou.models.MoneyLoot
 import io.github.rednesto.bou.quantity.BoundedIntQuantity
 import io.github.rednesto.bou.requirements.DataByKeyRequirement
+import io.github.rednesto.bou.tests.framework.PluginConfigurationTestCase
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.fail
-import org.slf4j.LoggerFactory
 import org.spongepowered.api.entity.EntitySnapshot
-import java.nio.file.Paths
 
-class MobsDropsConfigurationTests {
+class MobsDropsConfigurationTests : PluginConfigurationTestCase<Config.MobsDrops>("mobsdrops", BouTypeTokens.CONFIG_MOBS_DROPS) {
 
     @Test
     fun `complex 1`() {
-        val (_, config) = prepare("complex1")
+        val config = loadConfig("complex1")
 
         val sheep = run {
             val requirements = listOf(listOf(
@@ -74,17 +72,5 @@ class MobsDropsConfigurationTests {
 
         assertTrue(config.enabled)
         assertEquals(expected, config.drops)
-    }
-
-    private fun prepare(testName: String): Pair<BoxOUtils, Config.MobsDrops> {
-        val folderUri = javaClass.getResource("/configurationTests/mobsdrops") ?: fail { "config folder does not exist" }
-        val configDir = Paths.get(folderUri.toURI())
-        val plugin = BoxOUtils(LoggerFactory.getLogger(BoxOUtils::class.java), configDir, IntegrationsManager())
-        BoxOUtils.setInstance(plugin)
-        val integrationsManager = plugin.integrationsManager
-        integrationsManager.loadVanillaBuiltins()
-        BouUtils.registerIntegrations(integrationsManager, true)
-        val node = SpongeConfig.loader(configDir.resolve("$testName.conf")).load()
-        return Pair(plugin, node.getValue(BouTypeTokens.CONFIG_MOBS_DROPS)!!)
     }
 }
