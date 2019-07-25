@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.github.rednesto.bou.tests.mock
+package io.github.rednesto.bou.tests.framework.mock
 
 import com.flowpowered.math.vector.Vector3d
 import com.flowpowered.math.vector.Vector3i

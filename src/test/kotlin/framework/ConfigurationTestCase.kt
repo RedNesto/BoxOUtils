@@ -24,33 +24,13 @@
 package io.github.rednesto.bou.tests.framework
 
 import com.google.common.reflect.TypeToken
-import ninja.leaping.configurate.ConfigurationNode
-import ninja.leaping.configurate.ConfigurationOptions
-import ninja.leaping.configurate.hocon.HoconConfigurationLoader
 import ninja.leaping.configurate.objectmapping.serialize.TypeSerializerCollection
-import ninja.leaping.configurate.objectmapping.serialize.TypeSerializers
-import org.junit.jupiter.api.fail
 
 abstract class ConfigurationTestCase<T>(val rootNodeKey: String, val typeToken: TypeToken<T>) {
 
+    protected val configHelper: ConfigHelper = ConfigHelper.create(::populateSerializers)
+
     protected abstract fun populateSerializers(serializers: TypeSerializerCollection)
 
-    protected open fun loadNode(configuration: String): ConfigurationNode {
-        val typeSerializers = TypeSerializers.newCollection()
-        populateSerializers(typeSerializers)
-
-        val loaderOptions = ConfigurationOptions.defaults()
-                .setSerializers(typeSerializers)
-
-        val loader = HoconConfigurationLoader.builder()
-                .setDefaultOptions(loaderOptions)
-                .setSource { configuration.reader().buffered() }
-                .build()
-        return loader.load()
-    }
-
-    protected open fun loadConfig(configuration: String): T {
-        val rootNode = loadNode(configuration)
-        return rootNode.getNode(rootNodeKey).getValue(typeToken) ?: fail("Configuration value is null")
-    }
+    protected open fun loadConfig(configuration: String): T = configHelper.loadConfig(configuration, rootNodeKey, typeToken)
 }

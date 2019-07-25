@@ -25,8 +25,8 @@ package io.github.rednesto.bou.tests.requirements
 
 import com.flowpowered.math.vector.Vector3d
 import io.github.rednesto.bou.requirements.WorldsRequirement
-import io.github.rednesto.bou.tests.mock.MockPlayer
-import io.github.rednesto.bou.tests.mock.MockWorld
+import io.github.rednesto.bou.tests.framework.mock.MockPlayer
+import io.github.rednesto.bou.tests.framework.mock.MockWorld
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test

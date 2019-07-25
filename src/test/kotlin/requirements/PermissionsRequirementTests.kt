@@ -24,7 +24,7 @@
 package io.github.rednesto.bou.tests.requirements
 
 import io.github.rednesto.bou.requirements.PermissionsRequirement
-import io.github.rednesto.bou.tests.mock.MockPlayer
+import io.github.rednesto.bou.tests.framework.mock.MockPlayer
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test

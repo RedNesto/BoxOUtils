@@ -107,7 +107,7 @@ requirements=[
     }
 
     override fun loadConfig(configuration: String): MutableList<MutableList<Requirement<*>>> {
-        val rootNode = loadNode(configuration)
+        val rootNode = configHelper.loadNode(configuration)
         return RequirementSerializer.getRequirementGroups(rootNode.getNode("requirements"))
     }
 
