@@ -23,10 +23,10 @@
  */
 package io.github.rednesto.bou;
 
-import io.github.rednesto.bou.models.CustomLoot;
-import io.github.rednesto.bou.models.FastHarvestCrop;
-import io.github.rednesto.bou.models.FastHarvestTools;
-import io.github.rednesto.bou.models.SpawnedMob;
+import io.github.rednesto.bou.api.blockspawners.SpawnedMob;
+import io.github.rednesto.bou.api.customdrops.CustomLoot;
+import io.github.rednesto.bou.api.fastharvest.FastHarvestCrop;
+import io.github.rednesto.bou.api.fastharvest.FastHarvestTools;
 import ninja.leaping.configurate.objectmapping.Setting;
 import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
 

@@ -24,14 +24,14 @@
 package io.github.rednesto.bou.tests
 
 import io.github.rednesto.bou.Config
+import io.github.rednesto.bou.api.customdrops.CustomLoot
+import io.github.rednesto.bou.api.customdrops.ItemLoot
+import io.github.rednesto.bou.api.customdrops.MoneyLoot
+import io.github.rednesto.bou.api.lootReuse.MultiplyLootReuse
+import io.github.rednesto.bou.api.lootReuse.SimpleLootReuse
+import io.github.rednesto.bou.api.quantity.BoundedIntQuantity
 import io.github.rednesto.bou.config.serializers.BouTypeTokens
 import io.github.rednesto.bou.integration.griefprevention.GriefPreventionRegionRequirement
-import io.github.rednesto.bou.lootReuse.MultiplyLootReuse
-import io.github.rednesto.bou.lootReuse.SimpleLootReuse
-import io.github.rednesto.bou.models.CustomLoot
-import io.github.rednesto.bou.models.ItemLoot
-import io.github.rednesto.bou.models.MoneyLoot
-import io.github.rednesto.bou.quantity.BoundedIntQuantity
 import io.github.rednesto.bou.requirements.DataByKeyRequirement
 import io.github.rednesto.bou.tests.framework.PluginConfigurationTestCase
 import org.junit.jupiter.api.Assertions.assertEquals

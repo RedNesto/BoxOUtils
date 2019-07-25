@@ -25,12 +25,12 @@ package io.github.rednesto.bou.tests.configuration
 
 import com.google.common.base.MoreObjects
 import com.google.common.reflect.TypeToken
+import io.github.rednesto.bou.api.requirement.AbstractRequirement
+import io.github.rednesto.bou.api.requirement.Requirement
+import io.github.rednesto.bou.api.requirement.RequirementProvider
 import io.github.rednesto.bou.config.serializers.BouTypeTokens
 import io.github.rednesto.bou.config.serializers.RequirementSerializer
 import io.github.rednesto.bou.config.serializers.RequirementsMapSerializer
-import io.github.rednesto.bou.requirement.AbstractRequirement
-import io.github.rednesto.bou.requirement.Requirement
-import io.github.rednesto.bou.requirement.RequirementProvider
 import io.github.rednesto.bou.tests.framework.BouFixture
 import io.github.rednesto.bou.tests.framework.ConfigurationTestCase
 import ninja.leaping.configurate.ConfigurationNode

@@ -25,10 +25,15 @@ package io.github.rednesto.bou.config.serializers;
 
 import com.google.common.reflect.TypeToken;
 import io.github.rednesto.bou.Config;
-import io.github.rednesto.bou.lootReuse.LootReuse;
-import io.github.rednesto.bou.models.*;
-import io.github.rednesto.bou.quantity.IntQuantity;
-import io.github.rednesto.bou.requirement.Requirement;
+import io.github.rednesto.bou.api.blockspawners.SpawnedMob;
+import io.github.rednesto.bou.api.customdrops.CustomLoot;
+import io.github.rednesto.bou.api.customdrops.ItemLoot;
+import io.github.rednesto.bou.api.customdrops.MoneyLoot;
+import io.github.rednesto.bou.api.fastharvest.FastHarvestCrop;
+import io.github.rednesto.bou.api.fastharvest.FastHarvestTools;
+import io.github.rednesto.bou.api.lootReuse.LootReuse;
+import io.github.rednesto.bou.api.quantity.IntQuantity;
+import io.github.rednesto.bou.api.requirement.Requirement;
 
 import java.util.Map;
 

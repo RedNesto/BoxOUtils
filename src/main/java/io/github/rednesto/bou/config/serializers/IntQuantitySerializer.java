@@ -24,9 +24,9 @@
 package io.github.rednesto.bou.config.serializers;
 
 import com.google.common.reflect.TypeToken;
-import io.github.rednesto.bou.quantity.BoundedIntQuantity;
-import io.github.rednesto.bou.quantity.FixedIntQuantity;
-import io.github.rednesto.bou.quantity.IntQuantity;
+import io.github.rednesto.bou.api.quantity.BoundedIntQuantity;
+import io.github.rednesto.bou.api.quantity.FixedIntQuantity;
+import io.github.rednesto.bou.api.quantity.IntQuantity;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import ninja.leaping.configurate.objectmapping.serialize.TypeSerializer;

@@ -21,35 +21,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.github.rednesto.bou.requirement;
+package io.github.rednesto.bou.api.requirement;
 
-import org.spongepowered.api.event.cause.Cause;
+import ninja.leaping.configurate.ConfigurationNode;
 
-public interface Requirement<T> {
+public interface RequirementProvider {
 
+    /**
+     * @return the id used in the 'requirements' part of CustomLoots.
+     */
     String getId();
 
-    Class<T> getApplicableType();
-
     /**
-     * Indicates whether this requirement can be used for the given source.
+     * Creates a requirement from the given configuration.
      *
-     * @param source the thing for which loot will be dropped
-     * @param cause the cause
+     * @param node the configuration node of this requirement. Its key will always be this {@link #getId()}
      *
-     * @return {@code true} if this requirement can be applied to the source, {@code false} otherwise
+     * @return the created requirement
+     *
+     * @throws RequirementConfigurationException if the configuration is invalid (like missing values)
      */
-    default boolean appliesTo(T source, Cause cause) {
-        return true;
-    }
-
-    /**
-     * Indicates if the given source fulfills this requirement.
-     *
-     * @param source the source to check
-     * @param cause the cause
-     *
-     * @return {@code true} if the source fulfills this requirement, {@code false} otherwise
-     */
-    boolean fulfills(T source, Cause cause);
+    Requirement<?> provide(ConfigurationNode node) throws RequirementConfigurationException;
 }

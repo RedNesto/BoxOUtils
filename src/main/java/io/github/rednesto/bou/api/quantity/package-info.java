@@ -22,6 +22,6 @@
  * SOFTWARE.
  */
 @ParametersAreNonnullByDefault
-package io.github.rednesto.bou.quantity;
+package io.github.rednesto.bou.api.quantity;
 
 import javax.annotation.ParametersAreNonnullByDefault;

@@ -23,9 +23,9 @@
  */
 package io.github.rednesto.bou;
 
-import io.github.rednesto.bou.customdrops.CustomDropsProvider;
+import io.github.rednesto.bou.api.customdrops.CustomDropsProvider;
+import io.github.rednesto.bou.api.requirement.RequirementProvider;
 import io.github.rednesto.bou.integration.vanilla.VanillaCustomDropsProvider;
-import io.github.rednesto.bou.requirement.RequirementProvider;
 import io.github.rednesto.bou.requirements.DataByKeyRequirementProvider;
 import io.github.rednesto.bou.requirements.PermissionsRequirement;
 import io.github.rednesto.bou.requirements.WorldsRequirement;

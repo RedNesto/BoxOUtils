@@ -21,12 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.github.rednesto.bou.models;
+package io.github.rednesto.bou.api.customdrops;
 
 import com.google.common.base.MoreObjects;
-import io.github.rednesto.bou.lootReuse.LootReuse;
-import io.github.rednesto.bou.quantity.IntQuantity;
-import io.github.rednesto.bou.requirement.Requirement;
+import io.github.rednesto.bou.api.lootReuse.LootReuse;
+import io.github.rednesto.bou.api.quantity.IntQuantity;
+import io.github.rednesto.bou.api.requirement.Requirement;
 
 import java.util.List;
 import java.util.Map;

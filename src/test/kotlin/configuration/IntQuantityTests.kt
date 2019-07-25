@@ -23,11 +23,11 @@
  */
 package io.github.rednesto.bou.tests.configuration
 
+import io.github.rednesto.bou.api.quantity.BoundedIntQuantity
+import io.github.rednesto.bou.api.quantity.FixedIntQuantity
+import io.github.rednesto.bou.api.quantity.IntQuantity
 import io.github.rednesto.bou.config.serializers.BouTypeTokens
 import io.github.rednesto.bou.config.serializers.IntQuantitySerializer
-import io.github.rednesto.bou.quantity.BoundedIntQuantity
-import io.github.rednesto.bou.quantity.FixedIntQuantity
-import io.github.rednesto.bou.quantity.IntQuantity
 import io.github.rednesto.bou.tests.framework.ConfigurationTestCase
 import ninja.leaping.configurate.objectmapping.ObjectMappingException
 import ninja.leaping.configurate.objectmapping.serialize.TypeSerializerCollection

@@ -21,49 +21,44 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.github.rednesto.bou.quantity;
+package io.github.rednesto.bou.api.fastharvest;
 
 import com.google.common.base.MoreObjects;
 
-import java.util.Random;
+public class FastHarvestCrop {
 
-public class BoundedIntQuantity implements IntQuantity {
+    private int chance;
+    private int chanceOf;
+    private int count;
+    private int fortuneFactor;
+    private int minimum;
 
-    private int from;
-    private int to;
-
-    private static final Random RANDOM = new Random();
-
-    public BoundedIntQuantity(int from, int to) {
-        this.from = from;
-        this.to = to;
+    public FastHarvestCrop(int chance, int chanceOf, int count, int fortuneFactor, int minimum) {
+        this.chance = chance;
+        this.chanceOf = chanceOf;
+        this.count = count;
+        this.fortuneFactor = fortuneFactor;
+        this.minimum = minimum;
     }
 
-    public int get() {
-        if (from == to) {
-            return to;
-        }
-
-        return RANDOM.nextInt(to + 1 - from) + from;
+    public int getChance() {
+        return chance;
     }
 
-    public int getFrom() {
-        return from;
+    public int getChanceOf() {
+        return chanceOf;
     }
 
-    public int getTo() {
-        return to;
+    public int getCount() {
+        return count;
     }
 
-    public static BoundedIntQuantity parse(String toParse) {
-        String[] bounds = toParse.split("-", 2);
-        if (bounds.length != 2) {
-            throw new IllegalArgumentException();
-        }
+    public int getFortuneFactor() {
+        return fortuneFactor;
+    }
 
-        int from = Integer.parseInt(bounds[0]);
-        int to = Integer.parseInt(bounds[1]);
-        return new BoundedIntQuantity(from, to);
+    public int getMinimum() {
+        return minimum;
     }
 
     @Override
@@ -71,20 +66,30 @@ public class BoundedIntQuantity implements IntQuantity {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof BoundedIntQuantity)) {
+        if (!(o instanceof FastHarvestCrop)) {
             return false;
         }
 
-        BoundedIntQuantity that = (BoundedIntQuantity) o;
-        return from == that.from &&
-                to == that.to;
+        FastHarvestCrop that = (FastHarvestCrop) o;
+        return chance == that.chance &&
+                chanceOf == that.chanceOf &&
+                count == that.count &&
+                fortuneFactor == that.fortuneFactor &&
+                minimum == that.minimum;
     }
 
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
-                .add("from", from)
-                .add("to", to)
+                .add("chance", chance)
+                .add("chanceOf", chanceOf)
+                .add("count", count)
+                .add("fortuneFactor", fortuneFactor)
+                .add("minimum", minimum)
                 .toString();
+    }
+
+    public static FastHarvestCrop createDefault() {
+        return new FastHarvestCrop(-1, -1, 0, 1, 1);
     }
 }

@@ -21,23 +21,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.github.rednesto.bou.requirement;
+package io.github.rednesto.bou.api.lootReuse;
 
-public class RequirementConfigurationException extends Exception {
+public interface LootReuse {
 
-    public RequirementConfigurationException() {
-        super();
-    }
-
-    public RequirementConfigurationException(String message) {
-        super(message);
-    }
-
-    public RequirementConfigurationException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public RequirementConfigurationException(Throwable cause) {
-        super(cause);
-    }
+    int computeQuantity(int original);
 }

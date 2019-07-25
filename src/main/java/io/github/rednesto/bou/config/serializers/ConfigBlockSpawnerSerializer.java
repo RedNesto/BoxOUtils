@@ -25,7 +25,7 @@ package io.github.rednesto.bou.config.serializers;
 
 import com.google.common.reflect.TypeToken;
 import io.github.rednesto.bou.Config;
-import io.github.rednesto.bou.models.SpawnedMob;
+import io.github.rednesto.bou.api.blockspawners.SpawnedMob;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import ninja.leaping.configurate.objectmapping.serialize.TypeSerializer;

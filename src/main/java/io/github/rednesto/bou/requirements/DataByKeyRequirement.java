@@ -25,7 +25,7 @@ package io.github.rednesto.bou.requirements;
 
 import com.google.common.base.MoreObjects;
 import io.github.rednesto.bou.BoxOUtils;
-import io.github.rednesto.bou.requirement.AbstractRequirement;
+import io.github.rednesto.bou.api.requirement.AbstractRequirement;
 import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.key.Key;

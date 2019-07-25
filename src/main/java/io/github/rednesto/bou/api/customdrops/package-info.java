@@ -21,21 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.github.rednesto.bou.customdrops;
+@ParametersAreNonnullByDefault
+package io.github.rednesto.bou.api.customdrops;
 
-import io.github.rednesto.bou.BoxOUtils;
-import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.item.inventory.ItemStack;
-
-import java.util.Optional;
-
-import javax.annotation.Nullable;
-
-public interface CustomDropsProvider {
-
-    default void init(BoxOUtils plugin) {}
-
-    String getId();
-
-    Optional<ItemStack> createItemStack(String id, @Nullable Player targetPlayer);
-}
+import javax.annotation.ParametersAreNonnullByDefault;

@@ -25,7 +25,7 @@ package io.github.rednesto.bou.example;
 
 import io.github.rednesto.bou.BoxOUtils;
 import io.github.rednesto.bou.IntegrationsManager;
-import io.github.rednesto.bou.customdrops.CustomDropsProvider;
+import io.github.rednesto.bou.api.customdrops.CustomDropsProvider;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.enchantment.Enchantment;

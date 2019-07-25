@@ -23,7 +23,7 @@
  */
 package io.github.rednesto.bou;
 
-import io.github.rednesto.bou.models.FastHarvestCrop;
+import io.github.rednesto.bou.api.fastharvest.FastHarvestCrop;
 
 import java.util.Random;
 

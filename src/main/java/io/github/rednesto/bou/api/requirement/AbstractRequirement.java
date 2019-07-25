@@ -21,22 +21,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.github.rednesto.bou.lootReuse;
+package io.github.rednesto.bou.api.requirement;
 
 import com.google.common.base.MoreObjects;
-import io.github.rednesto.bou.quantity.IntQuantity;
 
-public class SimpleLootReuse implements LootReuse {
+public abstract class AbstractRequirement<T> implements Requirement<T> {
 
-    private final IntQuantity quantity;
+    private final String id;
+    private final Class<T> applicableType;
 
-    public SimpleLootReuse(IntQuantity quantity) {
-        this.quantity = quantity;
+    protected AbstractRequirement(String id, Class<T> applicableType) {
+        this.id = id;
+        this.applicableType = applicableType;
     }
 
     @Override
-    public int computeQuantity(int original) {
-        return this.quantity.get();
+    public String getId() {
+        return this.id;
+    }
+
+    @Override
+    public Class<T> getApplicableType() {
+        return this.applicableType;
     }
 
     @Override
@@ -44,18 +50,20 @@ public class SimpleLootReuse implements LootReuse {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof SimpleLootReuse)) {
+        if (!(o instanceof AbstractRequirement)) {
             return false;
         }
 
-        SimpleLootReuse that = (SimpleLootReuse) o;
-        return quantity.equals(that.quantity);
+        AbstractRequirement<?> that = (AbstractRequirement<?>) o;
+        return id.equals(that.id) &&
+                applicableType.equals(that.applicableType);
     }
 
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
-                .add("quantity", quantity)
+                .add("id", id)
+                .add("applicableType", applicableType)
                 .toString();
     }
 }

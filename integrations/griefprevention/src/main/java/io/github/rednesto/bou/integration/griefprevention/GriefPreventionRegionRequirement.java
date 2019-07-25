@@ -24,10 +24,10 @@
 package io.github.rednesto.bou.integration.griefprevention;
 
 import com.google.common.base.MoreObjects;
-import io.github.rednesto.bou.requirement.AbstractRequirement;
-import io.github.rednesto.bou.requirement.Requirement;
-import io.github.rednesto.bou.requirement.RequirementConfigurationException;
-import io.github.rednesto.bou.requirement.RequirementProvider;
+import io.github.rednesto.bou.api.requirement.AbstractRequirement;
+import io.github.rednesto.bou.api.requirement.Requirement;
+import io.github.rednesto.bou.api.requirement.RequirementConfigurationException;
+import io.github.rednesto.bou.api.requirement.RequirementProvider;
 import me.ryanhamshire.griefprevention.GriefPrevention;
 import me.ryanhamshire.griefprevention.api.claim.Claim;
 import me.ryanhamshire.griefprevention.api.claim.ClaimManager;

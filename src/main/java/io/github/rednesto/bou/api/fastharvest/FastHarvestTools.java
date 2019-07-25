@@ -21,44 +21,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.github.rednesto.bou.models;
+package io.github.rednesto.bou.api.fastharvest;
 
 import com.google.common.base.MoreObjects;
 
-public class FastHarvestCrop {
+import java.util.List;
 
-    private int chance;
-    private int chanceOf;
-    private int count;
-    private int fortuneFactor;
-    private int minimum;
+public class FastHarvestTools {
 
-    public FastHarvestCrop(int chance, int chanceOf, int count, int fortuneFactor, int minimum) {
-        this.chance = chance;
-        this.chanceOf = chanceOf;
-        this.count = count;
-        this.fortuneFactor = fortuneFactor;
-        this.minimum = minimum;
+    private boolean enabled;
+    private boolean isWhitelist;
+    private List<String> toolsIds;
+
+    public FastHarvestTools(boolean enabled, boolean isWhitelist, List<String> toolsIds) {
+        this.enabled = enabled;
+        this.isWhitelist = isWhitelist;
+        this.toolsIds = toolsIds;
     }
 
-    public int getChance() {
-        return chance;
+    public boolean isEnabled() {
+        return enabled;
     }
 
-    public int getChanceOf() {
-        return chanceOf;
+    public boolean isWhitelist() {
+        return isWhitelist;
     }
 
-    public int getCount() {
-        return count;
-    }
-
-    public int getFortuneFactor() {
-        return fortuneFactor;
-    }
-
-    public int getMinimum() {
-        return minimum;
+    public List<String> getToolsIds() {
+        return toolsIds;
     }
 
     @Override
@@ -66,30 +56,22 @@ public class FastHarvestCrop {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof FastHarvestCrop)) {
+        if (!(o instanceof FastHarvestTools)) {
             return false;
         }
 
-        FastHarvestCrop that = (FastHarvestCrop) o;
-        return chance == that.chance &&
-                chanceOf == that.chanceOf &&
-                count == that.count &&
-                fortuneFactor == that.fortuneFactor &&
-                minimum == that.minimum;
+        FastHarvestTools that = (FastHarvestTools) o;
+        return enabled == that.enabled &&
+                isWhitelist == that.isWhitelist &&
+                toolsIds.equals(that.toolsIds);
     }
 
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
-                .add("chance", chance)
-                .add("chanceOf", chanceOf)
-                .add("count", count)
-                .add("fortuneFactor", fortuneFactor)
-                .add("minimum", minimum)
+                .add("enabled", enabled)
+                .add("isWhitelist", isWhitelist)
+                .add("toolsIds", toolsIds)
                 .toString();
-    }
-
-    public static FastHarvestCrop createDefault() {
-        return new FastHarvestCrop(-1, -1, 0, 1, 1);
     }
 }

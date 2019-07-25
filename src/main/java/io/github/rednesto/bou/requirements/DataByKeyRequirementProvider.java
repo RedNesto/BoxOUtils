@@ -24,9 +24,9 @@
 package io.github.rednesto.bou.requirements;
 
 import io.github.rednesto.bou.SpongeUtils;
-import io.github.rednesto.bou.requirement.Requirement;
-import io.github.rednesto.bou.requirement.RequirementConfigurationException;
-import io.github.rednesto.bou.requirement.RequirementProvider;
+import io.github.rednesto.bou.api.requirement.Requirement;
+import io.github.rednesto.bou.api.requirement.RequirementConfigurationException;
+import io.github.rednesto.bou.api.requirement.RequirementProvider;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import org.spongepowered.api.data.value.ValueContainer;

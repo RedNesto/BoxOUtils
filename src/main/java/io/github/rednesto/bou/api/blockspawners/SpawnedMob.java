@@ -21,54 +21,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.github.rednesto.bou.models;
+package io.github.rednesto.bou.api.blockspawners;
 
 import com.google.common.base.MoreObjects;
-import io.github.rednesto.bou.quantity.IntQuantity;
+import io.github.rednesto.bou.api.quantity.IntQuantity;
 
 import java.util.Objects;
 
 import javax.annotation.Nullable;
 
-public class ItemLoot {
+public class SpawnedMob {
 
     private String id;
-    @Nullable
-    private String providerId;
-    @Nullable
-    private String displayname;
     private double chance;
     @Nullable
     private IntQuantity quantity;
 
-    public ItemLoot(String id, @Nullable String providerId, @Nullable String displayname, double chance, @Nullable IntQuantity quantity) {
+    public SpawnedMob(String id, double chance, @Nullable IntQuantity quantity) {
         this.id = id;
-        this.providerId = providerId;
-        this.displayname = displayname;
         this.chance = chance / 100;
         this.quantity = quantity;
     }
 
-    public boolean shouldLoot() {
+    public boolean shouldSpawn() {
         return chance <= 0 || Math.random() <= chance;
     }
 
     public String getId() {
         return id;
-    }
-
-    @Nullable
-    public String getProviderId() {
-        return providerId;
-    }
-
-    public double getChance() {
-        return chance;
-    }
-
-    @Nullable
-    public String getDisplayname() {
-        return displayname;
     }
 
     @Nullable
@@ -81,24 +61,20 @@ public class ItemLoot {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof ItemLoot)) {
+        if (!(o instanceof SpawnedMob)) {
             return false;
         }
 
-        ItemLoot itemLoot = (ItemLoot) o;
-        return Double.compare(itemLoot.chance, chance) == 0 &&
-                id.equals(itemLoot.id) &&
-                Objects.equals(providerId, itemLoot.providerId) &&
-                Objects.equals(displayname, itemLoot.displayname) &&
-                Objects.equals(quantity, itemLoot.quantity);
+        SpawnedMob that = (SpawnedMob) o;
+        return Double.compare(that.chance, chance) == 0 &&
+                id.equals(that.id) &&
+                Objects.equals(quantity, that.quantity);
     }
 
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
                 .add("id", id)
-                .add("providerId", providerId)
-                .add("displayname", displayname)
                 .add("chance", chance)
                 .add("quantity", quantity)
                 .toString();

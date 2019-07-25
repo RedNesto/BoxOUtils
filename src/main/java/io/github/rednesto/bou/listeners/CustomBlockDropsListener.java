@@ -24,8 +24,8 @@
 package io.github.rednesto.bou.listeners;
 
 import io.github.rednesto.bou.Config;
-import io.github.rednesto.bou.customdrops.CustomDropsProcessor;
-import io.github.rednesto.bou.models.CustomLoot;
+import io.github.rednesto.bou.CustomDropsProcessor;
+import io.github.rednesto.bou.api.customdrops.CustomLoot;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;

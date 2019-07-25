@@ -24,7 +24,7 @@
 package io.github.rednesto.bou.config.serializers;
 
 import com.google.common.reflect.TypeToken;
-import io.github.rednesto.bou.requirement.Requirement;
+import io.github.rednesto.bou.api.requirement.Requirement;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import ninja.leaping.configurate.objectmapping.serialize.TypeSerializer;

@@ -25,7 +25,7 @@ package io.github.rednesto.bou.listeners;
 
 import io.github.rednesto.bou.Config;
 import io.github.rednesto.bou.CropsAlgoritm;
-import io.github.rednesto.bou.models.FastHarvestCrop;
+import io.github.rednesto.bou.api.fastharvest.FastHarvestCrop;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.key.Keys;

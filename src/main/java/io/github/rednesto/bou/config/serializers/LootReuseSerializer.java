@@ -24,10 +24,10 @@
 package io.github.rednesto.bou.config.serializers;
 
 import com.google.common.reflect.TypeToken;
-import io.github.rednesto.bou.lootReuse.LootReuse;
-import io.github.rednesto.bou.lootReuse.MultiplyLootReuse;
-import io.github.rednesto.bou.lootReuse.SimpleLootReuse;
-import io.github.rednesto.bou.quantity.IntQuantity;
+import io.github.rednesto.bou.api.lootReuse.LootReuse;
+import io.github.rednesto.bou.api.lootReuse.MultiplyLootReuse;
+import io.github.rednesto.bou.api.lootReuse.SimpleLootReuse;
+import io.github.rednesto.bou.api.quantity.IntQuantity;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import ninja.leaping.configurate.objectmapping.serialize.TypeSerializer;

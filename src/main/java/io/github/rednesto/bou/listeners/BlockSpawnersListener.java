@@ -25,7 +25,7 @@ package io.github.rednesto.bou.listeners;
 
 import com.flowpowered.math.vector.Vector3i;
 import io.github.rednesto.bou.Config;
-import io.github.rednesto.bou.models.SpawnedMob;
+import io.github.rednesto.bou.api.blockspawners.SpawnedMob;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.living.player.Player;

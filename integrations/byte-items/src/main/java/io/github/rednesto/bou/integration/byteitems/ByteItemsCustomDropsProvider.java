@@ -25,7 +25,7 @@ package io.github.rednesto.bou.integration.byteitems;
 
 import de.randombyte.byteitems.api.ByteItemsService;
 import io.github.rednesto.bou.BoxOUtils;
-import io.github.rednesto.bou.customdrops.CustomDropsProvider;
+import io.github.rednesto.bou.api.customdrops.CustomDropsProvider;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;

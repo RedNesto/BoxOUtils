@@ -21,34 +21,47 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.github.rednesto.bou.models;
+package io.github.rednesto.bou.api.customdrops;
 
 import com.google.common.base.MoreObjects;
+import io.github.rednesto.bou.api.quantity.IntQuantity;
 
-import java.util.List;
+import java.util.Objects;
 
-public class FastHarvestTools {
+import javax.annotation.Nullable;
 
-    private boolean enabled;
-    private boolean isWhitelist;
-    private List<String> toolsIds;
+public class MoneyLoot {
 
-    public FastHarvestTools(boolean enabled, boolean isWhitelist, List<String> toolsIds) {
-        this.enabled = enabled;
-        this.isWhitelist = isWhitelist;
-        this.toolsIds = toolsIds;
+    private IntQuantity amount;
+    @Nullable
+    private String currencyId;
+    private double chance;
+    @Nullable
+    private String message;
+
+    public MoneyLoot(IntQuantity amount, @Nullable String currencyId, double chance, @Nullable String message) {
+        this.amount = amount;
+        this.currencyId = currencyId;
+        this.chance = chance / 100;
+        this.message = message;
     }
 
-    public boolean isEnabled() {
-        return enabled;
+    public boolean shouldLoot() {
+        return chance <= 0 || Math.random() <= chance;
     }
 
-    public boolean isWhitelist() {
-        return isWhitelist;
+    public IntQuantity getAmount() {
+        return amount;
     }
 
-    public List<String> getToolsIds() {
-        return toolsIds;
+    @Nullable
+    public String getCurrencyId() {
+        return currencyId;
+    }
+
+    @Nullable
+    public String getMessage() {
+        return message;
     }
 
     @Override
@@ -56,22 +69,24 @@ public class FastHarvestTools {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof FastHarvestTools)) {
+        if (!(o instanceof MoneyLoot)) {
             return false;
         }
 
-        FastHarvestTools that = (FastHarvestTools) o;
-        return enabled == that.enabled &&
-                isWhitelist == that.isWhitelist &&
-                toolsIds.equals(that.toolsIds);
+        MoneyLoot moneyLoot = (MoneyLoot) o;
+        return Double.compare(moneyLoot.chance, chance) == 0 &&
+                amount.equals(moneyLoot.amount) &&
+                Objects.equals(currencyId, moneyLoot.currencyId) &&
+                Objects.equals(message, moneyLoot.message);
     }
 
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
-                .add("enabled", enabled)
-                .add("isWhitelist", isWhitelist)
-                .add("toolsIds", toolsIds)
+                .add("amount", amount)
+                .add("currencyId", currencyId)
+                .add("chance", chance)
+                .add("message", message)
                 .toString();
     }
 }

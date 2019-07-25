@@ -22,6 +22,6 @@
  * SOFTWARE.
  */
 @ParametersAreNonnullByDefault
-package io.github.rednesto.bou.customdrops;
+package io.github.rednesto.bou.api.fastharvest;
 
 import javax.annotation.ParametersAreNonnullByDefault;

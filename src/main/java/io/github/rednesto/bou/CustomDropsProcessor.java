@@ -21,16 +21,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.github.rednesto.bou.customdrops;
+package io.github.rednesto.bou;
 
-import io.github.rednesto.bou.BoxOUtils;
-import io.github.rednesto.bou.IntegrationsManager;
-import io.github.rednesto.bou.lootReuse.LootReuse;
-import io.github.rednesto.bou.models.CustomLoot;
-import io.github.rednesto.bou.models.ItemLoot;
-import io.github.rednesto.bou.models.MoneyLoot;
-import io.github.rednesto.bou.quantity.IntQuantity;
-import io.github.rednesto.bou.requirement.Requirement;
+import io.github.rednesto.bou.api.customdrops.CustomLoot;
+import io.github.rednesto.bou.api.customdrops.ItemLoot;
+import io.github.rednesto.bou.api.customdrops.MoneyLoot;
+import io.github.rednesto.bou.api.lootReuse.LootReuse;
+import io.github.rednesto.bou.api.quantity.IntQuantity;
+import io.github.rednesto.bou.api.requirement.Requirement;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.key.Keys;

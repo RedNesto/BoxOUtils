@@ -21,28 +21,49 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.github.rednesto.bou.requirement;
+package io.github.rednesto.bou.api.quantity;
 
 import com.google.common.base.MoreObjects;
 
-public abstract class AbstractRequirement<T> implements Requirement<T> {
+import java.util.Random;
 
-    private final String id;
-    private final Class<T> applicableType;
+public class BoundedIntQuantity implements IntQuantity {
 
-    protected AbstractRequirement(String id, Class<T> applicableType) {
-        this.id = id;
-        this.applicableType = applicableType;
+    private int from;
+    private int to;
+
+    private static final Random RANDOM = new Random();
+
+    public BoundedIntQuantity(int from, int to) {
+        this.from = from;
+        this.to = to;
     }
 
-    @Override
-    public String getId() {
-        return this.id;
+    public int get() {
+        if (from == to) {
+            return to;
+        }
+
+        return RANDOM.nextInt(to + 1 - from) + from;
     }
 
-    @Override
-    public Class<T> getApplicableType() {
-        return this.applicableType;
+    public int getFrom() {
+        return from;
+    }
+
+    public int getTo() {
+        return to;
+    }
+
+    public static BoundedIntQuantity parse(String toParse) {
+        String[] bounds = toParse.split("-", 2);
+        if (bounds.length != 2) {
+            throw new IllegalArgumentException();
+        }
+
+        int from = Integer.parseInt(bounds[0]);
+        int to = Integer.parseInt(bounds[1]);
+        return new BoundedIntQuantity(from, to);
     }
 
     @Override
@@ -50,20 +71,20 @@ public abstract class AbstractRequirement<T> implements Requirement<T> {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof AbstractRequirement)) {
+        if (!(o instanceof BoundedIntQuantity)) {
             return false;
         }
 
-        AbstractRequirement<?> that = (AbstractRequirement<?>) o;
-        return id.equals(that.id) &&
-                applicableType.equals(that.applicableType);
+        BoundedIntQuantity that = (BoundedIntQuantity) o;
+        return from == that.from &&
+                to == that.to;
     }
 
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
-                .add("id", id)
-                .add("applicableType", applicableType)
+                .add("from", from)
+                .add("to", to)
                 .toString();
     }
 }

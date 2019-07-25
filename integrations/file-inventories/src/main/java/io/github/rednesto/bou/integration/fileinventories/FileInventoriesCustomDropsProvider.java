@@ -24,7 +24,7 @@
 package io.github.rednesto.bou.integration.fileinventories;
 
 import io.github.rednesto.bou.BoxOUtils;
-import io.github.rednesto.bou.customdrops.CustomDropsProvider;
+import io.github.rednesto.bou.api.customdrops.CustomDropsProvider;
 import io.github.rednesto.fileinventories.api.FileInventoriesService;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;

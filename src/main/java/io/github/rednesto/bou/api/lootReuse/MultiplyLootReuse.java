@@ -21,47 +21,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.github.rednesto.bou.models;
+package io.github.rednesto.bou.api.lootReuse;
 
 import com.google.common.base.MoreObjects;
-import io.github.rednesto.bou.quantity.IntQuantity;
 
-import java.util.Objects;
+public class MultiplyLootReuse implements LootReuse {
 
-import javax.annotation.Nullable;
+    private final float multiplier;
 
-public class MoneyLoot {
-
-    private IntQuantity amount;
-    @Nullable
-    private String currencyId;
-    private double chance;
-    @Nullable
-    private String message;
-
-    public MoneyLoot(IntQuantity amount, @Nullable String currencyId, double chance, @Nullable String message) {
-        this.amount = amount;
-        this.currencyId = currencyId;
-        this.chance = chance / 100;
-        this.message = message;
+    public MultiplyLootReuse(float multiplier) {
+        this.multiplier = multiplier;
     }
 
-    public boolean shouldLoot() {
-        return chance <= 0 || Math.random() <= chance;
-    }
-
-    public IntQuantity getAmount() {
-        return amount;
-    }
-
-    @Nullable
-    public String getCurrencyId() {
-        return currencyId;
-    }
-
-    @Nullable
-    public String getMessage() {
-        return message;
+    @Override
+    public int computeQuantity(int original) {
+        return Math.round(original * this.multiplier);
     }
 
     @Override
@@ -69,24 +43,18 @@ public class MoneyLoot {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof MoneyLoot)) {
+        if (!(o instanceof MultiplyLootReuse)) {
             return false;
         }
 
-        MoneyLoot moneyLoot = (MoneyLoot) o;
-        return Double.compare(moneyLoot.chance, chance) == 0 &&
-                amount.equals(moneyLoot.amount) &&
-                Objects.equals(currencyId, moneyLoot.currencyId) &&
-                Objects.equals(message, moneyLoot.message);
+        MultiplyLootReuse that = (MultiplyLootReuse) o;
+        return Float.compare(that.multiplier, multiplier) == 0;
     }
 
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
-                .add("amount", amount)
-                .add("currencyId", currencyId)
-                .add("chance", chance)
-                .add("message", message)
+                .add("multiplier", multiplier)
                 .toString();
     }
 }

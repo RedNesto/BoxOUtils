@@ -22,6 +22,6 @@
  * SOFTWARE.
  */
 @ParametersAreNonnullByDefault
-package io.github.rednesto.bou.lootReuse;
+package io.github.rednesto.bou.api.blockspawners;
 
 import javax.annotation.ParametersAreNonnullByDefault;

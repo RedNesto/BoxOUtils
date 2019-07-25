@@ -21,40 +21,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.github.rednesto.bou.lootReuse;
+package io.github.rednesto.bou.api.customdrops;
 
-import com.google.common.base.MoreObjects;
+import io.github.rednesto.bou.BoxOUtils;
+import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.item.inventory.ItemStack;
 
-public class MultiplyLootReuse implements LootReuse {
+import java.util.Optional;
 
-    private final float multiplier;
+import javax.annotation.Nullable;
 
-    public MultiplyLootReuse(float multiplier) {
-        this.multiplier = multiplier;
-    }
+public interface CustomDropsProvider {
 
-    @Override
-    public int computeQuantity(int original) {
-        return Math.round(original * this.multiplier);
-    }
+    default void init(BoxOUtils plugin) {}
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof MultiplyLootReuse)) {
-            return false;
-        }
+    String getId();
 
-        MultiplyLootReuse that = (MultiplyLootReuse) o;
-        return Float.compare(that.multiplier, multiplier) == 0;
-    }
-
-    @Override
-    public String toString() {
-        return MoreObjects.toStringHelper(this)
-                .add("multiplier", multiplier)
-                .toString();
-    }
+    Optional<ItemStack> createItemStack(String id, @Nullable Player targetPlayer);
 }
