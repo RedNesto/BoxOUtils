@@ -1,28 +1,6 @@
-plugins {
-    id 'net.minecrell.licenser'
-}
-
-repositories {
-    maven {
-        url 'https://repo.spongepowered.org/maven/'
-    }
-    maven {
-        url 'https://jitpack.io'
-    }
-}
-
 dependencies {
-    compileOnly 'org.spongepowered:spongeapi:7.1.0'
-
+    compileOnly "org.spongepowered:spongeapi:${spongeApiVersion}"
     compileOnly rootProject
 
     compileOnly 'com.github.randombyte-developer:byte-items:v2.3'
-}
-
-license {
-    header = rootProject.file('LICENSE')
-
-    include '**/*.java'
-
-    newLine = false
 }

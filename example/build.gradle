@@ -1,24 +1,15 @@
 plugins {
     id 'org.spongepowered.plugin'
-    id 'net.minecrell.licenser'
 }
 
 version = '0.0'
 archivesBaseName = 'BoxOUtils-Integration-Example'
 
 dependencies {
-    compileOnly 'org.spongepowered:spongeapi:7.1.0'
-    annotationProcessor 'org.spongepowered:spongeapi:7.1.0'
+    compileOnly "org.spongepowered:spongeapi:${spongeApiVersion}"
+    annotationProcessor "org.spongepowered:spongeapi:${spongeApiVersion}"
 
     compileOnly rootProject
 }
 
 sponge.plugin.id = 'bou-integration-example'
-
-license {
-    header = rootProject.file('LICENSE')
-
-    include '**/*.java'
-
-    newLine = false
-}
