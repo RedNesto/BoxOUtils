@@ -23,6 +23,8 @@
  */
 package io.github.rednesto.bou.listeners;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import io.github.rednesto.bou.Config;
 import io.github.rednesto.bou.CustomDropsProcessor;
 import io.github.rednesto.bou.api.customdrops.CustomLoot;
@@ -34,16 +36,23 @@ import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.cause.entity.damage.source.IndirectEntityDamageSource;
 import org.spongepowered.api.event.entity.DestructEntityEvent;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
+import org.spongepowered.api.event.filter.cause.First;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Nullable;
 
 public class CustomMobDropsListener {
+
+    private final Cache<UUID, Boolean> requirementResultsTracker = CacheBuilder.newBuilder()
+            .expireAfterWrite(15, TimeUnit.SECONDS)
+            .build();
 
     @Listener
     public void onMobDeath(DestructEntityEvent.Death event) {
@@ -66,22 +75,26 @@ public class CustomMobDropsListener {
             return null;
         });
 
-        Location<World> targetLocation = targetEntity.getLocation();
-        if (CustomDropsProcessor.fulfillsRequirements(targetEntity.createSnapshot(), event.getCause(), loot.getRequirements())) {
+        boolean requirementsFulfilled = CustomDropsProcessor.fulfillsRequirements(targetEntity.createSnapshot(), event.getCause(), loot.getRequirements());
+        requirementResultsTracker.put(targetEntity.getUniqueId(), requirementsFulfilled);
+        if (requirementsFulfilled) {
+            Location<World> targetLocation = targetEntity.getLocation();
             CustomDropsProcessor.dropLoot(loot, player, targetLocation);
         }
     }
 
     @Listener
-    public void onItemDrop(DropItemEvent.Destruct event) {
-        Entity entity = event.getCause().first(Entity.class).orElse(null);
-        if (entity == null) {
+    public void onItemDrop(DropItemEvent.Destruct event, @First Entity entity) {
+        UUID entityId = entity.getUniqueId();
+        Boolean result = requirementResultsTracker.getIfPresent(entityId);
+        requirementResultsTracker.invalidate(entityId);
+        if (result == null || !result) {
             return;
         }
 
         Map<String, CustomLoot> drops = Config.getMobsDrops().drops;
         CustomLoot customLoot = drops.get(entity.getType().getId());
-        if (customLoot != null && CustomDropsProcessor.fulfillsRequirements(entity.createSnapshot(), event.getCause(), customLoot.getRequirements())) {
+        if (customLoot != null) {
             CustomDropsProcessor.handleDropItemEvent(event, customLoot);
         }
     }

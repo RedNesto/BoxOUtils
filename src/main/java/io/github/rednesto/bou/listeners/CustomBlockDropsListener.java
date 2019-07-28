@@ -23,6 +23,8 @@
  */
 package io.github.rednesto.bou.listeners;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import io.github.rednesto.bou.Config;
 import io.github.rednesto.bou.CustomDropsProcessor;
 import io.github.rednesto.bou.api.customdrops.CustomLoot;
@@ -40,8 +42,17 @@ import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 public class CustomBlockDropsListener {
+
+    // I'd like to find a better thing to use as block identifier, something that does not rely on location,
+    // entities unique id are great for that, but I don't know anything similar for blocks
+    private final Cache<Location<World>, Boolean> requirementResultsTracker = CacheBuilder.newBuilder()
+            // 15 seconds should be enough even if the server is skipping some ticks
+            // but this should not be too high because the requirements test results may change quickly
+            .expireAfterWrite(15, TimeUnit.SECONDS)
+            .build();
 
     @Listener
     public void onBlockBreak(ChangeBlockEvent.Break event, @First Player player) {
@@ -53,23 +64,27 @@ public class CustomBlockDropsListener {
                 continue;
             }
 
-            Location<World> targetLocation = originalBlock.getLocation().orElse(player.getLocation());
-            if (CustomDropsProcessor.fulfillsRequirements(originalBlock, event.getCause(), loot.getRequirements())) {
+            boolean requirementsFulfilled = CustomDropsProcessor.fulfillsRequirements(originalBlock, event.getCause(), loot.getRequirements());
+            Location<World> targetLocation = originalBlock.getLocation().orElseGet(() -> new Location<>(player.getWorld(), originalBlock.getPosition()));
+            requirementResultsTracker.put(targetLocation, requirementsFulfilled);
+            if (requirementsFulfilled) {
                 CustomDropsProcessor.dropLoot(loot, player, targetLocation);
             }
         }
     }
 
     @Listener
-    public void onItemDrop(DropItemEvent.Destruct event, @First Player player) {
-        BlockSnapshot block = event.getCause().first(BlockSnapshot.class).orElse(null);
-        if (block == null) {
+    public void onItemDrop(DropItemEvent.Destruct event, @First Player player, @First BlockSnapshot block) {
+        Location<World> targetLocation = block.getLocation().orElseGet(() -> new Location<>(player.getWorld(), block.getPosition()));
+        Boolean result = requirementResultsTracker.getIfPresent(targetLocation);
+        requirementResultsTracker.invalidate(targetLocation);
+        if (result == null || !result) {
             return;
         }
 
         Map<String, CustomLoot> drops = Config.getBlocksDrops().drops;
         CustomLoot customLoot = drops.get(block.getState().getType().getId());
-        if (customLoot != null && CustomDropsProcessor.fulfillsRequirements(block, event.getCause(), customLoot.getRequirements())) {
+        if (customLoot != null) {
             CustomDropsProcessor.handleDropItemEvent(event, customLoot);
         }
     }
