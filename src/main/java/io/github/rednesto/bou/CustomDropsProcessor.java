@@ -30,7 +30,6 @@ import io.github.rednesto.bou.api.lootReuse.LootReuse;
 import io.github.rednesto.bou.api.quantity.IntQuantity;
 import io.github.rednesto.bou.api.requirement.Requirement;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityTypes;
@@ -59,7 +58,7 @@ import javax.annotation.Nullable;
 
 public class CustomDropsProcessor {
 
-    public static void handleDropItemEvent(DropItemEvent.Destruct event, CustomLoot customLoot) {
+    public static void handleDropItemEvent(DropItemEvent.Destruct event, CustomLoot customLoot, Object source) {
         if (customLoot.isOverwrite()) {
             event.setCancelled(true);
             return;
@@ -67,8 +66,7 @@ public class CustomDropsProcessor {
 
         CustomLoot.Reuse reuse = customLoot.getReuse();
         if (reuse != null) {
-            BlockSnapshot block = event.getCause().first(BlockSnapshot.class).orElse(null);
-            if (block != null && !fulfillsRequirements(block, event.getCause(), reuse.getRequirements())) {
+            if (!fulfillsRequirements(source, event.getCause(), reuse.getRequirements())) {
                 return;
             }
 

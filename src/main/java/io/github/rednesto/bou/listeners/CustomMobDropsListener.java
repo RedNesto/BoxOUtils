@@ -95,7 +95,7 @@ public class CustomMobDropsListener {
         Map<String, CustomLoot> drops = Config.getMobsDrops().drops;
         CustomLoot customLoot = drops.get(entity.getType().getId());
         if (customLoot != null) {
-            CustomDropsProcessor.handleDropItemEvent(event, customLoot);
+            CustomDropsProcessor.handleDropItemEvent(event, customLoot, entity.createSnapshot());
         }
     }
 

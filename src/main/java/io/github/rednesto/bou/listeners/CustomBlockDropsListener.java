@@ -85,7 +85,7 @@ public class CustomBlockDropsListener {
         Map<String, CustomLoot> drops = Config.getBlocksDrops().drops;
         CustomLoot customLoot = drops.get(block.getState().getType().getId());
         if (customLoot != null) {
-            CustomDropsProcessor.handleDropItemEvent(event, customLoot);
+            CustomDropsProcessor.handleDropItemEvent(event, customLoot, block);
         }
     }
 
