@@ -19,14 +19,13 @@ apply plugin: 'net.minecraftforge.gradle.forge'
 apply plugin: 'org.spongepowered.mctester'
 
 repositories {
-    mavenLocal()
     maven {
         url 'https://repo.spongepowered.org/maven/'
     }
 }
 
 dependencies {
-    compile 'io.github.rednesto:box-o-utils:0.8'
+    compile fileTree(dir: '../build/libs', include: '*.jar')
 }
 
 minecraft {

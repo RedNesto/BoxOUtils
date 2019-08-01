@@ -1,9 +1,10 @@
 import com.flowpowered.math.vector.Vector3d;
-import io.github.rednesto.bou.common.Config;
-import io.github.rednesto.bou.common.CustomLoot;
-import io.github.rednesto.bou.common.ItemLoot;
-import io.github.rednesto.bou.sponge.BoxOUtils;
-import io.github.rednesto.bou.sponge.listeners.CustomBlockDropsListener;
+import io.github.rednesto.bou.BoxOUtils;
+import io.github.rednesto.bou.Config;
+import io.github.rednesto.bou.api.customdrops.CustomLoot;
+import io.github.rednesto.bou.api.customdrops.ItemLoot;
+import io.github.rednesto.bou.api.quantity.FixedIntQuantity;
+import io.github.rednesto.bou.listeners.CustomBlockDropsListener;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -37,7 +38,7 @@ public class TestRun extends BaseTest {
         HashMap<String, CustomLoot> map = new HashMap<>();
         ArrayList<ItemLoot> itemLoots = new ArrayList<>();
         itemLoots.add(new ItemLoot("minecraft:diamond_sword", null, null, 0d, null));
-        map.put("minecraft:grass", new CustomLoot(itemLoots, 0, false, false, Collections.emptyList(), null, null));
+        map.put("minecraft:grass", new CustomLoot(itemLoots, new FixedIntQuantity(0), false, false, Collections.emptyList(), null, null));
         BoxOUtils.getInstance().setBlocksDrops(new Config.BlocksDrops(true, map));
         Sponge.getEventManager().registerListeners(BoxOUtils.getInstance(), new CustomBlockDropsListener());
 
