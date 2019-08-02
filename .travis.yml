@@ -5,7 +5,10 @@ jdk:
 
 before_install:
   - chmod +x gradlew
-script: ./gradlew test checkLicenses shadowJar
+script:
+  - ./gradlew test checkLicenses shadowJar
+  - cd integrationTests
+  - ./gradlew test checkLicenses
 
 before_cache:
   - rm -f $HOME/.gradle/caches/modules-2/modules-2.lock
