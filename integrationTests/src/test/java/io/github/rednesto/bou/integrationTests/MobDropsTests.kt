@@ -54,7 +54,7 @@ class MobDropsTests(testUtils: TestUtils) : BaseTest(testUtils) {
         val customLoot = CustomLoot(itemLoots, null, false, false, emptyList(), null, null)
         var spawnEntityCustomCallCount = 0
         var dropItemDestructCallCount = 0
-        doTest("minecraft:sheep", customLoot) { event: SpawnEntityEvent ->
+        doTest(customLoot) { event: SpawnEntityEvent ->
             if (event.isCancelled) {
                 return@doTest
             }
@@ -82,7 +82,7 @@ class MobDropsTests(testUtils: TestUtils) : BaseTest(testUtils) {
         val itemLoots = listOf(ItemLoot("minecraft:diamond_sword", null, null, 0.0, null))
         val customLoot = CustomLoot(itemLoots, null, true, false, emptyList(), null, null)
         var spawnEntityCustomCallCount = 0
-        doTest("minecraft:sheep", customLoot) { event: SpawnEntityEvent ->
+        doTest(customLoot) { event: SpawnEntityEvent ->
             if (event.isCancelled) {
                 return@doTest
             }
@@ -104,7 +104,7 @@ class MobDropsTests(testUtils: TestUtils) : BaseTest(testUtils) {
     fun `fixed experience`() {
         val customLoot = CustomLoot(emptyList(), FixedIntQuantity(5), false, false, emptyList(), null, null)
         var spawnEntityCustomCallCount = 0
-        doTest("minecraft:sheep", customLoot) { event: SpawnEntityEvent ->
+        doTest(customLoot) { event: SpawnEntityEvent ->
             if (event.isCancelled) {
                 return@doTest
             }
@@ -126,7 +126,7 @@ class MobDropsTests(testUtils: TestUtils) : BaseTest(testUtils) {
     fun `bounded experience`() {
         val customLoot = CustomLoot(emptyList(), BoundedIntQuantity(5, 15), false, false, emptyList(), null, null)
         var spawnEntityCustomCallCount = 0
-        doTest("minecraft:sheep", customLoot) { event: SpawnEntityEvent ->
+        doTest(customLoot) { event: SpawnEntityEvent ->
             if (event.isCancelled) {
                 return@doTest
             }
@@ -149,7 +149,7 @@ class MobDropsTests(testUtils: TestUtils) : BaseTest(testUtils) {
     @Test
     fun `experience overwrite`() {
         val customLoot = CustomLoot(emptyList(), null, false, true, emptyList(), null, null)
-        doTest("minecraft:sheep", customLoot) { event: SpawnEntityEvent ->
+        doTest(customLoot) { event: SpawnEntityEvent ->
             if (event.isCancelled) {
                 return@doTest
             }
@@ -161,7 +161,7 @@ class MobDropsTests(testUtils: TestUtils) : BaseTest(testUtils) {
     @Test
     fun `experience overwrite mixed`() {
         val customLoot = CustomLoot(emptyList(), FixedIntQuantity(5), false, true, emptyList(), null, null)
-        doTest("minecraft:sheep", customLoot) { event: SpawnEntityEvent ->
+        doTest(customLoot) { event: SpawnEntityEvent ->
             if (event.isCancelled) {
                 return@doTest
             }
@@ -179,8 +179,8 @@ class MobDropsTests(testUtils: TestUtils) : BaseTest(testUtils) {
         }
     }
 
-    private fun doTest(blockId: String, customLoot: CustomLoot, predicate: (event: SpawnEntityEvent) -> Unit) {
-        BoxOUtils.getInstance().mobsDrops = Config.MobsDrops(true, mapOf(blockId to customLoot))
+    private fun doTest(customLoot: CustomLoot, predicate: (event: SpawnEntityEvent) -> Unit) {
+        BoxOUtils.getInstance().mobsDrops = Config.MobsDrops(true, mapOf("minecraft:sheep" to customLoot))
 
         val playerLocation: Location<World> = testUtils.thePlayer.location
         val entityLocation: Location<World> = playerLocation.add(Vector3d.FORWARD)
