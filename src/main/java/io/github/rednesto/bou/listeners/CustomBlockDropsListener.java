@@ -68,7 +68,7 @@ public class CustomBlockDropsListener {
             Location<World> targetLocation = originalBlock.getLocation().orElseGet(() -> new Location<>(player.getWorld(), originalBlock.getPosition()));
             requirementResultsTracker.put(targetLocation, requirementsFulfilled);
             if (requirementsFulfilled) {
-                CustomDropsProcessor.dropLoot(loot, player, targetLocation);
+                CustomDropsProcessor.dropLoot(loot, player, targetLocation, originalBlock, event.getCause());
             }
         }
     }

@@ -27,6 +27,7 @@ import com.google.common.reflect.TypeToken;
 import io.github.rednesto.bou.Config;
 import io.github.rednesto.bou.api.blockspawners.SpawnedMob;
 import io.github.rednesto.bou.api.customdrops.CustomLoot;
+import io.github.rednesto.bou.api.customdrops.CustomLootCommand;
 import io.github.rednesto.bou.api.customdrops.ItemLoot;
 import io.github.rednesto.bou.api.customdrops.MoneyLoot;
 import io.github.rednesto.bou.api.fastharvest.FastHarvestCrop;
@@ -41,6 +42,7 @@ public final class BouTypeTokens {
 
     public static final TypeToken<CustomLoot> CUSTOM_LOOT = TypeToken.of(CustomLoot.class);
     public static final TypeToken<CustomLoot.Reuse> CUSTOM_LOOT_REUSE = TypeToken.of(CustomLoot.Reuse.class);
+    public static final TypeToken<CustomLootCommand> CUSTOM_LOOT_COMMAND = TypeToken.of(CustomLootCommand.class);
     public static final TypeToken<IntQuantity> INT_QUANTITY = TypeToken.of(IntQuantity.class);
     public static final TypeToken<ItemLoot> ITEM_LOOT = TypeToken.of(ItemLoot.class);
     public static final TypeToken<LootReuse> LOOT_REUSE = TypeToken.of(LootReuse.class);

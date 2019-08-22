@@ -29,6 +29,7 @@ import io.github.rednesto.bou.Config;
 import io.github.rednesto.bou.CustomDropsProcessor;
 import io.github.rednesto.bou.api.customdrops.CustomLoot;
 import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.ExperienceOrb;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.living.player.Player;
@@ -75,11 +76,12 @@ public class CustomMobDropsListener {
             return null;
         });
 
-        boolean requirementsFulfilled = CustomDropsProcessor.fulfillsRequirements(targetEntity.createSnapshot(), event.getCause(), loot.getRequirements());
+        EntitySnapshot targetEntitySnapshot = targetEntity.createSnapshot();
+        boolean requirementsFulfilled = CustomDropsProcessor.fulfillsRequirements(targetEntitySnapshot, event.getCause(), loot.getRequirements());
         requirementResultsTracker.put(targetEntity.getUniqueId(), requirementsFulfilled);
         if (requirementsFulfilled) {
             Location<World> targetLocation = targetEntity.getLocation();
-            CustomDropsProcessor.dropLoot(loot, player, targetLocation);
+            CustomDropsProcessor.dropLoot(loot, player, targetLocation, targetEntitySnapshot, event.getCause());
         }
     }
 

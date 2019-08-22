@@ -46,6 +46,7 @@ public class CustomLoot {
     private MoneyLoot moneyLoot;
     @Nullable
     private Reuse reuse;
+    private List<CustomLootCommand> commands;
 
     public CustomLoot(List<ItemLoot> itemLoots,
                       @Nullable IntQuantity experience,
@@ -53,7 +54,7 @@ public class CustomLoot {
                       boolean expOverwrite,
                       List<List<Requirement<?>>> requirements,
                       @Nullable MoneyLoot moneyLoot,
-                      @Nullable Reuse reuse) {
+                      @Nullable Reuse reuse, List<CustomLootCommand> commands) {
         this.itemLoots = itemLoots;
         this.experience = experience;
         this.overwrite = overwrite;
@@ -61,6 +62,7 @@ public class CustomLoot {
         this.requirements = requirements;
         this.moneyLoot = moneyLoot;
         this.reuse = reuse;
+        this.commands = commands;
     }
 
     public List<ItemLoot> getItemLoots() {
@@ -94,6 +96,10 @@ public class CustomLoot {
         return reuse;
     }
 
+    public List<CustomLootCommand> getCommands() {
+        return commands;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -104,13 +110,14 @@ public class CustomLoot {
         }
 
         CustomLoot that = (CustomLoot) o;
-        return experience == that.experience &&
-                overwrite == that.overwrite &&
+        return overwrite == that.overwrite &&
                 expOverwrite == that.expOverwrite &&
                 itemLoots.equals(that.itemLoots) &&
+                Objects.equals(experience, that.experience) &&
                 requirements.equals(that.requirements) &&
                 Objects.equals(moneyLoot, that.moneyLoot) &&
-                Objects.equals(reuse, that.reuse);
+                Objects.equals(reuse, that.reuse) &&
+                commands.equals(that.commands);
     }
 
     @Override
@@ -123,6 +130,7 @@ public class CustomLoot {
                 .add("requirements", requirements)
                 .add("moneyLoot", moneyLoot)
                 .add("reuse", reuse)
+                .add("commands", commands)
                 .toString();
     }
 

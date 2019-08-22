@@ -24,12 +24,14 @@
 package io.github.rednesto.bou;
 
 import io.github.rednesto.bou.api.customdrops.CustomLoot;
+import io.github.rednesto.bou.api.customdrops.CustomLootCommand;
 import io.github.rednesto.bou.api.customdrops.ItemLoot;
 import io.github.rednesto.bou.api.customdrops.MoneyLoot;
 import io.github.rednesto.bou.api.lootReuse.LootReuse;
 import io.github.rednesto.bou.api.quantity.IntQuantity;
 import io.github.rednesto.bou.api.requirement.Requirement;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityTypes;
@@ -106,7 +108,7 @@ public class CustomDropsProcessor {
         return false;
     }
 
-    public static void dropLoot(CustomLoot loot, @Nullable Player targetPlayer, @Nullable Location<World> targetLocation) {
+    public static void dropLoot(CustomLoot loot, @Nullable Player targetPlayer, @Nullable Location<World> targetLocation, Object source, Cause cause) {
         @Nullable MoneyLoot moneyLoot = loot.getMoneyLoot();
         if (targetPlayer != null && moneyLoot != null && moneyLoot.shouldLoot()) {
             int randomQuantity = moneyLoot.getAmount().get();
@@ -127,8 +129,8 @@ public class CustomDropsProcessor {
                     return;
                 }
 
-                Cause cause = Cause.of(EventContext.empty(), BoxOUtils.getInstance());
-                TransactionResult transactionResult = account.deposit(usedCurrency, BigDecimal.valueOf(randomQuantity), cause);
+                Cause depositCause = Cause.of(EventContext.empty(), BoxOUtils.getInstance());
+                TransactionResult transactionResult = account.deposit(usedCurrency, BigDecimal.valueOf(randomQuantity), depositCause);
                 switch (transactionResult.getResult()) {
                     case ACCOUNT_NO_SPACE:
                         targetPlayer.sendMessage(Text.of(TextColors.RED,
@@ -148,6 +150,29 @@ public class CustomDropsProcessor {
                         break;
                 }
             });
+        }
+
+        if (targetPlayer != null) {
+            for (CustomLootCommand command : loot.getCommands()) {
+                if (!fulfillsRequirements(source, cause, command.getRequirements())) {
+                    continue;
+                }
+
+                String commandToSend = command.getRawCommand()
+                        .replace("{player.name}", targetPlayer.getName())
+                        .replace("{player.uuid}", targetPlayer.getUniqueId().toString());
+                CommandSource commandSource = null;
+                switch (command.getSenderMode()) {
+                    case SERVER:
+                        commandSource = Sponge.getServer().getConsole();
+                        break;
+                    case PLAYER:
+                        commandSource = targetPlayer;
+                        break;
+                }
+
+                Sponge.getCommandManager().process(commandSource, commandToSend);
+            }
         }
 
         if (targetLocation == null) {

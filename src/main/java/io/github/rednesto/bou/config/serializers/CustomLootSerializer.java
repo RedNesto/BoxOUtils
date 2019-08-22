@@ -25,6 +25,7 @@ package io.github.rednesto.bou.config.serializers;
 
 import com.google.common.reflect.TypeToken;
 import io.github.rednesto.bou.api.customdrops.CustomLoot;
+import io.github.rednesto.bou.api.customdrops.CustomLootCommand;
 import io.github.rednesto.bou.api.customdrops.ItemLoot;
 import io.github.rednesto.bou.api.customdrops.MoneyLoot;
 import io.github.rednesto.bou.api.quantity.IntQuantity;
@@ -60,7 +61,10 @@ public class CustomLootSerializer implements TypeSerializer<CustomLoot> {
         boolean overwrite = value.getNode("overwrite").getBoolean(false);
         boolean expOverwrite = value.getNode("exp-overwrite").getBoolean(false);
 
-        return new CustomLoot(itemLoots, experience, overwrite, expOverwrite, requirements, moneyLoot, reuse);
+        List<CustomLootCommand> commands = new ArrayList<>(value.getNode("commands").getList(BouTypeTokens.CUSTOM_LOOT_COMMAND));
+        commands.removeIf(Objects::isNull);
+
+        return new CustomLoot(itemLoots, experience, overwrite, expOverwrite, requirements, moneyLoot, reuse, commands);
     }
 
     @Override

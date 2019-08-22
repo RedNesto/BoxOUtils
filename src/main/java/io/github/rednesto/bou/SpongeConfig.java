@@ -152,6 +152,7 @@ public class SpongeConfig {
                 .registerType(BouTypeTokens.CUSTOM_LOOT, new CustomLootSerializer())
                 .registerType(BouTypeTokens.ITEM_LOOT, new ItemLootSerializer())
                 .registerType(BouTypeTokens.CUSTOM_LOOT_REUSE, new CustomLootReuseSerializer())
+                .registerType(BouTypeTokens.CUSTOM_LOOT_COMMAND, new CustomLootCommandSerializer())
                 .registerType(BouTypeTokens.REQUIREMENT, new RequirementSerializer())
                 .registerType(BouTypeTokens.REQUIREMENTS_MAP, new RequirementsMapSerializer())
                 .registerType(BouTypeTokens.MONEY_LOOT, new MoneyLootSerializer())
