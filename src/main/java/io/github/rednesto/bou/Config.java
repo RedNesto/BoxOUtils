@@ -31,6 +31,7 @@ import ninja.leaping.configurate.objectmapping.Setting;
 import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -61,6 +62,10 @@ public final class Config {
 
     public static FastHarvest getFastHarvest() {
         return BoxOUtils.getInstance().getFastHarvest();
+    }
+
+    public static CropsControl getCropsControl() {
+        return BoxOUtils.getInstance().getCropsControl();
     }
 
     @ConfigSerializable
@@ -117,51 +122,52 @@ public final class Config {
         @Setting("enabled")
         public boolean enabled;
 
-        @Setting("beetroot")
-        public FastHarvestCrop beetroot;
-        @Setting("beetroot_seed")
-        public FastHarvestCrop beetrootSeed;
-        @Setting("carrot")
-        public FastHarvestCrop carrot;
-        @Setting("potato")
-        public FastHarvestCrop potato;
-        @Setting("seed")
-        public FastHarvestCrop seed;
-        @Setting("wheat")
-        public FastHarvestCrop wheat;
+        @Setting("drop_in_world")
+        public boolean dropInWorld;
 
-        @Setting("list")
+        @Setting("tools")
         public FastHarvestTools tools;
 
         public FastHarvest() {}
 
-        public FastHarvest(boolean enabled,
-                           FastHarvestCrop beetroot,
-                           FastHarvestCrop beetrootSeed,
-                           FastHarvestCrop carrot,
-                           FastHarvestCrop potato,
-                           FastHarvestCrop seed,
-                           FastHarvestCrop wheat,
-                           FastHarvestTools tools) {
+        public FastHarvest(boolean enabled, boolean dropInWorld, FastHarvestTools tools) {
             this.enabled = enabled;
-            this.beetroot = beetroot;
-            this.beetrootSeed = beetrootSeed;
-            this.carrot = carrot;
-            this.potato = potato;
-            this.seed = seed;
-            this.wheat = wheat;
+            this.dropInWorld = dropInWorld;
             this.tools = tools;
         }
 
         public static FastHarvest createDefault() {
-            return new FastHarvest(false,
-                    FastHarvestCrop.createDefault(),
-                    FastHarvestCrop.createDefault(),
-                    FastHarvestCrop.createDefault(),
-                    FastHarvestCrop.createDefault(),
-                    FastHarvestCrop.createDefault(),
-                    FastHarvestCrop.createDefault(),
-                    new FastHarvestTools(false, true, new ArrayList<>()));
+            FastHarvestTools tools = new FastHarvestTools(false, true, true, new ArrayList<>());
+            return new FastHarvest(false, true, tools);
+        }
+    }
+
+    @ConfigSerializable
+    public static class CropsControl {
+
+        @Setting("enabled")
+        public boolean enabled;
+
+        @Setting("crops")
+        public Map<String, FastHarvestCrop> crops;
+
+        public CropsControl() {}
+
+        public CropsControl(boolean enabled, Map<String, FastHarvestCrop> crops) {
+            this.enabled = enabled;
+            this.crops = crops;
+        }
+
+        public static CropsControl createDefault() {
+            HashMap<String, FastHarvestCrop> crops = new HashMap<>();
+            crops.put("minecraft:beetroot", FastHarvestCrop.createDefault());
+            crops.put("minecraft:beetroot_seed", FastHarvestCrop.createDefault(3));
+            crops.put("minecraft:carrot", FastHarvestCrop.createDefault(3));
+            crops.put("minecraft:potato", FastHarvestCrop.createDefault(3));
+            crops.put("minecraft:seed", FastHarvestCrop.createDefault(3));
+            crops.put("minecraft:wheat", FastHarvestCrop.createDefault());
+
+            return new CropsControl(false, crops);
         }
     }
 }

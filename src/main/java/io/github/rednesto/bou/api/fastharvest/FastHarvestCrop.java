@@ -90,6 +90,10 @@ public class FastHarvestCrop {
     }
 
     public static FastHarvestCrop createDefault() {
-        return new FastHarvestCrop(-1, -1, 0, 1, 1);
+        return createDefault(0);
+    }
+
+    public static FastHarvestCrop createDefault(int count) {
+        return new FastHarvestCrop(-1, -1, count, 1, 1);
     }
 }

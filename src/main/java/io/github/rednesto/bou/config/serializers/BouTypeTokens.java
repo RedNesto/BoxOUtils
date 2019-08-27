@@ -57,6 +57,7 @@ public final class BouTypeTokens {
     public static final TypeToken<Config.MobsDrops> CONFIG_MOBS_DROPS = TypeToken.of(Config.MobsDrops.class);
     public static final TypeToken<Config.BlockSpawners> CONFIG_BLOCK_SPAWNERS = TypeToken.of(Config.BlockSpawners.class);
     public static final TypeToken<Config.FastHarvest> CONFIG_FAST_HARVEST = TypeToken.of(Config.FastHarvest.class);
+    public static final TypeToken<Config.CropsControl> CONFIG_CROPS_CONTROL = TypeToken.of(Config.CropsControl.class);
 
     private BouTypeTokens() {}
 }

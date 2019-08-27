@@ -30,17 +30,23 @@ import java.util.List;
 public class FastHarvestTools {
 
     private boolean enabled;
+    private boolean damageOnUse;
     private boolean isWhitelist;
     private List<String> toolsIds;
 
-    public FastHarvestTools(boolean enabled, boolean isWhitelist, List<String> toolsIds) {
+    public FastHarvestTools(boolean enabled, boolean damageOnUse, boolean isWhitelist, List<String> toolsIds) {
         this.enabled = enabled;
+        this.damageOnUse = damageOnUse;
         this.isWhitelist = isWhitelist;
         this.toolsIds = toolsIds;
     }
 
     public boolean isEnabled() {
         return enabled;
+    }
+
+    public boolean isDamageOnUse() {
+        return damageOnUse;
     }
 
     public boolean isWhitelist() {
@@ -62,6 +68,7 @@ public class FastHarvestTools {
 
         FastHarvestTools that = (FastHarvestTools) o;
         return enabled == that.enabled &&
+                damageOnUse == that.damageOnUse &&
                 isWhitelist == that.isWhitelist &&
                 toolsIds.equals(that.toolsIds);
     }
@@ -70,6 +77,7 @@ public class FastHarvestTools {
     public String toString() {
         return MoreObjects.toStringHelper(this)
                 .add("enabled", enabled)
+                .add("damageOnUse", damageOnUse)
                 .add("isWhitelist", isWhitelist)
                 .add("toolsIds", toolsIds)
                 .toString();

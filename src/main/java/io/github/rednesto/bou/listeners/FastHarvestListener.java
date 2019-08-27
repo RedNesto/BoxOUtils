@@ -29,6 +29,8 @@ import io.github.rednesto.bou.api.fastharvest.FastHarvestCrop;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.manipulator.immutable.block.ImmutableGrowthData;
+import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.living.player.Player;
@@ -47,7 +49,6 @@ import org.spongepowered.api.world.World;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Function;
 
 import javax.annotation.Nullable;
 
@@ -58,14 +59,10 @@ public class FastHarvestListener {
     private static final Map<String, CropDefinition> DEFINITIONS = new HashMap<>();
 
     static {
-        DEFINITIONS.put("minecraft:wheat", new CropDefinition(7,
-                config -> config.seed, ItemTypes.WHEAT_SEEDS, config -> config.wheat, ItemTypes.WHEAT));
-        DEFINITIONS.put("minecraft:carrots", new CropDefinition(7,
-                config -> config.carrot, ItemTypes.CARROT, null, null));
-        DEFINITIONS.put("minecraft:potatoes", new CropDefinition(7,
-                config -> config.potato, ItemTypes.POTATO, null, null));
-        DEFINITIONS.put("minecraft:beetroots", new CropDefinition(3,
-                config -> config.beetrootSeed, ItemTypes.BEETROOT_SEEDS, config -> config.beetroot, ItemTypes.BEETROOT));
+        DEFINITIONS.put("minecraft:wheat", new CropDefinition(ItemTypes.WHEAT_SEEDS, 3, ItemTypes.WHEAT, 1));
+        DEFINITIONS.put("minecraft:carrots", new CropDefinition(ItemTypes.CARROT, 3, null, 0));
+        DEFINITIONS.put("minecraft:potatoes", new CropDefinition(ItemTypes.POTATO, 3, null, 0));
+        DEFINITIONS.put("minecraft:beetroots", new CropDefinition(ItemTypes.BEETROOT_SEEDS, 3, ItemTypes.BEETROOT, 1));
     }
 
     @Listener
@@ -81,12 +78,35 @@ public class FastHarvestListener {
             return;
         }
 
-        ItemStack maybeItemInHand = player.getItemInHand(event.getHandType()).orElse(ItemStack.empty());
-        int age = targetBlock.get(Keys.GROWTH_STAGE).orElse(0);
-        if (!Config.canHarvest(maybeItemInHand.getType().getId()) || age != cropDefinition.maxAge) {
+        ImmutableBoundedValue<Integer> growthStage = targetBlock.get(ImmutableGrowthData.class).map(ImmutableGrowthData::growthStage).orElse(null);
+        if (growthStage == null) {
             return;
         }
 
+        ItemStack itemInHand = player.getItemInHand(event.getHandType()).orElse(ItemStack.empty());
+        int age = growthStage.get();
+        int maxAge = growthStage.getMaxValue();
+        if (!Config.canHarvest(itemInHand.getType().getId()) || age != maxAge) {
+            return;
+        }
+
+        FastHarvestCrop seedConfig;
+        FastHarvestCrop productConfig = null;
+        ItemType productType = cropDefinition.product;
+        Config.CropsControl cropsControl = Config.getCropsControl();
+        if (cropsControl.enabled) {
+            seedConfig = cropsControl.crops.get(cropDefinition.seed.getId());
+            if (productType != null) {
+                productConfig = cropsControl.crops.get(productType.getId());
+            }
+        } else {
+            seedConfig = FastHarvestCrop.createDefault(cropDefinition.seedCount);
+            if (productType != null) {
+                productConfig = FastHarvestCrop.createDefault(cropDefinition.productCount);
+            }
+        }
+
+        Location<World> entitiesSpawnLocation = targetBlock.getLocation().orElse(player.getLocation());
         int fortuneLevel = event.getContext().get(EventContextKeys.USED_ITEM)
                 .flatMap(item -> item.get(Keys.ITEM_ENCHANTMENTS))
                 .flatMap(enchantments -> enchantments.stream()
@@ -95,17 +115,13 @@ public class FastHarvestListener {
                         .findFirst())
                 .orElse(0);
 
-        Location<World> entitiesSpawnLocation = targetBlock.getLocation().orElse(player.getLocation());
+        if (seedConfig != null) {
+            // We decrement because we consume the seed to plant it again
+            createAndSpawnEntity(age, maxAge, fortuneLevel, entitiesSpawnLocation, seedConfig, cropDefinition.seed, true);
+        }
 
-        FastHarvestCrop seedConfig = cropDefinition.seedConfigProvider.apply(fastHarvest);
-        // We decrement because we consume the seed to plant it again
-        createAndSpawnEntity(cropDefinition, age, fortuneLevel, entitiesSpawnLocation, seedConfig, cropDefinition.seed, true);
-
-        Function<FastHarvest, FastHarvestCrop> productConfigProvider = cropDefinition.productConfigProvider;
-        ItemType productType = cropDefinition.product;
-        if (productConfigProvider != null && productType != null ) {
-            FastHarvestCrop productConfig = productConfigProvider.apply(fastHarvest);
-            createAndSpawnEntity(cropDefinition, age, fortuneLevel, entitiesSpawnLocation, productConfig, cropDefinition.product, false);
+        if (productType != null && productConfig != null) {
+            createAndSpawnEntity(age, maxAge, fortuneLevel, entitiesSpawnLocation, productConfig, productType, false);
         }
 
         targetBlock.getLocation().ifPresent(location -> {
@@ -115,10 +131,10 @@ public class FastHarvestListener {
         });
     }
 
-    private void createAndSpawnEntity(CropDefinition cropDefinition, int age, int fortuneLevel,
+    private static void createAndSpawnEntity(int age, int maxAge, int fortuneLevel,
                                      Location<World> entitiesSpawnLocation, FastHarvestCrop cropConfig, ItemType itemType,
                                      boolean decrementQuantity) {
-        int quantity = CropsAlgoritm.ALG_19.compute(cropConfig, age, cropDefinition.maxAge, fortuneLevel);
+        int quantity = CropsAlgoritm.ALG_19.compute(cropConfig, age, maxAge, fortuneLevel);
         if (decrementQuantity) {
             quantity--;
         }
@@ -133,21 +149,17 @@ public class FastHarvestListener {
 
     private static class CropDefinition {
 
-        private final int maxAge;
-        private final Function<FastHarvest, FastHarvestCrop> seedConfigProvider;
         private final ItemType seed;
-        @Nullable
-        private final Function<FastHarvest, FastHarvestCrop> productConfigProvider;
+        private final int seedCount;
         @Nullable
         private final ItemType product;
+        private final int productCount;
 
-        private CropDefinition(int maxAge, Function<FastHarvest, FastHarvestCrop> seedConfigProvider, ItemType seed,
-                               @Nullable Function<FastHarvest, FastHarvestCrop> productConfigProvider, @Nullable ItemType product) {
-            this.maxAge = maxAge;
-            this.seedConfigProvider = seedConfigProvider;
+        private CropDefinition(ItemType seed, int seedCount, @Nullable ItemType product, int productCount) {
             this.seed = seed;
-            this.productConfigProvider = productConfigProvider;
+            this.seedCount = seedCount;
             this.product = product;
+            this.productCount = productCount;
         }
     }
 }

@@ -59,6 +59,7 @@ public class SpongeConfig {
         Files.createDirectories(plugin.getConfigDir());
 
         loadFastHarvest(plugin);
+        loadCropsControl(plugin);
         loadBlocksDrops(plugin);
         loadMobsDrops(plugin);
         loadBlockSpawners(plugin);
@@ -69,6 +70,16 @@ public class SpongeConfig {
     private static void loadFastHarvest(BoxOUtils plugin) throws IOException {
         doLoad(plugin, "fastharvest.conf", "FastHarvest", BouTypeTokens.CONFIG_FAST_HARVEST, config -> {
             BoxOUtils.getInstance().setFastHarvest(config);
+            if (config.enabled && !fastHarvestListenersRegistered && !IS_TESTING) {
+                Sponge.getEventManager().registerListeners(plugin, new FastHarvestListener());
+                fastHarvestListenersRegistered = true;
+            }
+        });
+    }
+
+    private static void loadCropsControl(BoxOUtils plugin) throws IOException {
+        doLoad(plugin, "cropscontrol.conf", "CropsControl", BouTypeTokens.CONFIG_CROPS_CONTROL, config -> {
+            BoxOUtils.getInstance().setCropsControl(config);
             if (config.enabled && !fastHarvestListenersRegistered && !IS_TESTING) {
                 Sponge.getEventManager().registerListeners(plugin, new FastHarvestListener());
                 fastHarvestListenersRegistered = true;

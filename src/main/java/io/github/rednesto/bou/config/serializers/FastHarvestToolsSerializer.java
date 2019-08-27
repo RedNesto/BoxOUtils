@@ -40,9 +40,11 @@ public class FastHarvestToolsSerializer implements TypeSerializer<FastHarvestToo
     @Override
     public @Nullable FastHarvestTools deserialize(@NonNull TypeToken<?> type, @NonNull ConfigurationNode value) throws ObjectMappingException {
         boolean enabled = value.getNode("enabled").getBoolean();
-        boolean isWhitelist = value.getNode("is_whitelist").getBoolean();
+        boolean damageOnUse = value.getNode("damage_on_use").getBoolean(true);
+        boolean isWhitelist = value.getNode("is_whitelist").getBoolean(true);
         List<String> tools = new ArrayList<>(value.getNode("tools").getList(TypeTokens.STRING_TOKEN));
-        return new FastHarvestTools(enabled, isWhitelist, tools);
+
+        return new FastHarvestTools(enabled, damageOnUse, isWhitelist, tools);
     }
 
     @Override

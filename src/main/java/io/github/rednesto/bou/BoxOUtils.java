@@ -65,6 +65,7 @@ public class BoxOUtils {
     private Config.MobsDrops mobsDrops = new Config.MobsDrops(false, new HashMap<>());
     private Config.BlockSpawners blockSpawners = new Config.BlockSpawners(false, new HashMap<>());
     private Config.FastHarvest fastHarvest = Config.FastHarvest.createDefault();
+    private Config.CropsControl cropsControl = Config.CropsControl.createDefault();
 
     private static BoxOUtils instance;
 
@@ -152,6 +153,14 @@ public class BoxOUtils {
 
     public void setFastHarvest(Config.FastHarvest fastHarvest) {
         this.fastHarvest = fastHarvest;
+    }
+
+    public Config.CropsControl getCropsControl() {
+        return cropsControl;
+    }
+
+    public void setCropsControl(Config.CropsControl cropsControl) {
+        this.cropsControl = cropsControl;
     }
 
     public static BoxOUtils getInstance() {
