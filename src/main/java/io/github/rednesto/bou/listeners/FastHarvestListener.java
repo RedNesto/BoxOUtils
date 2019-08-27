@@ -26,9 +26,11 @@ package io.github.rednesto.bou.listeners;
 import io.github.rednesto.bou.Config;
 import io.github.rednesto.bou.CropsAlgoritm;
 import io.github.rednesto.bou.api.fastharvest.FastHarvestCrop;
+import io.github.rednesto.bou.api.fastharvest.FastHarvestTools;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.manipulator.mutable.item.DurabilityData;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.living.player.Player;
@@ -124,6 +126,14 @@ public class FastHarvestListener {
             BlockState newState = oldState.with(Keys.GROWTH_STAGE, 0).orElse(oldState);
             location.setBlock(newState);
         });
+
+        FastHarvestTools fhTools = fastHarvest.tools;
+        if (fhTools.isDamageOnUse()) {
+            itemInHand.get(DurabilityData.class).map(DurabilityData::durability).ifPresent(durability -> {
+                durability.set(durability.get() - 1);
+                itemInHand.offer(durability);
+            });
+        }
     }
 
     private static void process(int age, int maxAge, int fortuneLevel, FastHarvestCrop cropConfig,
