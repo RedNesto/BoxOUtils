@@ -29,8 +29,6 @@ import io.github.rednesto.bou.api.fastharvest.FastHarvestCrop;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.immutable.block.ImmutableGrowthData;
-import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.living.player.Player;
@@ -59,10 +57,10 @@ public class FastHarvestListener {
     private static final Map<String, CropDefinition> DEFINITIONS = new HashMap<>();
 
     static {
-        DEFINITIONS.put("minecraft:wheat", new CropDefinition(ItemTypes.WHEAT_SEEDS, 3, ItemTypes.WHEAT, 1));
-        DEFINITIONS.put("minecraft:carrots", new CropDefinition(ItemTypes.CARROT, 3, null, 0));
-        DEFINITIONS.put("minecraft:potatoes", new CropDefinition(ItemTypes.POTATO, 3, null, 0));
-        DEFINITIONS.put("minecraft:beetroots", new CropDefinition(ItemTypes.BEETROOT_SEEDS, 3, ItemTypes.BEETROOT, 1));
+        DEFINITIONS.put("minecraft:wheat", new CropDefinition(7, ItemTypes.WHEAT_SEEDS, 3, ItemTypes.WHEAT, 0));
+        DEFINITIONS.put("minecraft:carrots", new CropDefinition(7, ItemTypes.CARROT, 3, null, 0));
+        DEFINITIONS.put("minecraft:potatoes", new CropDefinition(7, ItemTypes.POTATO, 3, null, 0));
+        DEFINITIONS.put("minecraft:beetroots", new CropDefinition(3, ItemTypes.BEETROOT_SEEDS, 3, ItemTypes.BEETROOT, 0));
     }
 
     @Listener
@@ -78,14 +76,9 @@ public class FastHarvestListener {
             return;
         }
 
-        ImmutableBoundedValue<Integer> growthStage = targetBlock.get(ImmutableGrowthData.class).map(ImmutableGrowthData::growthStage).orElse(null);
-        if (growthStage == null) {
-            return;
-        }
-
         ItemStack itemInHand = player.getItemInHand(event.getHandType()).orElse(ItemStack.empty());
-        int age = growthStage.get();
-        int maxAge = growthStage.getMaxValue();
+        int age = targetBlock.get(Keys.GROWTH_STAGE).orElse(0);
+        int maxAge = cropDefinition.maxAge;
         if (!Config.canHarvest(itemInHand.getType().getId()) || age != maxAge) {
             return;
         }
@@ -117,11 +110,13 @@ public class FastHarvestListener {
 
         if (seedConfig != null) {
             // We decrement because we consume the seed to plant it again
-            createAndSpawnEntity(age, maxAge, fortuneLevel, entitiesSpawnLocation, seedConfig, cropDefinition.seed, true);
+            process(age, maxAge, fortuneLevel, seedConfig, cropDefinition.seed, true,
+                    player, fastHarvest.dropInWorld, entitiesSpawnLocation);
         }
 
         if (productType != null && productConfig != null) {
-            createAndSpawnEntity(age, maxAge, fortuneLevel, entitiesSpawnLocation, productConfig, productType, false);
+            process(age, maxAge, fortuneLevel, productConfig, productType, false,
+                    player, fastHarvest.dropInWorld, entitiesSpawnLocation);
         }
 
         targetBlock.getLocation().ifPresent(location -> {
@@ -131,31 +126,49 @@ public class FastHarvestListener {
         });
     }
 
-    private static void createAndSpawnEntity(int age, int maxAge, int fortuneLevel,
-                                     Location<World> entitiesSpawnLocation, FastHarvestCrop cropConfig, ItemType itemType,
-                                     boolean decrementQuantity) {
+    private static void process(int age, int maxAge, int fortuneLevel, FastHarvestCrop cropConfig,
+                                ItemType itemType, boolean decrementQuantity, Player player, boolean spawnInWorld,
+                                Location<World> spawnLocation) {
+        ItemStack itemStack = createItemStack(age, maxAge, fortuneLevel, cropConfig, itemType, decrementQuantity);
+        if (spawnInWorld) {
+            spawnItem(spawnLocation, itemStack);
+        } else {
+            player.getInventory().offer(itemStack);
+        }
+    }
+
+    private static ItemStack createItemStack(int age, int maxAge, int fortuneLevel, FastHarvestCrop cropConfig,
+                                             ItemType itemType, boolean decrementQuantity) {
         int quantity = CropsAlgoritm.ALG_19.compute(cropConfig, age, maxAge, fortuneLevel);
         if (decrementQuantity) {
             quantity--;
         }
 
         if (quantity > 0) {
-            ItemStackSnapshot representedItem = ItemStack.of(itemType, quantity).createSnapshot();
-            Entity entity = entitiesSpawnLocation.createEntity(EntityTypes.ITEM);
-            entity.offer(Keys.REPRESENTED_ITEM, representedItem);
-            entitiesSpawnLocation.spawnEntity(entity);
+            return ItemStack.of(itemType, quantity);
         }
+
+        return ItemStack.empty();
+    }
+
+    private static void spawnItem(Location<World> spawnLocation, ItemStack itemStack) {
+        ItemStackSnapshot representedItem = itemStack.createSnapshot();
+        Entity entity = spawnLocation.createEntity(EntityTypes.ITEM);
+        entity.offer(Keys.REPRESENTED_ITEM, representedItem);
+        spawnLocation.spawnEntity(entity);
     }
 
     private static class CropDefinition {
 
+        private final int maxAge;
         private final ItemType seed;
         private final int seedCount;
         @Nullable
         private final ItemType product;
         private final int productCount;
 
-        private CropDefinition(ItemType seed, int seedCount, @Nullable ItemType product, int productCount) {
+        private CropDefinition(int maxAge, ItemType seed, int seedCount, @Nullable ItemType product, int productCount) {
+            this.maxAge = maxAge;
             this.seed = seed;
             this.seedCount = seedCount;
             this.product = product;
