@@ -25,8 +25,12 @@ package io.github.rednesto.bou.listeners;
 
 import io.github.rednesto.bou.Config;
 import io.github.rednesto.bou.CropsAlgoritm;
+import io.github.rednesto.bou.CustomDropsProcessor;
+import io.github.rednesto.bou.api.BouEventContextKeys;
+import io.github.rednesto.bou.api.customdrops.CustomLoot;
 import io.github.rednesto.bou.api.fastharvest.FastHarvestCrop;
 import io.github.rednesto.bou.api.fastharvest.FastHarvestTools;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.key.Keys;
@@ -34,9 +38,11 @@ import org.spongepowered.api.data.manipulator.mutable.item.DurabilityData;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.block.InteractBlockEvent;
 import org.spongepowered.api.event.cause.EventContextKeys;
+import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.event.filter.cause.First;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.ItemTypes;
@@ -47,7 +53,9 @@ import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.annotation.Nullable;
@@ -85,40 +93,60 @@ public class FastHarvestListener {
             return;
         }
 
-        FastHarvestCrop seedConfig;
-        FastHarvestCrop productConfig = null;
-        ItemType productType = cropDefinition.product;
-        Config.CropsControl cropsControl = Config.getCropsControl();
-        if (cropsControl.enabled) {
-            seedConfig = cropsControl.crops.get(cropDefinition.seed.getId());
-            if (productType != null) {
-                productConfig = cropsControl.crops.get(productType.getId());
-            }
-        } else {
-            seedConfig = FastHarvestCrop.createDefault(cropDefinition.seedCount);
-            if (productType != null) {
-                productConfig = FastHarvestCrop.createDefault(cropDefinition.productCount);
-            }
-        }
-
         Location<World> entitiesSpawnLocation = targetBlock.getLocation().orElse(player.getLocation());
-        int fortuneLevel = event.getContext().get(EventContextKeys.USED_ITEM)
-                .flatMap(item -> item.get(Keys.ITEM_ENCHANTMENTS))
-                .flatMap(enchantments -> enchantments.stream()
-                        .filter(enchantment -> enchantment.getType().equals(EnchantmentTypes.FORTUNE))
-                        .map(Enchantment::getLevel)
-                        .findFirst())
-                .orElse(0);
 
-        if (seedConfig != null) {
-            // We decrement because we consume the seed to plant it again
-            process(age, maxAge, fortuneLevel, seedConfig, cropDefinition.seed, true,
-                    player, fastHarvest.dropInWorld, entitiesSpawnLocation);
+        Map<String, CustomLoot> drops = Config.getBlocksDrops().drops;
+        String id = targetBlock.getState().getType().getId();
+        CustomLoot customLoot = drops.get(id);
+        if (customLoot != null) {
+            CustomDropsProcessor.dropLoot(customLoot, player, entitiesSpawnLocation, targetBlock, event.getCause(),
+                    fastHarvest.dropInWorld);
         }
 
-        if (productType != null && productConfig != null) {
-            process(age, maxAge, fortuneLevel, productConfig, productType, false,
-                    player, fastHarvest.dropInWorld, entitiesSpawnLocation);
+        try (CauseStackManager.StackFrame stackFrame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            if (customLoot != null) {
+                stackFrame.addContext(BouEventContextKeys.CUSTOM_LOOT, customLoot);
+            }
+            stackFrame.addContext(BouEventContextKeys.IS_FAST_HARVESTING, true);
+
+            stackFrame.pushCause(targetBlock);
+
+            Config.CropsControl cropsControl = Config.getCropsControl();
+            if (customLoot == null || !customLoot.isOverwrite()) {
+                FastHarvestCrop seedConfig;
+                FastHarvestCrop productConfig = null;
+                ItemType productType = cropDefinition.product;
+                if (cropsControl.enabled) {
+                    seedConfig = cropsControl.crops.get(cropDefinition.seed.getId());
+                    if (productType != null) {
+                        productConfig = cropsControl.crops.get(productType.getId());
+                    }
+                } else {
+                    seedConfig = FastHarvestCrop.createDefault(cropDefinition.seedCount);
+                    if (productType != null) {
+                        productConfig = FastHarvestCrop.createDefault(cropDefinition.productCount);
+                    }
+                }
+
+                int fortuneLevel = event.getContext().get(EventContextKeys.USED_ITEM)
+                        .flatMap(item -> item.get(Keys.ITEM_ENCHANTMENTS))
+                        .flatMap(enchantments -> enchantments.stream()
+                                .filter(enchantment -> enchantment.getType().equals(EnchantmentTypes.FORTUNE))
+                                .map(Enchantment::getLevel)
+                                .findFirst())
+                        .orElse(0);
+
+                if (seedConfig != null) {
+                    // We decrement because we consume the seed to plant it again
+                    process(age, maxAge, fortuneLevel, seedConfig, cropDefinition.seed, true,
+                            player, fastHarvest.dropInWorld, entitiesSpawnLocation, customLoot);
+                }
+
+                if (productType != null && productConfig != null) {
+                    process(age, maxAge, fortuneLevel, productConfig, productType, false,
+                            player, fastHarvest.dropInWorld, entitiesSpawnLocation, customLoot);
+                }
+            }
         }
 
         targetBlock.getLocation().ifPresent(location -> {
@@ -138,15 +166,52 @@ public class FastHarvestListener {
 
     private static void process(int age, int maxAge, int fortuneLevel, FastHarvestCrop cropConfig,
                                 ItemType itemType, boolean decrementQuantity, Player player, boolean spawnInWorld,
-                                Location<World> spawnLocation) {
+                                Location<World> spawnLocation, @Nullable CustomLoot customLoot) {
         ItemStack itemStack = createItemStack(age, maxAge, fortuneLevel, cropConfig, itemType, decrementQuantity);
+        if (itemStack == null) {
+            return;
+        }
+
         if (spawnInWorld) {
             spawnItem(spawnLocation, itemStack);
         } else {
+            if (customLoot != null) {
+                CustomLoot.Reuse lootReuse = customLoot.getReuse();
+                if (lootReuse != null) {
+                    List<ItemStack> reuseResult = new ArrayList<>();
+                    CustomDropsProcessor.computeSingleItemReuse(lootReuse, reuseResult, itemStack);
+                    if (!reuseResult.isEmpty()) {
+                        if (reuseResult.size() == 1) {
+                            player.getInventory().offer(reuseResult.get(0));
+                        } else {
+                            reuseResult.forEach(player.getInventory()::offer);
+                        }
+
+                        reuseResult.clear();
+                    }
+                }
+            }
+
             player.getInventory().offer(itemStack);
         }
     }
 
+    @Listener
+    public void onFastHarvestCropsSpawn(SpawnEntityEvent.Custom event, @First BlockSnapshot blockSnapshot) {
+        boolean isFastHarvesting = event.getContext().get(BouEventContextKeys.IS_FAST_HARVESTING).orElse(false);
+        if (!isFastHarvesting) {
+            return;
+        }
+
+        CustomLoot customLoot = event.getContext().get(BouEventContextKeys.CUSTOM_LOOT).orElse(null);
+        if (customLoot == null) {
+            return;
+        }
+
+        CustomDropsProcessor.handleDropItemEvent(event, customLoot, blockSnapshot);
+    }
+
+    @Nullable
     private static ItemStack createItemStack(int age, int maxAge, int fortuneLevel, FastHarvestCrop cropConfig,
                                              ItemType itemType, boolean decrementQuantity) {
         int quantity = CropsAlgoritm.ALG_19.compute(cropConfig, age, maxAge, fortuneLevel);
@@ -158,7 +223,7 @@ public class FastHarvestListener {
             return ItemStack.of(itemType, quantity);
         }
 
-        return ItemStack.empty();
+        return null;
     }
 
     private static void spawnItem(Location<World> spawnLocation, ItemStack itemStack) {

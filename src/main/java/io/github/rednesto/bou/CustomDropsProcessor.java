@@ -39,7 +39,7 @@ import org.spongepowered.api.entity.Item;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.EventContext;
-import org.spongepowered.api.event.item.inventory.DropItemEvent;
+import org.spongepowered.api.event.entity.AffectEntityEvent;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.service.economy.Currency;
@@ -55,12 +55,13 @@ import org.spongepowered.api.world.World;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 import javax.annotation.Nullable;
 
 public class CustomDropsProcessor {
 
-    public static void handleDropItemEvent(DropItemEvent.Destruct event, CustomLoot customLoot, Object source) {
+    public static void handleDropItemEvent(AffectEntityEvent event, CustomLoot customLoot, Object source) {
         if (customLoot.isOverwrite()) {
             event.setCancelled(true);
             return;
@@ -108,7 +109,13 @@ public class CustomDropsProcessor {
         return false;
     }
 
-    public static void dropLoot(CustomLoot loot, @Nullable Player targetPlayer, @Nullable Location<World> targetLocation, Object source, Cause cause) {
+    public static void dropLoot(CustomLoot loot, @Nullable Player targetPlayer, @Nullable Location<World> targetLocation,
+                                Object source, Cause cause) {
+        dropLoot(loot, targetPlayer, targetLocation, source, cause, true);
+    }
+
+    public static void dropLoot(CustomLoot loot, @Nullable Player targetPlayer, @Nullable Location<World> targetLocation,
+                                Object source, Cause cause, boolean dropInWorld) {
         @Nullable MoneyLoot moneyLoot = loot.getMoneyLoot();
         if (targetPlayer != null && moneyLoot != null && moneyLoot.shouldLoot()) {
             int randomQuantity = moneyLoot.getAmount().get();
@@ -175,18 +182,33 @@ public class CustomDropsProcessor {
             }
         }
 
-        if (targetLocation == null) {
-            return;
+        if (targetLocation != null) {
+            IntQuantity experience = loot.getExperience();
+            if (experience != null) {
+                int experienceAmount = experience.get();
+                if (experienceAmount > 0) {
+                    Entity experienceOrb = targetLocation.createEntity(EntityTypes.EXPERIENCE_ORB);
+                    experienceOrb.offer(Keys.CONTAINED_EXPERIENCE, experienceAmount);
+                    targetLocation.spawnEntity(experienceOrb);
+                }
+            }
         }
 
-        IntQuantity experience = loot.getExperience();
-        if (experience != null) {
-            int experienceAmount = experience.get();
-            if (experienceAmount > 0) {
-                Entity experienceOrb = targetLocation.createEntity(EntityTypes.EXPERIENCE_ORB);
-                experienceOrb.offer(Keys.CONTAINED_EXPERIENCE, experienceAmount);
-                targetLocation.spawnEntity(experienceOrb);
+        Consumer<ItemStack> lootStackConsumer;
+        if (dropInWorld) {
+            if (targetLocation == null) {
+                return;
             }
+
+            lootStackConsumer = itemStack -> {
+                Entity itemEntity = targetLocation.createEntity(EntityTypes.ITEM);
+                itemEntity.offer(Keys.REPRESENTED_ITEM, itemStack.createSnapshot());
+                targetLocation.spawnEntity(itemEntity);
+            };
+        } else if (targetPlayer != null) {
+            lootStackConsumer = itemStack -> targetPlayer.getInventory().offer(itemStack);
+        } else {
+            return;
         }
 
         for (ItemLoot itemLoot : loot.getItemLoots()) {
@@ -194,7 +216,6 @@ public class CustomDropsProcessor {
                 continue;
             }
 
-            Entity itemEntity = targetLocation.createEntity(EntityTypes.ITEM);
             ItemStack itemStack = IntegrationsManager.getInstance().createCustomDropStack(itemLoot.getProviderId(), itemLoot.getId(), targetPlayer).orElse(null);
             if (itemStack == null) {
                 continue;
@@ -209,61 +230,76 @@ public class CustomDropsProcessor {
                 itemStack.offer(Keys.DISPLAY_NAME, TextSerializers.FORMATTING_CODE.deserialize(itemLoot.getDisplayname()));
             }
 
-            itemEntity.offer(Keys.REPRESENTED_ITEM, itemStack.createSnapshot());
-            targetLocation.spawnEntity(itemEntity);
+            lootStackConsumer.accept(itemStack);
         }
     }
 
-    public static List<Entity> computeItemsReuse(List<? extends Entity> originalDropppedItems, CustomLoot.Reuse reuse) {
+    public static List<Entity> computeItemsReuse(List<? extends Entity> originalDroppedItems, CustomLoot.Reuse reuse) {
         ArrayList<Entity> result = new ArrayList<>();
-        for (Entity itemEntity : originalDropppedItems) {
+        ArrayList<ItemStack> reuseResult = new ArrayList<>();
+        for (Entity itemEntity : originalDroppedItems) {
             ItemStackSnapshot originalItem = itemEntity.get(Keys.REPRESENTED_ITEM).orElse(null);
             if (originalItem == null) {
                 continue;
             }
 
-            int reuseQuantity;
-            LootReuse lootReuse = reuse.getItems().get(originalItem.getType().getId());
-            if (lootReuse != null) {
-                reuseQuantity = lootReuse.computeQuantity(originalItem.getQuantity());
-            } else {
-                reuseQuantity = Math.round(originalItem.getQuantity() * reuse.getMultiplier());
-            }
-
-            if (reuseQuantity <= 0) {
+            computeSingleItemReuse(reuse, reuseResult, originalItem.createStack());
+            if (reuseResult.isEmpty()) {
                 continue;
             }
 
-            if (reuseQuantity == originalItem.getQuantity()) {
-                result.add(itemEntity);
-                continue;
-            }
-
-            int maxStackQuantity = originalItem.getType().getMaxStackQuantity();
-            if (reuseQuantity <= maxStackQuantity) {
-                setEntityItemQuantity(itemEntity, originalItem, reuseQuantity);
+            if (reuseResult.size() == 1) {
+                ItemStackSnapshot itemSnapshot = reuseResult.get(0).createSnapshot();
+                itemEntity.offer(Keys.REPRESENTED_ITEM, itemSnapshot);
                 result.add(itemEntity);
             } else {
-                int restQuantity = reuseQuantity % maxStackQuantity;
-                int fullStacksCount = (reuseQuantity - restQuantity) / maxStackQuantity;
-                for (int i = 0; i < fullStacksCount; i++) {
-                    Entity newItemEntity = (Entity) itemEntity.copy();
-                    setEntityItemQuantity(newItemEntity, originalItem, maxStackQuantity);
-                    result.add(newItemEntity);
-                }
-
-                setEntityItemQuantity(itemEntity, originalItem, restQuantity);
-                result.add(itemEntity);
+                reuseResult.forEach(itemStack -> {
+                    ItemStackSnapshot itemSnapshot = itemStack.createSnapshot();
+                    Entity entityCopy = ((Entity) itemEntity.copy());
+                    entityCopy.offer(Keys.REPRESENTED_ITEM, itemSnapshot);
+                    result.add(entityCopy);
+                });
             }
+
+            reuseResult.clear();
         }
 
         return result;
     }
 
-    private static void setEntityItemQuantity(Entity itemEntity, ItemStackSnapshot originalItem, int quantity) {
-        ItemStack newItem = originalItem.createStack();
-        newItem.setQuantity(quantity);
+    public static void computeSingleItemReuse(CustomLoot.Reuse reuse, List<ItemStack> result, ItemStack originalItem) {
+        int reuseQuantity;
+        LootReuse lootReuse = reuse.getItems().get(originalItem.getType().getId());
+        if (lootReuse != null) {
+            reuseQuantity = lootReuse.computeQuantity(originalItem.getQuantity());
+        } else {
+            reuseQuantity = Math.round(originalItem.getQuantity() * reuse.getMultiplier());
+        }
 
-        itemEntity.offer(Keys.REPRESENTED_ITEM, newItem.createSnapshot());
+        if (reuseQuantity <= 0) {
+            return;
+        }
+
+        if (reuseQuantity == originalItem.getQuantity()) {
+            result.add(originalItem);
+            return;
+        }
+
+        int maxStackQuantity = originalItem.getType().getMaxStackQuantity();
+        if (reuseQuantity <= maxStackQuantity) {
+            originalItem.setQuantity(reuseQuantity);
+            result.add(originalItem);
+        } else {
+            int restQuantity = reuseQuantity % maxStackQuantity;
+            int fullStacksCount = (reuseQuantity - restQuantity) / maxStackQuantity;
+            for (int i = 0; i < fullStacksCount; i++) {
+                ItemStack stack = originalItem.copy();
+                stack.setQuantity(maxStackQuantity);
+                result.add(stack);
+            }
+
+            originalItem.setQuantity(restQuantity);
+            result.add(originalItem);
+        }
     }
 }
