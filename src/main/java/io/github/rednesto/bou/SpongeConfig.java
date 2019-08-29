@@ -24,6 +24,8 @@
 package io.github.rednesto.bou;
 
 import com.google.common.reflect.TypeToken;
+import com.typesafe.config.ConfigParseOptions;
+import io.github.rednesto.bou.config.SimpleConfigIncluderFile;
 import io.github.rednesto.bou.config.serializers.*;
 import io.github.rednesto.bou.listeners.BlockSpawnersListener;
 import io.github.rednesto.bou.listeners.CustomBlockDropsListener;
@@ -138,6 +140,7 @@ public class SpongeConfig {
     public static HoconConfigurationLoader loader(Path path) {
         return HoconConfigurationLoader.builder()
                 .setPath(path)
+                .setParseOptions(ConfigParseOptions.defaults().appendIncluder(new SimpleConfigIncluderFile(path.getParent())))
                 .setDefaultOptions(ConfigurationOptions.defaults().setSerializers(createSerializersCollection()))
                 .build();
     }
