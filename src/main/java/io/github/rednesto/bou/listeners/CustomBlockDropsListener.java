@@ -56,7 +56,12 @@ public class CustomBlockDropsListener {
 
     @Listener
     public void onBlockBreak(ChangeBlockEvent.Break event, @First Player player) {
-        Map<String, CustomLoot> drops = Config.getBlocksDrops().drops;
+        final Config.BlocksDrops blocksDrops = Config.getBlocksDrops();
+        if (!blocksDrops.enabled) {
+            return;
+        }
+
+        Map<String, CustomLoot> drops = blocksDrops.drops;
         for (Transaction<BlockSnapshot> transaction : event.getTransactions()) {
             BlockSnapshot originalBlock = transaction.getOriginal();
             CustomLoot loot = drops.get(originalBlock.getState().getType().getId());
@@ -75,6 +80,11 @@ public class CustomBlockDropsListener {
 
     @Listener
     public void onItemDrop(DropItemEvent.Destruct event, @First Player player, @First BlockSnapshot block) {
+        final Config.BlocksDrops blocksDrops = Config.getBlocksDrops();
+        if (!blocksDrops.enabled) {
+            return;
+        }
+
         Location<World> targetLocation = block.getLocation().orElseGet(() -> new Location<>(player.getWorld(), block.getPosition()));
         Boolean result = requirementResultsTracker.getIfPresent(targetLocation);
         requirementResultsTracker.invalidate(targetLocation);
@@ -82,7 +92,7 @@ public class CustomBlockDropsListener {
             return;
         }
 
-        Map<String, CustomLoot> drops = Config.getBlocksDrops().drops;
+        Map<String, CustomLoot> drops = blocksDrops.drops;
         CustomLoot customLoot = drops.get(block.getState().getType().getId());
         if (customLoot != null) {
             CustomDropsProcessor.handleDropItemEvent(event, customLoot, block);
@@ -91,6 +101,11 @@ public class CustomBlockDropsListener {
 
     @Listener
     public void onExpOrbSpawn(SpawnEntityEvent event) {
+        final Config.BlocksDrops blocksDrops = Config.getBlocksDrops();
+        if (!blocksDrops.enabled) {
+            return;
+        }
+
         for (Entity entity : event.getEntities()) {
             if (!(entity instanceof ExperienceOrb)) {
                 continue;
@@ -98,7 +113,7 @@ public class CustomBlockDropsListener {
 
             for (Object cause : event.getCause().noneOf(ExperienceOrb.class)) {
                 if (cause instanceof BlockSnapshot) {
-                    Map<String, CustomLoot> drops = Config.getBlocksDrops().drops;
+                    Map<String, CustomLoot> drops = blocksDrops.drops;
                     CustomLoot customLoot = drops.get(((BlockSnapshot) cause).getState().getType().getId());
                     if (customLoot != null && customLoot.isExpOverwrite()) {
                         event.setCancelled(true);

@@ -58,7 +58,12 @@ public class CustomMobDropsListener {
     @Listener
     public void onMobDeath(DestructEntityEvent.Death event) {
         Living targetEntity = event.getTargetEntity();
-        Map<String, CustomLoot> drops = Config.getMobsDrops().drops;
+        Config.MobsDrops mobsDrops = Config.getMobsDrops();
+        if (!mobsDrops.enabled) {
+            return;
+        }
+
+        Map<String, CustomLoot> drops = mobsDrops.drops;
         CustomLoot loot = drops.get(targetEntity.getType().getId());
         if (loot == null) {
             return;
@@ -87,6 +92,11 @@ public class CustomMobDropsListener {
 
     @Listener
     public void onItemDrop(DropItemEvent.Destruct event, @First Entity entity) {
+        final Config.MobsDrops mobsDrops = Config.getMobsDrops();
+        if (!mobsDrops.enabled) {
+            return;
+        }
+
         UUID entityId = entity.getUniqueId();
         Boolean result = requirementResultsTracker.getIfPresent(entityId);
         requirementResultsTracker.invalidate(entityId);
@@ -94,7 +104,7 @@ public class CustomMobDropsListener {
             return;
         }
 
-        Map<String, CustomLoot> drops = Config.getMobsDrops().drops;
+        Map<String, CustomLoot> drops = mobsDrops.drops;
         CustomLoot customLoot = drops.get(entity.getType().getId());
         if (customLoot != null) {
             CustomDropsProcessor.handleDropItemEvent(event, customLoot, entity.createSnapshot());
@@ -103,6 +113,11 @@ public class CustomMobDropsListener {
 
     @Listener
     public void onExpOrbSpawn(SpawnEntityEvent event) {
+        final Config.MobsDrops mobsDrops = Config.getMobsDrops();
+        if (!mobsDrops.enabled) {
+            return;
+        }
+
         for (Entity entity : event.getEntities()) {
             if (!(entity instanceof ExperienceOrb)) {
                 continue;
@@ -110,7 +125,7 @@ public class CustomMobDropsListener {
 
             for (Object cause : event.getCause().noneOf(ExperienceOrb.class)) {
                 if (cause instanceof Entity) {
-                    Map<String, CustomLoot> drops = Config.getMobsDrops().drops;
+                    Map<String, CustomLoot> drops = mobsDrops.drops;
                     CustomLoot customLoot = drops.get(((Entity) cause).getType().getId());
                     if (customLoot != null && customLoot.isExpOverwrite()) {
                         event.setCancelled(true);

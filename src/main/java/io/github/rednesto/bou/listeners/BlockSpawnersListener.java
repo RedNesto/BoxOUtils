@@ -41,7 +41,12 @@ public class BlockSpawnersListener {
 
     @Listener
     public void onBlockBreak(ChangeBlockEvent.Break event, @First Player player) {
-        Map<String, List<SpawnedMob>> spawners = Config.getBlockSpawners().spawners;
+        final Config.BlockSpawners blockSpawners = Config.getBlockSpawners();
+        if (!blockSpawners.enabled) {
+            return;
+        }
+
+        Map<String, List<SpawnedMob>> spawners = blockSpawners.spawners;
         event.getTransactions().forEach(transaction -> {
             List<SpawnedMob> toSpawnMobs = spawners.get(transaction.getOriginal().getState().getType().getId());
             if (toSpawnMobs == null) {
