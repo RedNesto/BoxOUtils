@@ -35,6 +35,7 @@ import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.mutable.item.DurabilityData;
+import org.spongepowered.api.data.type.DyeColors;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.living.player.Player;
@@ -71,6 +72,8 @@ public class FastHarvestListener {
         DEFINITIONS.put("minecraft:carrots", new CropDefinition(7, ItemTypes.CARROT, 3, null, 0));
         DEFINITIONS.put("minecraft:potatoes", new CropDefinition(7, ItemTypes.POTATO, 3, null, 0));
         DEFINITIONS.put("minecraft:beetroots", new CropDefinition(3, ItemTypes.BEETROOT_SEEDS, 3, ItemTypes.BEETROOT, 0));
+        DEFINITIONS.put("minecraft:cocoa", new CropDefinition(2, ItemTypes.DYE, 3, null, 0));
+        DEFINITIONS.put("minecraft:nether_wart", new CropDefinition(3, ItemTypes.NETHER_WART, 2, null, 0));
     }
 
     @Listener
@@ -122,7 +125,13 @@ public class FastHarvestListener {
                         productConfig = cropsControl.crops.get(productType.getId());
                     }
                 } else {
-                    seedConfig = FastHarvestCrop.createDefault(cropDefinition.seedCount);
+
+                    if (cropDefinition.seed == ItemTypes.DYE) {
+                        seedConfig = new FastHarvestCrop(-1, -1, 0, 1, 3);
+                    } else {
+                        seedConfig = FastHarvestCrop.createDefault(cropDefinition.seedCount);
+                    }
+
                     if (productType != null) {
                         productConfig = FastHarvestCrop.createDefault(cropDefinition.productCount);
                     }
@@ -214,13 +223,23 @@ public class FastHarvestListener {
     @Nullable
     private static ItemStack createItemStack(int age, int maxAge, int fortuneLevel, FastHarvestCrop cropConfig,
                                              ItemType itemType, boolean decrementQuantity) {
-        int quantity = CropsAlgoritm.ALG_19.compute(cropConfig, age, maxAge, fortuneLevel);
+        CropsAlgoritm algorithm = CropsAlgoritm.ALG_19;
+        if (itemType == ItemTypes.NETHER_WART) {
+            algorithm = CropsAlgoritm.NETHER_WART;
+        }
+
+        int quantity = algorithm.compute(cropConfig, age, maxAge, fortuneLevel);
         if (decrementQuantity) {
             quantity--;
         }
 
         if (quantity > 0) {
-            return ItemStack.of(itemType, quantity);
+            final ItemStack stack = ItemStack.of(itemType, quantity);
+            if (itemType == ItemTypes.DYE) {
+                stack.offer(Keys.DYE_COLOR, DyeColors.BROWN);
+            }
+
+            return stack;
         }
 
         return null;

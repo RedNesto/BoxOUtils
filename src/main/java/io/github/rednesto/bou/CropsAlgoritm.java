@@ -74,6 +74,24 @@ public enum CropsAlgoritm {
 
             return dropsCount;
         }
+    },
+    NETHER_WART() {
+        @Override
+        public int compute(int age, int maxAge, int minimumDrop, int potentialDropCount, int fortune, int fortuneFactor, int chance, int chanceOf) {
+            int dropsCount = minimumDrop + random.nextInt(fortune * fortuneFactor + 1);
+
+            if (chance < 0 || chanceOf < 0) {
+                dropsCount += random.nextInt(potentialDropCount + 1);
+            } else {
+                for (int i = 0; i < potentialDropCount; i++) {
+                    if (random.nextInt(chanceOf) <= chance) {
+                        dropsCount++;
+                    }
+                }
+            }
+
+            return dropsCount;
+        }
     };
 
     private static Random random = new Random();
