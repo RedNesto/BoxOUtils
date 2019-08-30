@@ -24,13 +24,17 @@
 package io.github.rednesto.bou;
 
 import com.google.inject.Inject;
+import io.github.rednesto.bou.commands.BouReloadCommand;
 import org.slf4j.Logger;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.source.ConsoleSource;
+import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.config.ConfigDir;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.game.GameReloadEvent;
 import org.spongepowered.api.event.game.state.GameConstructionEvent;
+import org.spongepowered.api.event.game.state.GameInitializationEvent;
 import org.spongepowered.api.event.game.state.GamePreInitializationEvent;
 import org.spongepowered.api.plugin.Dependency;
 import org.spongepowered.api.plugin.Plugin;
@@ -97,6 +101,13 @@ public class BoxOUtils {
         } catch (IOException e) {
             this.logger.error("An exception occurred when loading configuration", e);
         }
+    }
+
+    @Listener
+    public void onGameInitialization(GameInitializationEvent event) {
+        Sponge.getCommandManager().register(this, CommandSpec.builder()
+                .child(BouReloadCommand.create(), "reload")
+                .build(), "boxoutils", "bou");
     }
 
     @Listener
