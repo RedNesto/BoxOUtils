@@ -161,7 +161,7 @@ public class CustomDropsProcessor {
 
         if (targetPlayer != null) {
             for (CustomLootCommand command : loot.getCommands()) {
-                if (!fulfillsRequirements(source, cause, command.getRequirements())) {
+                if (!command.shouldExecute() || !fulfillsRequirements(source, cause, command.getRequirements())) {
                     continue;
                 }
 

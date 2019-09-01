@@ -39,7 +39,7 @@ class CustomLootCommandTests : ConfigurationTestCase<CustomLootCommand>("command
     @Test
     fun `single simple command`() {
         val loaded = loadConfig("commands=\"test command\"")
-        val expected = CustomLootCommand("test command", CustomLootCommand.SenderMode.SERVER, listOf())
+        val expected = CustomLootCommand("test command", CustomLootCommand.SenderMode.SERVER, 0.0, listOf())
         assertEquals(expected, loaded)
     }
 
@@ -50,7 +50,7 @@ commands {
   command="test command"
 }
 """
-        val expected = CustomLootCommand("test command", CustomLootCommand.SenderMode.SERVER, listOf())
+        val expected = CustomLootCommand("test command", CustomLootCommand.SenderMode.SERVER, 0.0, listOf())
         assertEquals(expected, loadConfig(config))
     }
 
@@ -60,9 +60,10 @@ commands {
 commands {
   command="test command"
   as=PLAYER
+  chance=33.33
 }
 """
-        val expected = CustomLootCommand("test command", CustomLootCommand.SenderMode.PLAYER, listOf())
+        val expected = CustomLootCommand("test command", CustomLootCommand.SenderMode.PLAYER, 33.33, listOf())
         assertEquals(expected, loadConfig(config))
     }
 
@@ -76,9 +77,9 @@ commands=[
 ]
 """
         val expected = listOf(
-                CustomLootCommand("command 1", CustomLootCommand.SenderMode.SERVER, listOf()),
-                CustomLootCommand("command 2", CustomLootCommand.SenderMode.SERVER, listOf()),
-                CustomLootCommand("command 3", CustomLootCommand.SenderMode.SERVER, listOf())
+                CustomLootCommand("command 1", CustomLootCommand.SenderMode.SERVER, 0.0, listOf()),
+                CustomLootCommand("command 2", CustomLootCommand.SenderMode.SERVER, 0.0, listOf()),
+                CustomLootCommand("command 3", CustomLootCommand.SenderMode.SERVER, 0.0, listOf())
         )
         assertEquals(expected, loadConfigList(config))
     }
@@ -90,6 +91,7 @@ commands=[
   {
     command="command 1"
     as=PLAYER
+    chance=50
   }
   {
     command="command 2"
@@ -106,9 +108,9 @@ commands=[
 ]
 """
         val expected = listOf(
-                CustomLootCommand("command 1", CustomLootCommand.SenderMode.PLAYER, listOf()),
-                CustomLootCommand("command 2", CustomLootCommand.SenderMode.SERVER, listOf(listOf(GriefPreventionRegionRequirement(listOf("test region"), true)))),
-                CustomLootCommand("command 3", CustomLootCommand.SenderMode.SERVER, listOf())
+                CustomLootCommand("command 1", CustomLootCommand.SenderMode.PLAYER, 50.0, listOf()),
+                CustomLootCommand("command 2", CustomLootCommand.SenderMode.SERVER, 0.0, listOf(listOf(GriefPreventionRegionRequirement(listOf("test region"), true)))),
+                CustomLootCommand("command 3", CustomLootCommand.SenderMode.SERVER, 0.0, listOf())
         )
         assertEquals(expected, loadConfigList(config))
     }

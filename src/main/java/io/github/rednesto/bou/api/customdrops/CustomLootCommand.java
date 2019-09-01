@@ -32,12 +32,18 @@ public class CustomLootCommand {
 
     private String rawCommand;
     private SenderMode senderMode;
+    private double chance;
     private List<List<Requirement<?>>> requirements;
 
-    public CustomLootCommand(String rawCommand, SenderMode senderMode, List<List<Requirement<?>>> requirements) {
+    public CustomLootCommand(String rawCommand, SenderMode senderMode, double chance, List<List<Requirement<?>>> requirements) {
         this.rawCommand = rawCommand;
         this.senderMode = senderMode;
+        this.chance = chance / 100;
         this.requirements = requirements;
+    }
+
+    public boolean shouldExecute() {
+        return chance <= 0 || Math.random() <= chance;
     }
 
     public String getRawCommand() {
@@ -46,6 +52,10 @@ public class CustomLootCommand {
 
     public SenderMode getSenderMode() {
         return senderMode;
+    }
+
+    public double getChance() {
+        return chance;
     }
 
     public List<List<Requirement<?>>> getRequirements() {
@@ -60,8 +70,10 @@ public class CustomLootCommand {
         if (!(o instanceof CustomLootCommand)) {
             return false;
         }
+
         CustomLootCommand that = (CustomLootCommand) o;
-        return rawCommand.equals(that.rawCommand) &&
+        return Double.compare(that.chance, chance) == 0 &&
+                rawCommand.equals(that.rawCommand) &&
                 senderMode == that.senderMode &&
                 requirements.equals(that.requirements);
     }
@@ -71,6 +83,7 @@ public class CustomLootCommand {
         return MoreObjects.toStringHelper(this)
                 .add("rawCommand", rawCommand)
                 .add("senderMode", senderMode)
+                .add("chance", chance)
                 .add("requirements", requirements)
                 .toString();
     }

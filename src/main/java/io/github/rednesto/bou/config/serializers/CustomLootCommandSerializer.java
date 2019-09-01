@@ -41,6 +41,7 @@ public class CustomLootCommandSerializer implements TypeSerializer<CustomLootCom
     public @Nullable CustomLootCommand deserialize(@NonNull TypeToken<?> type, @NonNull ConfigurationNode value) throws ObjectMappingException {
         String rawCommand;
         CustomLootCommand.SenderMode senderMode = CustomLootCommand.SenderMode.SERVER;
+        double chance = 0;
         List<List<Requirement<?>>> requirements;
         if (value.hasMapChildren()) {
             rawCommand = value.getNode("command").getString();
@@ -56,6 +57,8 @@ public class CustomLootCommandSerializer implements TypeSerializer<CustomLootCom
                 }
             }
 
+            chance = value.getNode("chance").getDouble(0);
+
             ConfigurationNode requirementsNode = value.getNode("requirements");
             requirements = RequirementSerializer.getRequirementGroups(requirementsNode);
         } else {
@@ -67,7 +70,7 @@ public class CustomLootCommandSerializer implements TypeSerializer<CustomLootCom
             throw new ObjectMappingException("A command must be specified.");
         }
 
-        return new CustomLootCommand(rawCommand, senderMode, requirements);
+        return new CustomLootCommand(rawCommand, senderMode, chance, requirements);
     }
 
     @Override
