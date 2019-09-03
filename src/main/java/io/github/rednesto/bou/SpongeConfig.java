@@ -149,11 +149,19 @@ public class SpongeConfig {
     }
 
     public static HoconConfigurationLoader loader(Path path) {
-        return HoconConfigurationLoader.builder()
+        HoconConfigurationLoader.Builder builder = HoconConfigurationLoader.builder()
                 .setPath(path)
-                .setParseOptions(ConfigParseOptions.defaults().appendIncluder(new SimpleConfigIncluderFile(path.getParent())))
-                .setDefaultOptions(ConfigurationOptions.defaults().setSerializers(createSerializersCollection()))
-                .build();
+                .setDefaultOptions(ConfigurationOptions.defaults().setSerializers(createSerializersCollection()));
+        try {
+            // SpongeForge relocates the HOCON library to avoid conflicts with Forge, which uses an older version of it.
+            // See https://github.com/SpongePowered/SpongeForge/blob/007b0f5734981fc050cb79f8409e36a5ad64bbdc/build.gradle#L155
+            // It would be very hard, if not impossible, to work around this issue, so I just disable the includer on SpongeForge
+            Class.forName("configurate.typesafe.config.ConfigParseOptions");
+        } catch (ClassNotFoundException e) {
+            builder.setParseOptions(ConfigParseOptions.defaults().appendIncluder(new SimpleConfigIncluderFile(path.getParent())));
+        }
+
+        return builder.build();
     }
 
     public static TypeSerializerCollection createSerializersCollection() {
