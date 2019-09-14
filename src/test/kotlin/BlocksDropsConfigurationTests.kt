@@ -69,7 +69,7 @@ class BlocksDropsConfigurationTests : PluginConfigurationTestCase<Config.BlocksD
 
         val skull = run {
             val requirements = listOf(listOf(GriefPreventionRegionRequirement(listOf("test region"), true)))
-            val reuse = CustomLoot.Reuse(2f, emptyMap(), listOf(listOf(DataByKeyRequirement("block_data", BlockSnapshot::class.java, mapOf("sponge_impl:skull_type" to listOf("minecraft:ender_dragon"))))))
+            val reuse = CustomLoot.Reuse(2f, emptyMap(), listOf(listOf(DataByKeyRequirement("box-o-utils:block_data", BlockSnapshot::class.java, mapOf("sponge_impl:skull_type" to listOf("minecraft:ender_dragon"))))))
             CustomLoot(emptyList(), null, false, false, requirements, null, reuse, emptyList())
         }
 
@@ -98,7 +98,7 @@ class BlocksDropsConfigurationTests : PluginConfigurationTestCase<Config.BlocksD
     fun `requirements 1`() {
         val config = loadConfig("requirements1")
 
-        val requirements = listOf(listOf(DataByKeyRequirement("block_data", BlockSnapshot::class.java, mapOf("sponge_impl:skull_type" to listOf("minecraft:ender_dragon")))))
+        val requirements = listOf(listOf(DataByKeyRequirement("box-o-utils:block_data", BlockSnapshot::class.java, mapOf("sponge_impl:skull_type" to listOf("minecraft:ender_dragon")))))
         val customLoot = CustomLoot(emptyList(), null, false, false, requirements, null, null, emptyList())
         val expected = mutableMapOf("minecraft:skull" to customLoot)
 

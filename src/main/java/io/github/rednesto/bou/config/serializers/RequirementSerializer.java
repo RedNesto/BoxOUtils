@@ -24,10 +24,10 @@
 package io.github.rednesto.bou.config.serializers;
 
 import com.google.common.reflect.TypeToken;
-import io.github.rednesto.bou.IntegrationsManager;
 import io.github.rednesto.bou.api.requirement.Requirement;
 import io.github.rednesto.bou.api.requirement.RequirementConfigurationException;
 import io.github.rednesto.bou.api.requirement.RequirementProvider;
+import io.github.rednesto.bou.api.requirement.RequirementProviderIntegrations;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import ninja.leaping.configurate.objectmapping.serialize.TypeSerializer;
@@ -43,7 +43,11 @@ public class RequirementSerializer implements TypeSerializer<Requirement<?>> {
     @Override
     public @Nullable Requirement<?> deserialize(@NonNull TypeToken<?> type, @NonNull ConfigurationNode value) throws ObjectMappingException {
         String key = (String) value.getKey();
-        RequirementProvider requirementProvider = IntegrationsManager.getInstance().getRequirementProvider(key);
+        if (key == null) {
+            return null;
+        }
+
+        RequirementProvider requirementProvider = RequirementProviderIntegrations.getInstance().getById(key, true);
         if (requirementProvider == null) {
             return null;
         }

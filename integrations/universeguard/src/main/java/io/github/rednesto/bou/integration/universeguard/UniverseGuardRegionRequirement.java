@@ -116,7 +116,7 @@ public class UniverseGuardRegionRequirement extends AbstractRequirement<Locatabl
 
         @Override
         public String getId() {
-            return "universeguard";
+            return "box-o-utils:universeguard";
         }
 
         @Override

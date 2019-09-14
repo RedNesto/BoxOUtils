@@ -50,7 +50,7 @@ public class ByteItemsCustomDropsProvider implements CustomDropsProvider {
 
     @Override
     public String getId() {
-        return "byte-items";
+        return "box-o-utils:byte-items";
     }
 
     @Override

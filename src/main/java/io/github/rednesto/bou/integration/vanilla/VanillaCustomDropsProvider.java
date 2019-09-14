@@ -37,7 +37,7 @@ public class VanillaCustomDropsProvider implements CustomDropsProvider {
 
     @Override
     public String getId() {
-        return "vanilla";
+        return "box-o-utils:vanilla";
     }
 
     @Override

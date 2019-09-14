@@ -48,10 +48,10 @@ class MobsDropsConfigurationTests : PluginConfigurationTestCase<Config.MobsDrops
         val sheep = run {
             val requirements = listOf(listOf(
                     GriefPreventionRegionRequirement(listOf("test region"), false),
-                    DataByKeyRequirement("entity_data", EntitySnapshot::class.java, mapOf("sponge_impl:dye_color" to listOf("minecraft:red")))))
+                    DataByKeyRequirement("box-o-utils:entity_data", EntitySnapshot::class.java, mapOf("sponge_impl:dye_color" to listOf("minecraft:red")))))
             val reuseItems = mapOf(
-                    "minecraft:wool" to MultiplyLootReuse(3f),
-                    "minecraft:mutton" to SimpleLootReuse(BoundedIntQuantity(2, 5)))
+                    "minecraft:mutton" to SimpleLootReuse(BoundedIntQuantity(2, 5)),
+                    "minecraft:wool" to MultiplyLootReuse(3f))
             val reuse = CustomLoot.Reuse(2f, reuseItems, emptyList())
             val money = MoneyLoot(BoundedIntQuantity(5, 25), null, 50.0, "&aYou earned {money_amount}")
             val drops = listOf(
@@ -66,8 +66,8 @@ class MobsDropsConfigurationTests : PluginConfigurationTestCase<Config.MobsDrops
         }
 
         val expected = mapOf(
-                "minecraft:sheep" to sheep,
-                "minecraft:bat" to bat
+                "minecraft:bat" to bat,
+                "minecraft:sheep" to sheep
         )
 
         assertTrue(config.enabled)

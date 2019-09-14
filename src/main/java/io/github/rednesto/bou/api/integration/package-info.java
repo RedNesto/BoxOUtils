@@ -21,21 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.github.rednesto.bou.api.requirement;
+@ParametersAreNonnullByDefault
+package io.github.rednesto.bou.api.integration;
 
-import io.github.rednesto.bou.api.integration.Integration;
-import ninja.leaping.configurate.ConfigurationNode;
-
-public interface RequirementProvider extends Integration {
-
-    /**
-     * Creates a requirement from the given configuration.
-     *
-     * @param node the configuration node of this requirement. Its key will always be this {@link #getId()}
-     *
-     * @return the created requirement
-     *
-     * @throws RequirementConfigurationException if the configuration is invalid (like missing values)
-     */
-    Requirement<?> provide(ConfigurationNode node) throws RequirementConfigurationException;
-}
+import javax.annotation.ParametersAreNonnullByDefault;

@@ -57,7 +57,7 @@ requirements {
   req1="some string"
 }
 """
-        val expected = listOf(listOf(TestRequirement("req1", "some string")))
+        val expected = listOf(listOf(TestRequirement("bou-test:req1", "some string")))
         assertEquals(expected, loadConfig(config))
     }
 
@@ -70,8 +70,8 @@ requirements {
 }
 """
         val expected = listOf(listOf(
-                TestRequirement("req1", "some string"),
-                TestRequirement("req2", listOf("yes", "no", "maybe"))))
+                TestRequirement("bou-test:req1", "some string"),
+                TestRequirement("bou-test:req2", listOf("yes", "no", "maybe"))))
         assertEquals(expected, loadConfig(config))
     }
 
@@ -92,9 +92,9 @@ requirements=[
 ]
 """
         val expected = listOf(
-                listOf(TestRequirement("req1", "some string")),
-                listOf(TestRequirement("req2", listOf("wow", "many choices")),
-                        TestRequirement("req3", RequirementDataStruct("text", 5))))
+                listOf(TestRequirement("bou-test:req1", "some string")),
+                listOf(TestRequirement("bou-test:req2", listOf("wow", "many choices")),
+                        TestRequirement("bou-test:req3", RequirementDataStruct("text", 5))))
         val loaded = loadConfig(config)
         // We sort those requirements to have the same order than the expected one
         loaded[1].sortBy { it.id }
@@ -114,14 +114,14 @@ requirements=[
     @BeforeEach
     private fun setUp() {
         pluginFixture.setUp()
-        val integrationsManager = pluginFixture.plugin.integrationsManager
-        integrationsManager.register(TestRequirement.Provider("req1") { it.string!! })
-        integrationsManager.register(TestRequirement.Provider("req2") {
+        val integrationsManager = pluginFixture.plugin.integrationsManager.requirementsProviderIntegrations
+        integrationsManager.register(TestRequirement.Provider("bou-test:req1") { it.string!! }, true)
+        integrationsManager.register(TestRequirement.Provider("bou-test:req2") {
             ArrayList(it.getList(TypeTokens.STRING_TOKEN))
-        })
-        integrationsManager.register(TestRequirement.Provider("req3") {
+        }, true)
+        integrationsManager.register(TestRequirement.Provider("bou-test:req3") {
             RequirementDataStruct(it.getNode("str").string!!, it.getNode("int").int)
-        })
+        }, true)
     }
 }
 

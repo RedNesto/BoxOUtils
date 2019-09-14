@@ -119,7 +119,7 @@ public class GriefPreventionRegionRequirement extends AbstractRequirement<Locata
 
         @Override
         public String getId() {
-            return "griefprevention";
+            return "box-o-utils:griefprevention";
         }
 
         @Override

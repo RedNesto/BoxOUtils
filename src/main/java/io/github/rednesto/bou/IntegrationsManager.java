@@ -23,65 +23,21 @@
  */
 package io.github.rednesto.bou;
 
-import io.github.rednesto.bou.api.customdrops.CustomDropsProvider;
-import io.github.rednesto.bou.api.requirement.RequirementProvider;
+import io.github.rednesto.bou.api.customdrops.CustomDropsProviderIntegrations;
+import io.github.rednesto.bou.api.requirement.RequirementProviderIntegrations;
 import io.github.rednesto.bou.integration.vanilla.VanillaCustomDropsProvider;
 import io.github.rednesto.bou.requirements.DataByKeyRequirementProvider;
 import io.github.rednesto.bou.requirements.PermissionsRequirement;
 import io.github.rednesto.bou.requirements.WorldsRequirement;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.entity.EntitySnapshot;
-import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.item.inventory.ItemStack;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-
-import javax.annotation.Nullable;
 
 public final class IntegrationsManager {
 
     private boolean vanillaBuiltinsLoaded = false;
 
-    private boolean customDropsProvidersInit = false;
-    private final CustomDropsProvider defaultCustomDropsProvider = new VanillaCustomDropsProvider();
-    private final Map<String, CustomDropsProvider> customDropsProviders = new HashMap<>();
-
-    private final Map<String, RequirementProvider> requirementProviders = new HashMap<>();
-
-    public void register(CustomDropsProvider customDropsProvider) {
-        customDropsProviders.put(customDropsProvider.getId(), customDropsProvider);
-        if (customDropsProvidersInit) {
-            customDropsProvider.init(BoxOUtils.getInstance());
-        }
-    }
-
-    public void register(RequirementProvider requirementProvider) {
-        requirementProviders.put(requirementProvider.getId(), requirementProvider);
-    }
-
-    public CustomDropsProvider getDefaultCustomDropsProvider() {
-        return defaultCustomDropsProvider;
-    }
-
-    public Optional<ItemStack> createCustomDropStack(@Nullable String providerId, String id, @Nullable Player targetPlayer) {
-        if (providerId == null) {
-            return defaultCustomDropsProvider.createItemStack(id, targetPlayer);
-        }
-
-        CustomDropsProvider provider = customDropsProviders.get(providerId);
-        if (provider != null) {
-            return provider.createItemStack(id, targetPlayer);
-        }
-
-        return Optional.empty();
-    }
-
-    @Nullable
-    public RequirementProvider getRequirementProvider(String id) {
-        return requirementProviders.get(id);
-    }
+    private CustomDropsProviderIntegrations customDropsProviderIntegrations = new CustomDropsProviderIntegrations(new VanillaCustomDropsProvider());
+    private RequirementProviderIntegrations requirementProviderIntegrations = new RequirementProviderIntegrations();
 
     public void loadVanillaBuiltins() {
         if (vanillaBuiltinsLoaded) {
@@ -90,32 +46,27 @@ public final class IntegrationsManager {
 
         vanillaBuiltinsLoaded = true;
 
-        register(defaultCustomDropsProvider);
-        register(new DataByKeyRequirementProvider<>("block_data", BlockSnapshot.class));
-        register(new DataByKeyRequirementProvider<>("entity_data", EntitySnapshot.class));
-        register(new PermissionsRequirement.Provider());
-        register(new WorldsRequirement.Provider());
+        requirementProviderIntegrations.register(new DataByKeyRequirementProvider<>("box-o-utils:block_data", BlockSnapshot.class), true);
+        requirementProviderIntegrations.register(new DataByKeyRequirementProvider<>("box-o-utils:entity_data", EntitySnapshot.class), true);
+        requirementProviderIntegrations.register(new PermissionsRequirement.Provider(), true);
+        requirementProviderIntegrations.register(new WorldsRequirement.Provider(), true);
     }
 
     void initIntegrations(BoxOUtils plugin) {
         if (plugin.getBlocksDrops().enabled || plugin.getMobsDrops().enabled) {
-            initCustomDropsProviders(plugin);
-        }
-    }
-
-    private void initCustomDropsProviders(BoxOUtils plugin) {
-        if (customDropsProvidersInit) {
-            return;
-        }
-
-        customDropsProvidersInit = true;
-        defaultCustomDropsProvider.init(plugin);
-        for (CustomDropsProvider provider : customDropsProviders.values()) {
-            provider.init(plugin);
+            customDropsProviderIntegrations.initIntegrations(plugin);
         }
     }
 
     public static IntegrationsManager getInstance() {
         return BoxOUtils.getInstance().getIntegrationsManager();
+    }
+
+    public CustomDropsProviderIntegrations getCustomDropsProviderIntegrations() {
+        return customDropsProviderIntegrations;
+    }
+
+    public RequirementProviderIntegrations getRequirementsProviderIntegrations() {
+        return requirementProviderIntegrations;
     }
 }

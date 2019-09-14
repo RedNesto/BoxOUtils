@@ -69,7 +69,7 @@ public class FileInventoriesCustomDropsProvider implements CustomDropsProvider {
 
     @Override
     public String getId() {
-        return "file-inv";
+        return "box-o-utils:file-inv";
     }
 
     @Override

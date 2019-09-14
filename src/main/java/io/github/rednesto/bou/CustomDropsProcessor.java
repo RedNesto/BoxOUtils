@@ -23,10 +23,7 @@
  */
 package io.github.rednesto.bou;
 
-import io.github.rednesto.bou.api.customdrops.CustomLoot;
-import io.github.rednesto.bou.api.customdrops.CustomLootCommand;
-import io.github.rednesto.bou.api.customdrops.ItemLoot;
-import io.github.rednesto.bou.api.customdrops.MoneyLoot;
+import io.github.rednesto.bou.api.customdrops.*;
 import io.github.rednesto.bou.api.lootReuse.LootReuse;
 import io.github.rednesto.bou.api.quantity.IntQuantity;
 import io.github.rednesto.bou.api.requirement.Requirement;
@@ -216,7 +213,9 @@ public class CustomDropsProcessor {
                 continue;
             }
 
-            ItemStack itemStack = IntegrationsManager.getInstance().createCustomDropStack(itemLoot.getProviderId(), itemLoot.getId(), targetPlayer).orElse(null);
+            ItemStack itemStack = CustomDropsProviderIntegrations.getInstance()
+                    .createCustomDropStack(itemLoot.getProviderId(), itemLoot.getId(), targetPlayer)
+                    .orElse(null);
             if (itemStack == null) {
                 continue;
             }

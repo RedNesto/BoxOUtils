@@ -90,7 +90,7 @@ public class PermissionsRequirement extends AbstractRequirement<Object> {
 
         @Override
         public String getId() {
-            return "permissions";
+            return "box-o-utils:permissions";
         }
 
         @Override

@@ -106,7 +106,7 @@ public class WorldsRequirement extends AbstractRequirement<Object> {
 
         @Override
         public String getId() {
-            return "worlds";
+            return "box-o-utils:worlds";
         }
 
         @Override

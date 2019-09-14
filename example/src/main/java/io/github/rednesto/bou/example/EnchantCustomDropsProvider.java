@@ -24,8 +24,8 @@
 package io.github.rednesto.bou.example;
 
 import io.github.rednesto.bou.BoxOUtils;
-import io.github.rednesto.bou.IntegrationsManager;
 import io.github.rednesto.bou.api.customdrops.CustomDropsProvider;
+import io.github.rednesto.bou.api.customdrops.CustomDropsProviderIntegrations;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.enchantment.Enchantment;
@@ -52,12 +52,12 @@ public class EnchantCustomDropsProvider implements CustomDropsProvider {
 
     @Override
     public String getId() {
-        return "auto-enchant";
+        return "box-o-utils:auto-enchant";
     }
 
     @Override
     public Optional<ItemStack> createItemStack(String id, @Nullable Player targetPlayer) {
-        return IntegrationsManager.getInstance().getDefaultCustomDropsProvider().createItemStack(id, targetPlayer)
+        return CustomDropsProviderIntegrations.getInstance().getDefaultIntegration().createItemStack(id, targetPlayer)
                 .map(item -> {
                     Enchantment enchant = Enchantment.of(EnchantmentTypes.KNOCKBACK, 1);
                     item.offer(Keys.ITEM_ENCHANTMENTS, Collections.singletonList(enchant));

@@ -24,7 +24,9 @@
 package io.github.rednesto.bou;
 
 import io.github.rednesto.bou.api.customdrops.CustomDropsProvider;
+import io.github.rednesto.bou.api.customdrops.CustomDropsProviderIntegrations;
 import io.github.rednesto.bou.api.requirement.RequirementProvider;
+import io.github.rednesto.bou.api.requirement.RequirementProviderIntegrations;
 import org.spongepowered.api.Sponge;
 
 import java.util.function.Consumer;
@@ -36,24 +38,28 @@ public final class BouUtils {
     }
 
     public static void registerIntegrations(IntegrationsManager integrationsManager, boolean forceLoad) {
+        CustomDropsProviderIntegrations customDropsProviders = integrationsManager.getCustomDropsProviderIntegrations();
+        Consumer<CustomDropsProvider> customDropsProviderRegistration = provider -> customDropsProviders.register(provider, true);
         if (forceLoad || Sponge.getPluginManager().isLoaded("file-inventories")) {
             reflectiveRegistration("io.github.rednesto.bou.integration.fileinventories.FileInventoriesCustomDropsProvider",
-                    (Consumer<CustomDropsProvider>) integrationsManager::register, "FileInventoriesCustomDropsProvider", "FileInventories");
+                    customDropsProviderRegistration, "FileInventoriesCustomDropsProvider", "FileInventories");
         }
 
         if (forceLoad || Sponge.getPluginManager().isLoaded("byte-items")) {
             reflectiveRegistration("io.github.rednesto.bou.integration.byteitems.ByteItemsCustomDropsProvider",
-                    (Consumer<CustomDropsProvider>) integrationsManager::register, "ByteItemsCustomDropsProvider", "ByteItems");
+                    customDropsProviderRegistration, "ByteItemsCustomDropsProvider", "ByteItems");
         }
 
+        RequirementProviderIntegrations requirementsProviders = integrationsManager.getRequirementsProviderIntegrations();
+        Consumer<RequirementProvider> requirementsProviderRegistration = provider -> requirementsProviders.register(provider, true);
         if (forceLoad || Sponge.getPluginManager().isLoaded("griefprevention")) {
             reflectiveRegistration("io.github.rednesto.bou.integration.griefprevention.GriefPreventionRegionRequirement$Provider",
-                    (Consumer<RequirementProvider>) integrationsManager::register, "GriefPreventionRegionRequirement.Provider", "GriefPrevention");
+                    requirementsProviderRegistration, "GriefPreventionRegionRequirement.Provider", "GriefPrevention");
         }
 
         if (forceLoad || Sponge.getPluginManager().isLoaded("universeguard")) {
             reflectiveRegistration("io.github.rednesto.bou.integration.universeguard.UniverseGuardRegionRequirement$Provider",
-                    (Consumer<RequirementProvider>) integrationsManager::register, "UniverseGuardRegionRequirement.Provider", "UniverseGuard", true);
+                    requirementsProviderRegistration, "UniverseGuardRegionRequirement.Provider", "UniverseGuard", true);
         }
     }
 
