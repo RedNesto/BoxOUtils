@@ -67,7 +67,7 @@ public class SpongeConfig {
 
     private static void loadFastHarvest(BoxOUtils plugin) throws IOException {
         doLoad(plugin, "fastharvest.conf", "FastHarvest", BouTypeTokens.CONFIG_FAST_HARVEST, config -> {
-            BoxOUtils.getInstance().setFastHarvest(config);
+            plugin.setFastHarvest(config);
             if (config.enabled && !fastHarvestListenersRegistered && !IS_TESTING) {
                 Sponge.getEventManager().registerListeners(plugin, new FastHarvestListener());
                 fastHarvestListenersRegistered = true;
@@ -77,7 +77,7 @@ public class SpongeConfig {
 
     private static void loadCropsControl(BoxOUtils plugin) throws IOException {
         doLoad(plugin, "cropscontrol.conf", "CropsControl", BouTypeTokens.CONFIG_CROPS_CONTROL, config -> {
-            BoxOUtils.getInstance().setCropsControl(config);
+            plugin.setCropsControl(config);
             if (config.enabled && !fastHarvestListenersRegistered && !IS_TESTING) {
                 Sponge.getEventManager().registerListeners(plugin, new FastHarvestListener());
                 fastHarvestListenersRegistered = true;
@@ -87,7 +87,7 @@ public class SpongeConfig {
 
     private static void loadBlocksDrops(BoxOUtils plugin) throws IOException {
         doLoad(plugin, "blocksdrops.conf", "BlocksDrops", BouTypeTokens.CONFIG_BLOCKS_DROPS, config -> {
-            BoxOUtils.getInstance().setBlocksDrops(config);
+            plugin.setBlocksDrops(config);
             if (config.enabled && !blockDropsListenersRegistered && !IS_TESTING) {
                 Sponge.getEventManager().registerListeners(plugin, new CustomBlockDropsListener());
                 blockDropsListenersRegistered = true;
@@ -97,7 +97,7 @@ public class SpongeConfig {
 
     private static void loadMobsDrops(BoxOUtils plugin) throws IOException {
         doLoad(plugin, "mobsdrops.conf", "MobsDrops", BouTypeTokens.CONFIG_MOBS_DROPS, config -> {
-            BoxOUtils.getInstance().setMobsDrops(config);
+            plugin.setMobsDrops(config);
             if (config.enabled && !mobDropsListenersRegistered && !IS_TESTING) {
                 Sponge.getEventManager().registerListeners(plugin, new CustomMobDropsListener());
                 mobDropsListenersRegistered = true;
@@ -107,7 +107,7 @@ public class SpongeConfig {
 
     private static void loadBlockSpawners(BoxOUtils plugin) throws IOException {
         doLoad(plugin, "blockspawners.conf", "BlockSpawners", BouTypeTokens.CONFIG_BLOCK_SPAWNERS, config -> {
-            BoxOUtils.getInstance().setBlockSpawners(config);
+            plugin.setBlockSpawners(config);
             if (config.enabled && !blockSpawnersListenersRegistered && !IS_TESTING) {
                 Sponge.getEventManager().registerListeners(plugin, new BlockSpawnersListener());
                 blockSpawnersListenersRegistered = true;
