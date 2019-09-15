@@ -52,14 +52,14 @@ public final class IntegrationsManager {
         requirementProviderIntegrations.register(new WorldsRequirement.Provider(), true);
     }
 
-    void initIntegrations(BoxOUtils plugin) {
-        if (plugin.getBlocksDrops().enabled || plugin.getMobsDrops().enabled) {
-            customDropsProviderIntegrations.initIntegrations(plugin);
-        }
+    public void initIntegrations(BoxOUtils plugin) {
+        customDropsProviderIntegrations.initIntegrations(plugin);
+        requirementProviderIntegrations.initIntegrations(plugin);
     }
 
-    public static IntegrationsManager getInstance() {
-        return BoxOUtils.getInstance().getIntegrationsManager();
+    public void reloadIntegrations(BoxOUtils plugin) {
+        customDropsProviderIntegrations.reloadIntegrations(plugin);
+        requirementProviderIntegrations.reloadIntegrations(plugin);
     }
 
     public CustomDropsProviderIntegrations getCustomDropsProviderIntegrations() {
@@ -68,5 +68,9 @@ public final class IntegrationsManager {
 
     public RequirementProviderIntegrations getRequirementsProviderIntegrations() {
         return requirementProviderIntegrations;
+    }
+
+    public static IntegrationsManager getInstance() {
+        return BoxOUtils.getInstance().getIntegrationsManager();
     }
 }

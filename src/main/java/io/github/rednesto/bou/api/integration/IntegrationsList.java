@@ -1,6 +1,9 @@
 package io.github.rednesto.bou.api.integration;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
+import io.github.rednesto.bou.BouUtils;
+import io.github.rednesto.bou.BoxOUtils;
 import io.github.rednesto.bou.SpongeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,6 +24,8 @@ public class IntegrationsList<I extends Integration> {
     private final Map<String, I> integrationsById = new HashMap<>();
     private final Map<String, I> integrationsByShortId = new HashMap<>();
     private final Set<String> conflictingShortIds = new HashSet<>();
+
+    private boolean initDone;
 
     public IntegrationsList(String name) {
         this(name, null);
@@ -96,6 +101,12 @@ public class IntegrationsList<I extends Integration> {
             }
         }
 
+        BoxOUtils plugin = BoxOUtils.getInstance();
+        if (initDone && shouldLoadIntegrationOnRegistration()) {
+            integration.init(plugin);
+            integration.load(plugin);
+        }
+
         integrationsById.put(integrationId, integration);
 
         if (!registerShortId) {
@@ -119,6 +130,31 @@ public class IntegrationsList<I extends Integration> {
 
         integrationsByShortId.put(shortId, integration);
         return true;
+    }
+
+    public void initIntegrations(BoxOUtils plugin) {
+        if (initDone) {
+            return;
+        }
+
+        initDone = true;
+        integrationsById.values().forEach(integration -> {
+            integration.init(plugin);
+            integration.load(plugin);
+        });
+    }
+
+    public void reloadIntegrations(BoxOUtils plugin) {
+        integrationsById.values().forEach(integration -> integration.load(plugin));
+    }
+
+    /**
+     * This method is only meant to be used for unit tests.
+     * It should always return {@code true} in a production environment.
+     */
+    @VisibleForTesting
+    protected boolean shouldLoadIntegrationOnRegistration() {
+        return !BouUtils.isTesting();
     }
 
     @Nullable

@@ -63,8 +63,6 @@ public class SpongeConfig {
         loadBlocksDrops(plugin);
         loadMobsDrops(plugin);
         loadBlockSpawners(plugin);
-
-        IntegrationsManager.getInstance().initIntegrations(plugin);
     }
 
     private static void loadFastHarvest(BoxOUtils plugin) throws IOException {

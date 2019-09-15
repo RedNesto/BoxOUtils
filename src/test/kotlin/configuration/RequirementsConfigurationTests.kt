@@ -48,7 +48,7 @@ private val TOKEN = object : TypeToken<MutableList<MutableList<Requirement<*>>>>
 
 class RequirementsConfigurationTests : ConfigurationTestCase<MutableList<MutableList<Requirement<*>>>>("requirements", TOKEN) {
 
-    val pluginFixture = BouFixture { Paths.get("config") }
+    val pluginFixture = BouFixture({ Paths.get("config") })
 
     @Test
     fun `single requirement`() {

@@ -23,7 +23,6 @@
  */
 package io.github.rednesto.bou.api.customdrops;
 
-import io.github.rednesto.bou.BoxOUtils;
 import io.github.rednesto.bou.api.integration.Integration;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.inventory.ItemStack;
@@ -33,8 +32,6 @@ import java.util.Optional;
 import javax.annotation.Nullable;
 
 public interface CustomDropsProvider extends Integration {
-
-    default void init(BoxOUtils plugin) {}
 
     Optional<ItemStack> createItemStack(String id, @Nullable Player targetPlayer);
 }

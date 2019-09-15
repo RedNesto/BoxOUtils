@@ -44,6 +44,7 @@ public class BouReloadCommand implements CommandExecutor {
         BoxOUtils plugin = BoxOUtils.getInstance();
         try {
             SpongeConfig.loadConf(plugin);
+            plugin.getIntegrationsManager().reloadIntegrations(plugin);
             src.sendMessage(Text.of("Box O' Utils configuration has been reloaded successfully"));
         } catch (IOException e) {
             plugin.getLogger().error("An exception occurred when reloading configuration", e);

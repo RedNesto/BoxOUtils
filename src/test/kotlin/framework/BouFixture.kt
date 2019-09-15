@@ -29,7 +29,7 @@ import io.github.rednesto.bou.IntegrationsManager
 import org.slf4j.LoggerFactory
 import java.nio.file.Path
 
-class BouFixture(private val configDirProvider: () -> Path) {
+class BouFixture(private val configDirProvider: () -> Path, val loadBuiltinIntegrations: Boolean = true) {
 
     lateinit var plugin: BoxOUtils
         private set
@@ -37,8 +37,10 @@ class BouFixture(private val configDirProvider: () -> Path) {
     fun setUp() {
         plugin = BoxOUtils(LoggerFactory.getLogger(BoxOUtils::class.java), configDirProvider(), IntegrationsManager())
         BoxOUtils.setInstance(plugin)
-        val integrationsManager = plugin.integrationsManager
-        integrationsManager.loadVanillaBuiltins()
-        BouUtils.registerIntegrations(integrationsManager, true)
+        if (loadBuiltinIntegrations) {
+            val integrationsManager = plugin.integrationsManager
+            integrationsManager.loadVanillaBuiltins()
+            BouUtils.registerIntegrations(integrationsManager, true)
+        }
     }
 }

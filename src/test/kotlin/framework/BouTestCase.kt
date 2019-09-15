@@ -27,9 +27,9 @@ import io.github.rednesto.bou.BoxOUtils
 import org.junit.jupiter.api.BeforeEach
 import java.nio.file.Path
 
-abstract class BouTestCase {
+abstract class BouTestCase(loadBuiltinIntegrations: Boolean = true) {
 
-    val pluginFixture: BouFixture = BouFixture { createConfigDir() }
+    val pluginFixture: BouFixture = BouFixture({ createConfigDir() }, loadBuiltinIntegrations)
 
     val plugin: BoxOUtils
         get() = pluginFixture.plugin

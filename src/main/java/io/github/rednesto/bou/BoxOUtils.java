@@ -35,6 +35,7 @@ import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.game.GameReloadEvent;
 import org.spongepowered.api.event.game.state.GameConstructionEvent;
 import org.spongepowered.api.event.game.state.GameInitializationEvent;
+import org.spongepowered.api.event.game.state.GamePostInitializationEvent;
 import org.spongepowered.api.event.game.state.GamePreInitializationEvent;
 import org.spongepowered.api.plugin.Dependency;
 import org.spongepowered.api.plugin.Plugin;
@@ -94,13 +95,17 @@ public class BoxOUtils {
         this.logger.info("Loading built-in integrations");
         integrationsManager.loadVanillaBuiltins();
         BouUtils.registerIntegrations(integrationsManager, false);
-        integrationsManager.initIntegrations(this);
 
         try {
             SpongeConfig.loadConf(this);
         } catch (IOException e) {
             this.logger.error("An exception occurred when loading configuration", e);
         }
+    }
+
+    @Listener
+    public void onGamePostInitialization(GamePostInitializationEvent event) {
+        integrationsManager.initIntegrations(this);
     }
 
     @Listener
@@ -114,6 +119,7 @@ public class BoxOUtils {
     public void onConfigReload(GameReloadEvent event) {
         try {
             SpongeConfig.loadConf(this);
+            integrationsManager.reloadIntegrations(this);
         } catch (IOException e) {
             this.logger.error("An exception occurred when reloading configuration", e);
             event.getCause().first(CommandSource.class)
