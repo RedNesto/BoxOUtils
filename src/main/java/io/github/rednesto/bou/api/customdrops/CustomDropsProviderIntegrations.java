@@ -17,7 +17,7 @@ public class CustomDropsProviderIntegrations extends IntegrationsList<CustomDrop
     private boolean integrationsInitialized;
 
     public CustomDropsProviderIntegrations(CustomDropsProvider vanillaProvider) {
-        super("CustomDropsProvider Integrations");
+        super("CustomDropsProvider Integrations", "box-o-utils");
         this.vanillaProvider = vanillaProvider;
         register(vanillaProvider, true);
     }

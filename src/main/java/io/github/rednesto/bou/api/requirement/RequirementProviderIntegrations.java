@@ -6,7 +6,7 @@ import io.github.rednesto.bou.api.integration.IntegrationsList;
 public class RequirementProviderIntegrations extends IntegrationsList<RequirementProvider> {
 
     public RequirementProviderIntegrations() {
-        super("RequirementProvider Integrations");
+        super("RequirementProvider Integrations", "box-o-utils");
     }
 
     public static RequirementProviderIntegrations getInstance() {

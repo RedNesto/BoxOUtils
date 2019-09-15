@@ -73,6 +73,36 @@ class IntegrationsListTests {
         assertNull(integrationsList.getByShortId("dummy"))
     }
 
+    @Test
+    fun `default namespace`() {
+        val integrationsList = IntegrationsList<DummyIntegration>("DummyIntegration", "mod_a")
+
+        val integration = DummyIntegration("mod_a:dummy")
+        assertTrue(integrationsList.register(integration))
+
+        assertSame(integration, integrationsList.getById("dummy"))
+    }
+
+    @Test
+    fun `default namespace fail`() {
+        val integrationsList = IntegrationsList<DummyIntegration>("DummyIntegration")
+
+        assertTrue(integrationsList.register(DummyIntegration("mod_a:dummy")))
+
+        assertNull(integrationsList.getById("dummy"))
+    }
+
+    @Test
+    fun `default namespace with short ID ambiguity`() {
+        val integrationsList = IntegrationsList<DummyIntegration>("DummyIntegration", "mod_a")
+
+        val integration = DummyIntegration("mod_a:dummy")
+        assertTrue(integrationsList.register(integration))
+        assertTrue(integrationsList.register(DummyIntegration("mod_b:dummy"), true))
+
+        assertSame(integration, integrationsList.getById("dummy"))
+    }
+
     private class DummyIntegration(val dummyId: String) : Integration {
         override fun getId(): String = dummyId
     }

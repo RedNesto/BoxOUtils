@@ -1,6 +1,7 @@
 package io.github.rednesto.bou.api.integration;
 
 import com.google.common.collect.ImmutableSet;
+import io.github.rednesto.bou.SpongeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spongepowered.api.plugin.Plugin;
@@ -14,14 +15,21 @@ public class IntegrationsList<I extends Integration> {
     private final Logger logger;
 
     private final String name;
+    @Nullable
+    private final String defaultNamespace;
 
     private final Map<String, I> integrationsById = new HashMap<>();
     private final Map<String, I> integrationsByShortId = new HashMap<>();
     private final Set<String> conflictingShortIds = new HashSet<>();
 
     public IntegrationsList(String name) {
+        this(name, null);
+    }
+
+    public IntegrationsList(String name, @Nullable String defaultNamespace) {
         this.name = name;
         this.logger = LoggerFactory.getLogger(name);
+        this.defaultNamespace = defaultNamespace;
     }
 
     /**
@@ -79,6 +87,15 @@ public class IntegrationsList<I extends Integration> {
             return false;
         }
 
+        if (this.defaultNamespace != null) {
+            String idWithDefaultNamespace = SpongeUtils.addNamespaceIfNeeded(shortId, this.defaultNamespace);
+            if (integrationsById.containsKey(idWithDefaultNamespace)) {
+                logger.warn("Integration '{}' has the same short ID than an existing integration on the default namespace '{}'." +
+                        " This may cause ambiguity when using the short ID form, the default namespace will take precedence.",
+                        integrationId, this.defaultNamespace);
+            }
+        }
+
         integrationsById.put(integrationId, integration);
 
         if (!registerShortId) {
@@ -106,13 +123,24 @@ public class IntegrationsList<I extends Integration> {
 
     @Nullable
     public I getById(String id) {
-        return integrationsById.get(id.toLowerCase(Locale.ROOT));
+        String lowercaseId = id.toLowerCase(Locale.ROOT);
+        if (!lowercaseId.contains(":")) {
+            if (this.defaultNamespace == null) {
+                // Don't try to get an integration without namespace
+                return null;
+            }
+
+            lowercaseId = SpongeUtils.addNamespaceIfNeeded(lowercaseId, this.defaultNamespace);
+        }
+
+        return integrationsById.get(lowercaseId);
     }
 
     @Nullable
     public I getById(String id, boolean canBeShortId) {
-        if (id.contains(":")) {
-            return getById(id);
+        I integrationById = getById(id);
+        if (integrationById != null) {
+            return integrationById;
         }
 
         if (canBeShortId) {
@@ -129,6 +157,11 @@ public class IntegrationsList<I extends Integration> {
 
     public Collection<I> getAll() {
         return ImmutableSet.copyOf(this.integrationsById.values());
+    }
+
+    @Nullable
+    public String getDefaultNamespace() {
+        return defaultNamespace;
     }
 
     public final String getName() {

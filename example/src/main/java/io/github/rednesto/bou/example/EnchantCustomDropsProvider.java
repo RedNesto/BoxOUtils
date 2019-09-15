@@ -52,13 +52,13 @@ public class EnchantCustomDropsProvider implements CustomDropsProvider {
 
     @Override
     public String getId() {
-        return "box-o-utils:auto-enchant";
+        return "bou-integration-example:auto-enchant";
     }
 
     @Override
     public Optional<ItemStack> createItemStack(String id, @Nullable Player targetPlayer) {
         return CustomDropsProviderIntegrations.getInstance().getDefaultIntegration().createItemStack(id, targetPlayer)
-                .map(item -> {
+                .map((ItemStack item) -> {
                     Enchantment enchant = Enchantment.of(EnchantmentTypes.KNOCKBACK, 1);
                     item.offer(Keys.ITEM_ENCHANTMENTS, Collections.singletonList(enchant));
 
