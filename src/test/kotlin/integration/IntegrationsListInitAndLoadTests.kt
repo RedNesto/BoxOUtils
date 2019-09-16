@@ -27,11 +27,12 @@ import io.github.rednesto.bou.BoxOUtils
 import io.github.rednesto.bou.api.integration.Integration
 import io.github.rednesto.bou.api.integration.IntegrationsList
 import io.github.rednesto.bou.tests.framework.BouTestCase
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.nio.file.Path
 import java.nio.file.Paths
+
+private typealias ThrowableSupplier = () -> Throwable
 
 class IntegrationsListInitAndLoadTests : BouTestCase(false) {
 
@@ -107,13 +108,24 @@ class IntegrationsListInitAndLoadTests : BouTestCase(false) {
         assertEquals(2, integrationB.loadCount)
     }
 
+    @Test
+    fun `exception thrown in integration init and load`() {
+        val integrationsList = IntegrationsList<FailingInitAndLoadIntegration>("DummyIntegration")
+
+        val integration = FailingInitAndLoadIntegration("mod_a:dummy")
+        assertTrue(integrationsList.register(integration))
+
+        assertDoesNotThrow { integrationsList.initIntegrations(plugin) }
+    }
+
     override fun createConfigDir(): Path = Paths.get("")
 
     private class CustomIntegrationsList : IntegrationsList<InitTrackingIntegration>("DummyIntegration") {
-        override fun shouldLoadIntegrationOnRegistration(): Boolean = true
+        override fun shouldInitIntegrationOnRegistration(): Boolean = true
     }
 
     private class InitTrackingIntegration(val dummyId: String) : Integration {
+
         var initCount: Int = 0
             private set
         var loadCount: Int = 0
@@ -126,6 +138,15 @@ class IntegrationsListInitAndLoadTests : BouTestCase(false) {
         override fun load(plugin: BoxOUtils) {
             loadCount++
         }
+
+        override fun getId(): String = dummyId
+    }
+
+    private class FailingInitAndLoadIntegration(val dummyId: String) : Integration {
+
+        override fun init(plugin: BoxOUtils): Unit = throw Exception()
+
+        override fun load(plugin: BoxOUtils): Unit = throw Exception()
 
         override fun getId(): String = dummyId
     }

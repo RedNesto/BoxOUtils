@@ -125,9 +125,8 @@ public class IntegrationsList<I extends Integration> {
         }
 
         BoxOUtils plugin = BoxOUtils.getInstance();
-        if (initDone && shouldLoadIntegrationOnRegistration()) {
-            integration.init(plugin);
-            integration.load(plugin);
+        if (initDone && shouldInitIntegrationOnRegistration()) {
+            initAndLoadIntegration(integration, plugin, true);
         }
 
         integrationsById.put(integrationId, integration);
@@ -161,14 +160,28 @@ public class IntegrationsList<I extends Integration> {
         }
 
         initDone = true;
-        integrationsById.values().forEach(integration -> {
-            integration.init(plugin);
-            integration.load(plugin);
-        });
+        integrationsById.values().forEach(integration -> initAndLoadIntegration(integration, plugin, true));
     }
 
     public void reloadIntegrations(BoxOUtils plugin) {
-        integrationsById.values().forEach(integration -> integration.load(plugin));
+        integrationsById.values().forEach(integration -> initAndLoadIntegration(integration, plugin, false));
+    }
+
+    private void initAndLoadIntegration(I integration, BoxOUtils plugin, boolean doInit) {
+        if (doInit) {
+            try {
+                integration.init(plugin);
+            } catch (Throwable e) {
+                this.logger.error("An error occurred when initializing the integration {}.", integration.getId(), e);
+                return;
+            }
+        }
+
+        try {
+            integration.load(plugin);
+        } catch (Throwable e) {
+            this.logger.error("An error occurred when loading the integration {}.", integration.getId(), e);
+        }
     }
 
     /**
@@ -176,7 +189,7 @@ public class IntegrationsList<I extends Integration> {
      * It should always return {@code true} in a production environment.
      */
     @VisibleForTesting
-    protected boolean shouldLoadIntegrationOnRegistration() {
+    protected boolean shouldInitIntegrationOnRegistration() {
         return !BouUtils.isTesting();
     }
 
@@ -219,7 +232,7 @@ public class IntegrationsList<I extends Integration> {
     }
 
     @Nullable
-    public String getDefaultNamespace() {
+    public final String getDefaultNamespace() {
         return defaultNamespace;
     }
 
