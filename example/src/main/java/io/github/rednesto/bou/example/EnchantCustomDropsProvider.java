@@ -46,13 +46,13 @@ public class EnchantCustomDropsProvider implements CustomDropsProvider {
     }
 
     @Override
-    public void init(BoxOUtils plugin) {
-        this.plugin.logger.info("Initializing EnchantCustomDropsProvider");
+    public String getId() {
+        return "bou-integration-example:auto-enchant";
     }
 
     @Override
-    public String getId() {
-        return "bou-integration-example:auto-enchant";
+    public void init(BoxOUtils plugin) {
+        this.plugin.logger.info("Initializing EnchantCustomDropsProvider");
     }
 
     @Override

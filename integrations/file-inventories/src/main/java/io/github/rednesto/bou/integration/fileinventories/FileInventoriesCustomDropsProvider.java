@@ -41,10 +41,15 @@ import javax.annotation.Nullable;
 public class FileInventoriesCustomDropsProvider implements CustomDropsProvider {
 
     @Override
-    public void init(BoxOUtils plugin) {
+    public String getId() {
+        return "box-o-utils:file-inv";
+    }
+
+    @Override
+    public void load(BoxOUtils plugin) {
         FileInventoriesService fileInvService = Sponge.getServiceManager().provide(FileInventoriesService.class).orElse(null);
         if (fileInvService == null) {
-            plugin.getLogger().error("FileInventoriesService is not available but should be. CustomDrops using FileItems will not work.");
+            plugin.getLogger().error("FileInventoriesService is not available. CustomDrops using FileItems will be ignored.");
             return;
         }
 
@@ -65,11 +70,6 @@ public class FileInventoriesCustomDropsProvider implements CustomDropsProvider {
         } catch (IOException e) {
             plugin.getLogger().error("Unable to walk in directory " + fileitems.toAbsolutePath(), e);
         }
-    }
-
-    @Override
-    public String getId() {
-        return "box-o-utils:file-inv";
     }
 
     @Override

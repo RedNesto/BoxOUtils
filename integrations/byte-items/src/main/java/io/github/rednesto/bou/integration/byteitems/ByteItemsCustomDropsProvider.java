@@ -24,12 +24,9 @@
 package io.github.rednesto.bou.integration.byteitems;
 
 import de.randombyte.byteitems.api.ByteItemsService;
-import io.github.rednesto.bou.BoxOUtils;
 import io.github.rednesto.bou.api.customdrops.CustomDropsProvider;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.event.Listener;
-import org.spongepowered.api.event.service.ChangeServiceProviderEvent;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 
@@ -39,15 +36,6 @@ import javax.annotation.Nullable;
 
 public class ByteItemsCustomDropsProvider implements CustomDropsProvider {
 
-    @Nullable
-    private ByteItemsService backingService;
-
-    @Override
-    public void init(BoxOUtils plugin) {
-        Sponge.getServiceManager().provide(ByteItemsService.class).ifPresent(service -> backingService = service);
-        Sponge.getEventManager().registerListeners(plugin, this);
-    }
-
     @Override
     public String getId() {
         return "box-o-utils:byte-items";
@@ -55,17 +43,8 @@ public class ByteItemsCustomDropsProvider implements CustomDropsProvider {
 
     @Override
     public Optional<ItemStack> createItemStack(String id, @Nullable Player targetPlayer) {
-        if (backingService == null) {
-            return Optional.empty();
-        }
-
-        return backingService.get(id).map(ItemStackSnapshot::createStack);
-    }
-
-    @Listener
-    public void onServiceProviderChange(ChangeServiceProviderEvent event) {
-        if (event.getService().equals(ByteItemsService.class)) {
-            backingService = (ByteItemsService) event.getNewProvider();
-        }
+        return Sponge.getServiceManager().provide(ByteItemsService.class)
+                .flatMap(service -> service.get(id))
+                .map(ItemStackSnapshot::createStack);
     }
 }
