@@ -33,9 +33,9 @@ import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.config.ConfigDir;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.game.GameReloadEvent;
+import org.spongepowered.api.event.game.state.GameAboutToStartServerEvent;
 import org.spongepowered.api.event.game.state.GameConstructionEvent;
 import org.spongepowered.api.event.game.state.GameInitializationEvent;
-import org.spongepowered.api.event.game.state.GamePostInitializationEvent;
 import org.spongepowered.api.event.game.state.GamePreInitializationEvent;
 import org.spongepowered.api.plugin.Dependency;
 import org.spongepowered.api.plugin.Plugin;
@@ -104,15 +104,15 @@ public class BoxOUtils {
     }
 
     @Listener
-    public void onGamePostInitialization(GamePostInitializationEvent event) {
-        integrationsManager.initIntegrations(this);
-    }
-
-    @Listener
     public void onGameInitialization(GameInitializationEvent event) {
         Sponge.getCommandManager().register(this, CommandSpec.builder()
                 .child(BouReloadCommand.create(), "reload")
                 .build(), "boxoutils", "bou");
+    }
+
+    @Listener
+    public void onGamePostInitialization(GameAboutToStartServerEvent event) {
+        integrationsManager.initIntegrations(this);
     }
 
     @Listener

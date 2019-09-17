@@ -24,9 +24,18 @@
 package io.github.rednesto.bou.api.integration;
 
 import io.github.rednesto.bou.BoxOUtils;
+import org.spongepowered.api.plugin.Plugin;
 
+/**
+ * An integration is used to extend existing features, like a new CustomDrops provider to customize dropped items.
+ */
 public interface Integration {
 
+    /**
+     * @return the ID of this integration. It must follow the format {@code modid:integrationid}.
+     *
+     * @see Plugin#ID_PATTERN the pattern IDs must respect
+     */
     String getId();
 
     /**
