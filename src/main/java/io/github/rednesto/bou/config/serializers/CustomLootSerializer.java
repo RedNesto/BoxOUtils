@@ -24,23 +24,23 @@
 package io.github.rednesto.bou.config.serializers;
 
 import com.google.common.reflect.TypeToken;
-import io.github.rednesto.bou.api.customdrops.CustomLoot;
-import io.github.rednesto.bou.api.customdrops.CustomLootCommand;
-import io.github.rednesto.bou.api.customdrops.ItemLoot;
-import io.github.rednesto.bou.api.customdrops.MoneyLoot;
-import io.github.rednesto.bou.api.quantity.IntQuantity;
+import io.github.rednesto.bou.api.customdrops.*;
 import io.github.rednesto.bou.api.requirement.Requirement;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import ninja.leaping.configurate.objectmapping.serialize.TypeSerializer;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 public class CustomLootSerializer implements TypeSerializer<CustomLoot> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(CustomLootSerializer.class);
 
     @Nullable
     @Override
@@ -54,17 +54,26 @@ public class CustomLootSerializer implements TypeSerializer<CustomLoot> {
         ConfigurationNode requirementsNode = value.getNode("requirements");
         List<List<Requirement<?>>> requirements = RequirementSerializer.getRequirementGroups(requirementsNode);
 
-        ConfigurationNode moneyNode = value.getNode("money");
-        MoneyLoot moneyLoot = !moneyNode.isVirtual() ? moneyNode.getValue(BouTypeTokens.MONEY_LOOT) : null;
-
-        IntQuantity experience = value.getNode("experience").getValue(BouTypeTokens.INT_QUANTITY);
         boolean overwrite = value.getNode("overwrite").getBoolean(false);
         boolean expOverwrite = value.getNode("exp-overwrite").getBoolean(false);
 
-        List<CustomLootCommand> commands = new ArrayList<>(value.getNode("commands").getList(BouTypeTokens.CUSTOM_LOOT_COMMAND));
-        commands.removeIf(Objects::isNull);
+        CustomLootComponentProviderIntegrations componentProviderIntegrations = CustomLootComponentProviderIntegrations.getInstance();
+        List<CustomLootComponent> components = new ArrayList<>();
+        value.getChildrenMap().forEach((key, node) -> {
+            String componentId = (String) key;
+            CustomLootComponentProvider componentProvider = componentProviderIntegrations.getById(componentId, true);
+            if (componentProvider == null) {
+                return;
+            }
 
-        return new CustomLoot(itemLoots, experience, overwrite, expOverwrite, requirements, moneyLoot, reuse, commands);
+            try {
+                components.add(componentProvider.provide(node));
+            } catch (Throwable t) {
+                LOGGER.error("Unable to read CustomLoot component configuration {}", componentId, t);
+            }
+        });
+
+        return new CustomLoot(itemLoots, overwrite, expOverwrite, requirements, reuse, components);
     }
 
     @Override

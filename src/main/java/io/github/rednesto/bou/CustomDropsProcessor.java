@@ -23,40 +23,35 @@
  */
 package io.github.rednesto.bou;
 
-import io.github.rednesto.bou.api.customdrops.*;
+import io.github.rednesto.bou.api.customdrops.CustomDropsProviderIntegrations;
+import io.github.rednesto.bou.api.customdrops.CustomLoot;
+import io.github.rednesto.bou.api.customdrops.CustomLootProcessingContext;
+import io.github.rednesto.bou.api.customdrops.ItemLoot;
 import io.github.rednesto.bou.api.lootReuse.LootReuse;
 import io.github.rednesto.bou.api.quantity.IntQuantity;
 import io.github.rednesto.bou.api.requirement.Requirement;
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.command.CommandSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.Item;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.cause.EventContext;
 import org.spongepowered.api.event.entity.AffectEntityEvent;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
-import org.spongepowered.api.service.economy.Currency;
-import org.spongepowered.api.service.economy.EconomyService;
-import org.spongepowered.api.service.economy.account.UniqueAccount;
-import org.spongepowered.api.service.economy.transaction.TransactionResult;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.text.serializer.TextSerializers;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-import javax.annotation.Nullable;
-
 public class CustomDropsProcessor {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(CustomDropsProcessor.class);
 
     public static void handleDropItemEvent(AffectEntityEvent event, CustomLoot customLoot, Object source) {
         if (customLoot.isOverwrite()) {
@@ -106,93 +101,24 @@ public class CustomDropsProcessor {
         return false;
     }
 
-    public static void dropLoot(CustomLoot loot, @Nullable Player targetPlayer, @Nullable Location<World> targetLocation,
-                                Object source, Cause cause) {
-        dropLoot(loot, targetPlayer, targetLocation, source, cause, true);
+    public static void dropLoot(CustomLootProcessingContext processingContext) {
+        dropLoot(processingContext, true);
     }
 
-    public static void dropLoot(CustomLoot loot, @Nullable Player targetPlayer, @Nullable Location<World> targetLocation,
-                                Object source, Cause cause, boolean dropInWorld) {
-        @Nullable MoneyLoot moneyLoot = loot.getMoneyLoot();
-        if (targetPlayer != null && moneyLoot != null && moneyLoot.shouldLoot()) {
-            int randomQuantity = moneyLoot.getAmount().get();
-            Sponge.getServiceManager().provide(EconomyService.class).ifPresent(economyService -> {
-                UniqueAccount account = economyService.getOrCreateAccount(targetPlayer.getUniqueId()).orElse(null);
-                if (account == null) {
-                    return;
-                }
-
-                Currency usedCurrency;
-                if (moneyLoot.getCurrencyId() == null) {
-                    usedCurrency = economyService.getDefaultCurrency();
-                } else {
-                    usedCurrency = Sponge.getGame().getRegistry().getType(Currency.class, moneyLoot.getCurrencyId()).orElse(null);
-                }
-
-                if (usedCurrency == null) {
-                    return;
-                }
-
-                Cause depositCause = Cause.of(EventContext.empty(), BoxOUtils.getInstance());
-                TransactionResult transactionResult = account.deposit(usedCurrency, BigDecimal.valueOf(randomQuantity), depositCause);
-                switch (transactionResult.getResult()) {
-                    case ACCOUNT_NO_SPACE:
-                        targetPlayer.sendMessage(Text.of(TextColors.RED,
-                                "You do not have enough space in your account to earn ", transactionResult.getAmount(), " ", transactionResult.getCurrency().getDisplayName()));
-                        break;
-                    case FAILED:
-                    case CONTEXT_MISMATCH:
-                        targetPlayer.sendMessage(Text.of(TextColors.RED,
-                                "Unable to add ", transactionResult.getAmount(), " ", transactionResult.getCurrency().getDisplayName(), " to your account"));
-                        break;
-                    case SUCCESS:
-                        if (moneyLoot.getMessage() != null) {
-                            String formattedAmount = TextSerializers.FORMATTING_CODE.serialize(transactionResult.getCurrency().format(transactionResult.getAmount()));
-                            String message = moneyLoot.getMessage().replace("{money_amount}", formattedAmount);
-                            targetPlayer.sendMessage(TextSerializers.FORMATTING_CODE.deserialize(message));
-                        }
-                        break;
-                }
-            });
-        }
-
-        if (targetPlayer != null) {
-            for (CustomLootCommand command : loot.getCommands()) {
-                if (!command.shouldExecute() || !fulfillsRequirements(source, cause, command.getRequirements())) {
-                    continue;
-                }
-
-                String commandToSend = command.getRawCommand()
-                        .replace("{player.name}", targetPlayer.getName())
-                        .replace("{player.uuid}", targetPlayer.getUniqueId().toString());
-                CommandSource commandSource = null;
-                switch (command.getSenderMode()) {
-                    case SERVER:
-                        commandSource = Sponge.getServer().getConsole();
-                        break;
-                    case PLAYER:
-                        commandSource = targetPlayer;
-                        break;
-                }
-
-                Sponge.getCommandManager().process(commandSource, commandToSend);
+    public static void dropLoot(CustomLootProcessingContext processingContext, boolean dropInWorld) {
+        CustomLoot loot = processingContext.getLoot();
+        loot.getComponents().forEach(components -> {
+            try {
+                components.processLoot(processingContext);
+            } catch (Throwable t) {
+                LOGGER.error("A CustomLootComponent encountered an exception during processing.", t);
             }
-        }
-
-        if (targetLocation != null) {
-            IntQuantity experience = loot.getExperience();
-            if (experience != null) {
-                int experienceAmount = experience.get();
-                if (experienceAmount > 0) {
-                    Entity experienceOrb = targetLocation.createEntity(EntityTypes.EXPERIENCE_ORB);
-                    experienceOrb.offer(Keys.CONTAINED_EXPERIENCE, experienceAmount);
-                    targetLocation.spawnEntity(experienceOrb);
-                }
-            }
-        }
+        });
 
         Consumer<ItemStack> lootStackConsumer;
+        Player targetPlayer = processingContext.getTargetPlayer();
         if (dropInWorld) {
+            Location<World> targetLocation = processingContext.getTargetLocation();
             if (targetLocation == null) {
                 return;
             }

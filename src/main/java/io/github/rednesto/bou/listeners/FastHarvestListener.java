@@ -28,6 +28,7 @@ import io.github.rednesto.bou.CropsAlgoritm;
 import io.github.rednesto.bou.CustomDropsProcessor;
 import io.github.rednesto.bou.api.BouEventContextKeys;
 import io.github.rednesto.bou.api.customdrops.CustomLoot;
+import io.github.rednesto.bou.api.customdrops.CustomLootProcessingContext;
 import io.github.rednesto.bou.api.fastharvest.FastHarvestCrop;
 import io.github.rednesto.bou.api.fastharvest.FastHarvestTools;
 import org.spongepowered.api.Sponge;
@@ -102,8 +103,8 @@ public class FastHarvestListener {
         String id = targetBlock.getState().getType().getId();
         CustomLoot customLoot = drops.get(id);
         if (customLoot != null) {
-            CustomDropsProcessor.dropLoot(customLoot, player, entitiesSpawnLocation, targetBlock, event.getCause(),
-                    fastHarvest.dropInWorld);
+            CustomLootProcessingContext processingContext = new CustomLootProcessingContext(customLoot, event, targetBlock, event.getCause(), player, entitiesSpawnLocation);
+            CustomDropsProcessor.dropLoot(processingContext, fastHarvest.dropInWorld);
         }
 
         try (CauseStackManager.StackFrame stackFrame = Sponge.getCauseStackManager().pushCauseFrame()) {

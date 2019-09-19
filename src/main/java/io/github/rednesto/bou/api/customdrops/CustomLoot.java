@@ -25,7 +25,6 @@ package io.github.rednesto.bou.api.customdrops;
 
 import com.google.common.base.MoreObjects;
 import io.github.rednesto.bou.api.lootReuse.LootReuse;
-import io.github.rednesto.bou.api.quantity.IntQuantity;
 import io.github.rednesto.bou.api.requirement.Requirement;
 
 import java.util.List;
@@ -37,41 +36,29 @@ import javax.annotation.Nullable;
 public class CustomLoot {
 
     private List<ItemLoot> itemLoots;
-    @Nullable
-    private IntQuantity experience;
     private boolean overwrite;
     private boolean expOverwrite;
     private List<List<Requirement<?>>> requirements;
     @Nullable
-    private MoneyLoot moneyLoot;
-    @Nullable
     private Reuse reuse;
-    private List<CustomLootCommand> commands;
+    private List<CustomLootComponent> components;
 
     public CustomLoot(List<ItemLoot> itemLoots,
-                      @Nullable IntQuantity experience,
                       boolean overwrite,
                       boolean expOverwrite,
                       List<List<Requirement<?>>> requirements,
-                      @Nullable MoneyLoot moneyLoot,
-                      @Nullable Reuse reuse, List<CustomLootCommand> commands) {
+                      @Nullable Reuse reuse,
+                      List<CustomLootComponent> components) {
         this.itemLoots = itemLoots;
-        this.experience = experience;
         this.overwrite = overwrite;
         this.expOverwrite = expOverwrite;
         this.requirements = requirements;
-        this.moneyLoot = moneyLoot;
         this.reuse = reuse;
-        this.commands = commands;
+        this.components = components;
     }
 
     public List<ItemLoot> getItemLoots() {
         return itemLoots;
-    }
-
-    @Nullable
-    public IntQuantity getExperience() {
-        return experience;
     }
 
     public boolean isOverwrite() {
@@ -87,17 +74,12 @@ public class CustomLoot {
     }
 
     @Nullable
-    public MoneyLoot getMoneyLoot() {
-        return moneyLoot;
-    }
-
-    @Nullable
     public Reuse getReuse() {
         return reuse;
     }
 
-    public List<CustomLootCommand> getCommands() {
-        return commands;
+    public List<CustomLootComponent> getComponents() {
+        return components;
     }
 
     @Override
@@ -113,24 +95,25 @@ public class CustomLoot {
         return overwrite == that.overwrite &&
                 expOverwrite == that.expOverwrite &&
                 itemLoots.equals(that.itemLoots) &&
-                Objects.equals(experience, that.experience) &&
                 requirements.equals(that.requirements) &&
-                Objects.equals(moneyLoot, that.moneyLoot) &&
                 Objects.equals(reuse, that.reuse) &&
-                commands.equals(that.commands);
+                components.equals(that.components);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(itemLoots, overwrite, expOverwrite, requirements, reuse, components);
     }
 
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
                 .add("itemLoots", itemLoots)
-                .add("experience", experience)
                 .add("overwrite", overwrite)
                 .add("expOverwrite", expOverwrite)
                 .add("requirements", requirements)
-                .add("moneyLoot", moneyLoot)
                 .add("reuse", reuse)
-                .add("commands", commands)
+                .add("components", components)
                 .toString();
     }
 

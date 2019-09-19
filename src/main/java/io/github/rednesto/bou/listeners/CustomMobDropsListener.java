@@ -28,6 +28,7 @@ import com.google.common.cache.CacheBuilder;
 import io.github.rednesto.bou.Config;
 import io.github.rednesto.bou.CustomDropsProcessor;
 import io.github.rednesto.bou.api.customdrops.CustomLoot;
+import io.github.rednesto.bou.api.customdrops.CustomLootProcessingContext;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.ExperienceOrb;
@@ -86,7 +87,8 @@ public class CustomMobDropsListener {
         requirementResultsTracker.put(targetEntity.getUniqueId(), requirementsFulfilled);
         if (requirementsFulfilled) {
             Location<World> targetLocation = targetEntity.getLocation();
-            CustomDropsProcessor.dropLoot(loot, player, targetLocation, targetEntitySnapshot, event.getCause());
+            CustomLootProcessingContext processingContext = new CustomLootProcessingContext(loot, event, targetEntitySnapshot, event.getCause(), player, targetLocation);
+            CustomDropsProcessor.dropLoot(processingContext);
         }
     }
 

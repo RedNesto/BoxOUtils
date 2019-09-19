@@ -31,6 +31,7 @@ import io.github.rednesto.bou.api.lootReuse.MultiplyLootReuse
 import io.github.rednesto.bou.api.lootReuse.SimpleLootReuse
 import io.github.rednesto.bou.api.quantity.BoundedIntQuantity
 import io.github.rednesto.bou.config.serializers.BouTypeTokens
+import io.github.rednesto.bou.integration.customdrops.MoneyLootComponent
 import io.github.rednesto.bou.integration.griefprevention.GriefPreventionRegionRequirement
 import io.github.rednesto.bou.requirements.DataByKeyRequirement
 import io.github.rednesto.bou.tests.framework.PluginConfigurationTestCase
@@ -53,16 +54,16 @@ class MobsDropsConfigurationTests : PluginConfigurationTestCase<Config.MobsDrops
                     "minecraft:mutton" to SimpleLootReuse(BoundedIntQuantity(2, 5)),
                     "minecraft:wool" to MultiplyLootReuse(3f))
             val reuse = CustomLoot.Reuse(2f, reuseItems, emptyList())
-            val money = MoneyLoot(BoundedIntQuantity(5, 25), null, 50.0, "&aYou earned {money_amount}")
+            val money = MoneyLootComponent(MoneyLoot(BoundedIntQuantity(5, 25), null, 50.0, "&aYou earned {money_amount}"))
             val drops = listOf(
                     ItemLoot("waw_sword", "byte-items", null, 0.0, null),
                     ItemLoot("test", "file-inv", null, 0.0, BoundedIntQuantity(0, 2)))
-            CustomLoot(drops, null, true, false, requirements, money, reuse, emptyList())
+            CustomLoot(drops, true, false, requirements, reuse, listOf(money))
         }
 
         val bat = run {
             val drops = listOf(ItemLoot("minecraft:ghast_tear", null, null, 33.33, null))
-            CustomLoot(drops, null, false, false, emptyList(), null, null, emptyList())
+            CustomLoot(drops, false, false, emptyList(), null, emptyList())
         }
 
         val expected = mapOf(

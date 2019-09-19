@@ -28,6 +28,7 @@ import com.google.common.cache.CacheBuilder;
 import io.github.rednesto.bou.Config;
 import io.github.rednesto.bou.CustomDropsProcessor;
 import io.github.rednesto.bou.api.customdrops.CustomLoot;
+import io.github.rednesto.bou.api.customdrops.CustomLootProcessingContext;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
@@ -73,7 +74,8 @@ public class CustomBlockDropsListener {
             Location<World> targetLocation = originalBlock.getLocation().orElseGet(() -> new Location<>(player.getWorld(), originalBlock.getPosition()));
             requirementResultsTracker.put(targetLocation, requirementsFulfilled);
             if (requirementsFulfilled) {
-                CustomDropsProcessor.dropLoot(loot, player, targetLocation, originalBlock, event.getCause());
+                CustomLootProcessingContext processingContext = new CustomLootProcessingContext(loot, event, originalBlock, event.getCause(), player, targetLocation);
+                CustomDropsProcessor.dropLoot(processingContext);
             }
         }
     }
