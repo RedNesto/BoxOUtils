@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.github.rednesto.bou.api.utils.enchantmentsFilter;
+package io.github.rednesto.bou.api.utils;
 
 import com.google.common.base.MoreObjects;
 import io.github.rednesto.bou.api.range.IntRange;
@@ -31,25 +31,24 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 
-public class SimpleEnchantmentsFilter extends EnchantmentsFilter {
+public class EnchantmentsFilter {
 
     private final Map<String, IntRange> neededRanges;
     private final Map<String, IntRange> disallowedRanges;
     private final Map<String, Boolean> wildcards;
     private final long positiveWildcards;
 
-    public SimpleEnchantmentsFilter(Map<String, IntRange> neededRanges, Map<String, IntRange> disallowedRanges) {
+    public EnchantmentsFilter(Map<String, IntRange> neededRanges, Map<String, IntRange> disallowedRanges) {
         this(neededRanges, disallowedRanges, Collections.emptyMap());
     }
 
-    public SimpleEnchantmentsFilter(Map<String, IntRange> neededRanges, Map<String, IntRange> disallowedRanges, Map<String, Boolean> wildcards) {
+    public EnchantmentsFilter(Map<String, IntRange> neededRanges, Map<String, IntRange> disallowedRanges, Map<String, Boolean> wildcards) {
         this.neededRanges = neededRanges;
         this.disallowedRanges = disallowedRanges;
         this.wildcards = wildcards;
         this.positiveWildcards = wildcards.values().stream().filter(value -> value).count();
     }
 
-    @Override
     public boolean test(Collection<Enchantment> enchantments) {
         if (enchantments.isEmpty()) {
             return positiveWildcards == 0 && neededRanges.isEmpty();
@@ -95,11 +94,11 @@ public class SimpleEnchantmentsFilter extends EnchantmentsFilter {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof SimpleEnchantmentsFilter)) {
+        if (!(o instanceof EnchantmentsFilter)) {
             return false;
         }
 
-        SimpleEnchantmentsFilter that = (SimpleEnchantmentsFilter) o;
+        EnchantmentsFilter that = (EnchantmentsFilter) o;
         return neededRanges.equals(that.neededRanges) &&
                 disallowedRanges.equals(that.disallowedRanges) &&
                 wildcards.equals(that.wildcards);

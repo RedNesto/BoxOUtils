@@ -26,8 +26,7 @@ package io.github.rednesto.bou.config.serializers;
 import com.google.common.reflect.TypeToken;
 import io.github.rednesto.bou.SpongeUtils;
 import io.github.rednesto.bou.api.range.IntRange;
-import io.github.rednesto.bou.api.utils.enchantmentsFilter.EnchantmentsFilter;
-import io.github.rednesto.bou.api.utils.enchantmentsFilter.SimpleEnchantmentsFilter;
+import io.github.rednesto.bou.api.utils.EnchantmentsFilter;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import ninja.leaping.configurate.objectmapping.serialize.TypeSerializer;
@@ -101,7 +100,7 @@ public class EnchantmentsFilterSerializer implements TypeSerializer<Enchantments
             }
         }
 
-        return new SimpleEnchantmentsFilter(neededRanges, disallowedRanges, wildcards);
+        return new EnchantmentsFilter(neededRanges, disallowedRanges, wildcards);
     }
 
     @Override

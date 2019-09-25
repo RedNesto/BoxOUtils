@@ -21,13 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.github.rednesto.bou.api.utils.enchantmentsFilter;
+@ParametersAreNonnullByDefault
+package io.github.rednesto.bou.api.utils;
 
-import org.spongepowered.api.item.enchantment.Enchantment;
-
-import java.util.Collection;
-
-public abstract class EnchantmentsFilter {
-
-    public abstract boolean test(Collection<Enchantment> enchantments);
-}
+import javax.annotation.ParametersAreNonnullByDefault;

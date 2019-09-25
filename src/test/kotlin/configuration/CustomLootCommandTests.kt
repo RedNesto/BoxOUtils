@@ -29,12 +29,17 @@ import io.github.rednesto.bou.config.serializers.CustomLootCommandSerializer
 import io.github.rednesto.bou.config.serializers.RequirementSerializer
 import io.github.rednesto.bou.config.serializers.RequirementsMapSerializer
 import io.github.rednesto.bou.integration.griefprevention.GriefPreventionRegionRequirement
+import io.github.rednesto.bou.tests.framework.BouFixture
 import io.github.rednesto.bou.tests.framework.ConfigurationTestCase
 import ninja.leaping.configurate.objectmapping.serialize.TypeSerializerCollection
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.nio.file.Paths
 
 class CustomLootCommandTests : ConfigurationTestCase<CustomLootCommand>("commands", BouTypeTokens.CUSTOM_LOOT_COMMAND) {
+
+    private val pluginFixture = BouFixture({ Paths.get("") })
 
     @Test
     fun `single simple command`() {
@@ -113,6 +118,11 @@ commands=[
                 CustomLootCommand("command 3", CustomLootCommand.SenderMode.SERVER, 0.0, listOf())
         )
         assertEquals(expected, loadConfigList(config))
+    }
+
+    @BeforeEach
+    fun setUp() {
+        pluginFixture.setUp()
     }
 
     override fun populateSerializers(serializers: TypeSerializerCollection) {

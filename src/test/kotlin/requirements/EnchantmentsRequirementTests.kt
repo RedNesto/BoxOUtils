@@ -27,8 +27,7 @@ import io.github.rednesto.bou.api.range.BoundedIntRange
 import io.github.rednesto.bou.api.range.FixedIntRange
 import io.github.rednesto.bou.api.range.SelectiveIntRange
 import io.github.rednesto.bou.api.requirement.Requirement
-import io.github.rednesto.bou.api.utils.enchantmentsFilter.EnchantmentsFilter
-import io.github.rednesto.bou.api.utils.enchantmentsFilter.SimpleEnchantmentsFilter
+import io.github.rednesto.bou.api.utils.EnchantmentsFilter
 import io.github.rednesto.bou.config.serializers.BouTypeTokens
 import io.github.rednesto.bou.config.serializers.EnchantmentsFilterSerializer
 import io.github.rednesto.bou.config.serializers.IntRangeSerializer
@@ -51,7 +50,7 @@ enchantments {
 }
         """)
 
-        val expectedFilter = SimpleEnchantmentsFilter(mapOf("minecraft:efficiency" to FixedIntRange(1)), emptyMap())
+        val expectedFilter = EnchantmentsFilter(mapOf("minecraft:efficiency" to FixedIntRange(1)), emptyMap())
         assertEquals(EnchantmentsRequirement(expectedFilter), requirement)
 
         assertFalse(expectedFilter())
@@ -69,7 +68,7 @@ enchantments {
 }
         """)
 
-        val expectedFilter = SimpleEnchantmentsFilter(emptyMap(), emptyMap(), mapOf("minecraft:efficiency" to true))
+        val expectedFilter = EnchantmentsFilter(emptyMap(), emptyMap(), mapOf("minecraft:efficiency" to true))
         assertEquals(EnchantmentsRequirement(expectedFilter), requirement)
 
         assertFalse(expectedFilter())
@@ -87,7 +86,7 @@ enchantments {
 }
         """)
 
-        val expectedFilter = SimpleEnchantmentsFilter(emptyMap(), emptyMap(), mapOf("minecraft:efficiency" to false))
+        val expectedFilter = EnchantmentsFilter(emptyMap(), emptyMap(), mapOf("minecraft:efficiency" to false))
         assertEquals(EnchantmentsRequirement(expectedFilter), requirement)
 
         assertTrue(expectedFilter())
@@ -104,7 +103,7 @@ enchantments {
 }
         """)
 
-        val expectedFilter = SimpleEnchantmentsFilter(mapOf("minecraft:efficiency" to BoundedIntRange(1, 3)), emptyMap())
+        val expectedFilter = EnchantmentsFilter(mapOf("minecraft:efficiency" to BoundedIntRange(1, 3)), emptyMap())
         assertEquals(EnchantmentsRequirement(expectedFilter), requirement)
 
         assertFalse(expectedFilter())
@@ -122,7 +121,7 @@ enchantments {
 }
         """)
 
-        val expectedFilter = SimpleEnchantmentsFilter(mapOf("minecraft:efficiency" to SelectiveIntRange(1, 2, 4)), emptyMap())
+        val expectedFilter = EnchantmentsFilter(mapOf("minecraft:efficiency" to SelectiveIntRange(1, 2, 4)), emptyMap())
         assertEquals(EnchantmentsRequirement(expectedFilter), requirement)
 
         assertFalse(expectedFilter())
@@ -142,7 +141,7 @@ enchantments {
 }
         """)
 
-        val expectedFilter = SimpleEnchantmentsFilter(mapOf(
+        val expectedFilter = EnchantmentsFilter(mapOf(
                 "minecraft:efficiency" to FixedIntRange(2),
                 "minecraft:silk_touch" to FixedIntRange(1)
         ), emptyMap())
@@ -161,7 +160,7 @@ enchantments {
 }
         """)
 
-        val expectedFilter = SimpleEnchantmentsFilter(emptyMap(), mapOf(
+        val expectedFilter = EnchantmentsFilter(emptyMap(), mapOf(
                 "minecraft:efficiency" to FixedIntRange(1)
         ))
         assertEquals(EnchantmentsRequirement(expectedFilter), requirement)
@@ -182,7 +181,7 @@ enchantments {
 }
         """)
 
-        val expectedFilter = SimpleEnchantmentsFilter(emptyMap(), mapOf(
+        val expectedFilter = EnchantmentsFilter(emptyMap(), mapOf(
                 "minecraft:efficiency" to BoundedIntRange(1, 3),
                 "minecraft:silk_touch" to FixedIntRange(1)
         ), mapOf("minecraft:unbreaking" to false))
@@ -217,7 +216,7 @@ enchantments {
 }
         """)
 
-        val expectedFilter = SimpleEnchantmentsFilter(
+        val expectedFilter = EnchantmentsFilter(
                 mapOf("minecraft:silk_touch" to FixedIntRange(1)),
                 emptyMap(),
                 mapOf("minecraft:efficiency" to true)
@@ -240,7 +239,7 @@ enchantments {
 }
         """)
 
-        val expectedFilter = SimpleEnchantmentsFilter(
+        val expectedFilter = EnchantmentsFilter(
                 mapOf("minecraft:unbreaking" to BoundedIntRange(1, 3), "minecraft:fortune" to SelectiveIntRange(1, 3)),
                 emptyMap(),
                 mapOf("minecraft:efficiency" to true, "minecraft:silk_touch" to false)
@@ -275,7 +274,7 @@ enchantments {
 }
         """)
 
-        val expectedFilter = SimpleEnchantmentsFilter(emptyMap(), emptyMap(), mapOf(
+        val expectedFilter = EnchantmentsFilter(emptyMap(), emptyMap(), mapOf(
                 "minecraft:efficiency" to true, "minecraft:unbreaking" to true,
                 "minecraft:silk_touch" to false, "minecraft:fortune" to false
         ))
@@ -305,7 +304,7 @@ enchantments {
 }
         """)
 
-        val expectedFilter = SimpleEnchantmentsFilter(
+        val expectedFilter = EnchantmentsFilter(
                 mapOf("minecraft:efficiency" to SelectiveIntRange(1, 5)),
                 mapOf("minecraft:fortune" to BoundedIntRange(1, 3)),
                 mapOf("minecraft:unbreaking" to true, "minecraft:silk_touch" to false))

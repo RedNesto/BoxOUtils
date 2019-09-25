@@ -36,7 +36,7 @@ import io.github.rednesto.bou.api.lootReuse.LootReuse;
 import io.github.rednesto.bou.api.quantity.IntQuantity;
 import io.github.rednesto.bou.api.range.IntRange;
 import io.github.rednesto.bou.api.requirement.Requirement;
-import io.github.rednesto.bou.api.utils.enchantmentsFilter.EnchantmentsFilter;
+import io.github.rednesto.bou.api.utils.EnchantmentsFilter;
 
 import java.util.Map;
 
