@@ -83,13 +83,17 @@ public class CustomDropsProcessor {
         for (List<Requirement<?>> requirementsList : requirements) {
             boolean failed = false;
             for (Requirement value : requirementsList) {
-                //noinspection unchecked
-                if (value.getApplicableType().isAssignableFrom(source.getClass()) && value.appliesTo(source, cause)) {
+                try {
                     //noinspection unchecked
-                    if (!value.fulfills(source, cause)) {
-                        failed = true;
-                        break;
+                    if (value.getApplicableType().isAssignableFrom(source.getClass()) && value.appliesTo(source, cause)) {
+                        //noinspection unchecked
+                        if (!value.fulfills(source, cause)) {
+                            failed = true;
+                            break;
+                        }
                     }
+                } catch (Throwable t) {
+                    LOGGER.error("Failed to compute a requirement.", t);
                 }
             }
 

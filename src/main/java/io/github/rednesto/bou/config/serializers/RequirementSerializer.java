@@ -55,7 +55,9 @@ public class RequirementSerializer implements TypeSerializer<Requirement<?>> {
         try {
             return requirementProvider.provide(value);
         } catch (RequirementConfigurationException e) {
-            throw new ObjectMappingException("Unable to read requirement", e);
+            throw new ObjectMappingException("Unable to read requirement configuration.", e);
+        } catch (Throwable t) {
+            throw new ObjectMappingException("Unexpected error during requirement creation.", t);
         }
     }
 

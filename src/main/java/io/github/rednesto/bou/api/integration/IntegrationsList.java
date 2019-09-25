@@ -194,16 +194,16 @@ public class IntegrationsList<I extends Integration> {
         if (doInit) {
             try {
                 integration.init(plugin);
-            } catch (Throwable e) {
-                this.logger.error("An error occurred when initializing the integration {}.", integration.getId(), e);
+            } catch (Throwable t) {
+                this.logger.error("An error occurred when initializing the integration {}.", integration.getId(), t);
                 return;
             }
         }
 
         try {
             integration.load(plugin);
-        } catch (Throwable e) {
-            this.logger.error("An error occurred when loading the integration {}.", integration.getId(), e);
+        } catch (Throwable t) {
+            this.logger.error("An error occurred when loading the integration {}.", integration.getId(), t);
         }
     }
 

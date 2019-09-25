@@ -25,6 +25,8 @@ package io.github.rednesto.bou.api.customdrops;
 
 import io.github.rednesto.bou.IntegrationsManager;
 import io.github.rednesto.bou.api.integration.IntegrationsList;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.inventory.ItemStack;
 
@@ -33,6 +35,8 @@ import java.util.Optional;
 import javax.annotation.Nullable;
 
 public class CustomDropsProviderIntegrations extends IntegrationsList<CustomDropsProvider> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(CustomDropsProviderIntegrations.class);
 
     private final CustomDropsProvider vanillaProvider;
 
@@ -43,13 +47,17 @@ public class CustomDropsProviderIntegrations extends IntegrationsList<CustomDrop
     }
 
     public Optional<ItemStack> createCustomDropStack(@Nullable String providerId, String id, @Nullable Player targetPlayer) {
-        if (providerId == null) {
-            return vanillaProvider.createItemStack(id, targetPlayer);
-        }
+        try {
+            if (providerId == null) {
+                return vanillaProvider.createItemStack(id, targetPlayer);
+            }
 
-        CustomDropsProvider provider = getById(providerId, true);
-        if (provider != null) {
-            return provider.createItemStack(id, targetPlayer);
+            CustomDropsProvider provider = getById(providerId, true);
+            if (provider != null) {
+                return provider.createItemStack(id, targetPlayer);
+            }
+        } catch (Throwable t) {
+            LOGGER.error("An error occurred when creating a CustomDrop itemstack.", t);
         }
 
         return Optional.empty();
