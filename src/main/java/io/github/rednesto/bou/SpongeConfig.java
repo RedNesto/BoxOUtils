@@ -177,7 +177,9 @@ public class SpongeConfig {
                 .registerType(BouTypeTokens.REQUIREMENTS_MAP, new RequirementsMapSerializer())
                 .registerType(BouTypeTokens.MONEY_LOOT, new MoneyLootSerializer())
                 .registerType(BouTypeTokens.INT_QUANTITY, new IntQuantitySerializer())
+                .registerType(BouTypeTokens.INT_RANGE, new IntRangeSerializer())
                 .registerType(BouTypeTokens.LOOT_REUSE, new LootReuseSerializer())
+                .registerType(BouTypeTokens.ENCHANTMENTS_FILTER, new EnchantmentsFilterSerializer())
                 // BlockSpawners
                 .registerType(BouTypeTokens.SPAWNED_MOB, new SpawnedMobSerializer())
                 // FastHarvest
