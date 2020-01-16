@@ -30,13 +30,15 @@ import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 
 import javax.annotation.Nullable;
 
 public class CustomLootProcessingContext {
 
-    private final CustomLoot loot;
+    private final List<CustomLoot> loots;
     @Nullable
     private final Event event;
     private final Object source;
@@ -46,9 +48,9 @@ public class CustomLootProcessingContext {
     @Nullable
     private final Location<World> targetLocation;
 
-    public CustomLootProcessingContext(CustomLoot loot, @Nullable Event event, Object source, Cause cause,
+    public CustomLootProcessingContext(List<CustomLoot> loots, @Nullable Event event, Object source, Cause cause,
                                        @Nullable Player targetPlayer, @Nullable Location<World> targetLocation) {
-        this.loot = loot;
+        this.loots = Collections.unmodifiableList(loots);
         this.event = event;
         this.source = source;
         this.cause = cause;
@@ -56,8 +58,8 @@ public class CustomLootProcessingContext {
         this.targetLocation = targetLocation;
     }
 
-    public CustomLoot getLoot() {
-        return loot;
+    public List<CustomLoot> getLoots() {
+        return loots;
     }
 
     @Nullable
@@ -93,7 +95,7 @@ public class CustomLootProcessingContext {
         }
 
         CustomLootProcessingContext that = (CustomLootProcessingContext) o;
-        return loot.equals(that.loot) &&
+        return loots.containsAll(that.loots) && loots.size() == that.loots.size() &&
                 Objects.equals(event, that.event) &&
                 source.equals(that.source) &&
                 cause.equals(that.cause) &&
@@ -103,13 +105,13 @@ public class CustomLootProcessingContext {
 
     @Override
     public int hashCode() {
-        return Objects.hash(loot, event, source, cause, targetPlayer, targetLocation);
+        return Objects.hash(loots, event, source, cause, targetPlayer, targetLocation);
     }
 
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
-                .add("loot", loot)
+                .add("loots", loots)
                 .add("event", event)
                 .add("source", source)
                 .add("cause", cause)

@@ -84,11 +84,11 @@ class BlocksDropsConfigurationTests : PluginConfigurationTestCase<Config.BlocksD
         }
 
         val expected = mapOf(
-                "minecraft:leaves" to leaves,
-                "minecraft:leaves2" to leaves2,
-                "minecraft:iron_ore" to ironOre,
-                "minecraft:skull" to skull,
-                "minecraft:wheat" to wheat
+                "minecraft:leaves" to listOf(leaves),
+                "minecraft:leaves2" to listOf(leaves2),
+                "minecraft:iron_ore" to listOf(ironOre),
+                "minecraft:skull" to listOf(skull),
+                "minecraft:wheat" to listOf(wheat)
         )
 
         assertTrue(config.enabled)
@@ -101,7 +101,7 @@ class BlocksDropsConfigurationTests : PluginConfigurationTestCase<Config.BlocksD
 
         val requirements = listOf(listOf(DataByKeyRequirement("box-o-utils:block_data", BlockSnapshot::class.java, mapOf("sponge_impl:skull_type" to listOf("minecraft:ender_dragon")))))
         val customLoot = CustomLoot(emptyList(), false, false, requirements, null, emptyList())
-        val expected = mutableMapOf("minecraft:skull" to customLoot)
+        val expected = mutableMapOf("minecraft:skull" to listOf(customLoot))
 
         assertTrue(config.enabled)
         assertEquals(expected, config.drops)
@@ -113,7 +113,7 @@ class BlocksDropsConfigurationTests : PluginConfigurationTestCase<Config.BlocksD
 
         val itemLoots = listOf(ItemLoot("minecraft:cobblestone", null, null, 25.0, null))
         val customLoot = CustomLoot(itemLoots, false, false, emptyList(), null, emptyList())
-        val expected = mapOf("minecraft:iron_ore" to customLoot)
+        val expected = mapOf("minecraft:iron_ore" to listOf(customLoot))
 
         assertTrue(config.enabled)
         assertEquals(expected, config.drops)
@@ -126,7 +126,7 @@ class BlocksDropsConfigurationTests : PluginConfigurationTestCase<Config.BlocksD
         val moneyLoot = MoneyLootComponent(MoneyLoot(BoundedIntQuantity(10, 30), "economylite:coin", 25.0, "&aYou earned {money_amount}"))
         val itemLoots = listOf(ItemLoot("minecraft:coal", null, null, 25.0, FixedIntQuantity(1)))
         val customLoot = CustomLoot(itemLoots, true, false, emptyList(), null, listOf(moneyLoot))
-        val expected = mapOf("minecraft:leaves" to customLoot)
+        val expected = mapOf("minecraft:leaves" to listOf(customLoot))
 
         assertTrue(config.enabled)
         assertEquals(expected, config.drops)

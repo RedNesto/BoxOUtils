@@ -74,11 +74,11 @@ public final class Config {
         @Setting("enabled")
         public boolean enabled;
         @Setting("blocks")
-        public Map<String, CustomLoot> drops;
+        public Map<String, List<CustomLoot>> drops;
 
         public BlocksDrops() {}
 
-        public BlocksDrops(boolean enabled, Map<String, CustomLoot> drops) {
+        public BlocksDrops(boolean enabled, Map<String, List<CustomLoot>> drops) {
             this.enabled = enabled;
             this.drops = drops;
         }
@@ -90,11 +90,11 @@ public final class Config {
         @Setting("enabled")
         public boolean enabled;
         @Setting("mobs")
-        public Map<String, CustomLoot> drops;
+        public Map<String, List<CustomLoot>> drops;
 
         public MobsDrops() {}
 
-        public MobsDrops(boolean enabled, Map<String, CustomLoot> drops) {
+        public MobsDrops(boolean enabled, Map<String, List<CustomLoot>> drops) {
             this.enabled = enabled;
             this.drops = drops;
         }

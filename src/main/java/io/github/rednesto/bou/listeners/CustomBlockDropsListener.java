@@ -31,7 +31,6 @@ import io.github.rednesto.bou.api.customdrops.CustomLoot;
 import io.github.rednesto.bou.api.customdrops.CustomLootProcessingContext;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
-import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.ExperienceOrb;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
@@ -42,6 +41,7 @@ import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -49,7 +49,7 @@ public class CustomBlockDropsListener {
 
     // I'd like to find a better thing to use as block identifier, something that does not rely on location,
     // entities unique id are great for that, but I don't know anything similar for blocks
-    private final Cache<Location<World>, Boolean> requirementResultsTracker = CacheBuilder.newBuilder()
+    private final Cache<Location<World>, List<CustomLoot>> requirementResultsTracker = CacheBuilder.newBuilder()
             // 15 seconds should be enough even if the server is skipping some ticks
             // but this should not be too high because the requirements test results may change quickly
             .expireAfterWrite(15, TimeUnit.SECONDS)
@@ -62,19 +62,19 @@ public class CustomBlockDropsListener {
             return;
         }
 
-        Map<String, CustomLoot> drops = blocksDrops.drops;
+        Map<String, List<CustomLoot>> drops = blocksDrops.drops;
         for (Transaction<BlockSnapshot> transaction : event.getTransactions()) {
             BlockSnapshot originalBlock = transaction.getOriginal();
-            CustomLoot loot = drops.get(originalBlock.getState().getType().getId());
-            if (loot == null) {
+            List<CustomLoot> loots = drops.get(originalBlock.getState().getType().getId());
+            if (loots == null) {
                 continue;
             }
 
-            boolean requirementsFulfilled = CustomDropsProcessor.fulfillsRequirements(originalBlock, event.getCause(), loot.getRequirements());
-            Location<World> targetLocation = originalBlock.getLocation().orElseGet(() -> new Location<>(player.getWorld(), originalBlock.getPosition()));
-            requirementResultsTracker.put(targetLocation, requirementsFulfilled);
-            if (requirementsFulfilled) {
-                CustomLootProcessingContext processingContext = new CustomLootProcessingContext(loot, event, originalBlock, event.getCause(), player, targetLocation);
+            List<CustomLoot> lootsToUse = CustomDropsProcessor.getLootsToUse(loots, originalBlock, event.getCause());
+            if (!lootsToUse.isEmpty()) {
+                Location<World> targetLocation = originalBlock.getLocation().orElseGet(() -> new Location<>(player.getWorld(), originalBlock.getPosition()));
+                requirementResultsTracker.put(targetLocation, lootsToUse);
+                CustomLootProcessingContext processingContext = new CustomLootProcessingContext(lootsToUse, event, originalBlock, event.getCause(), player, targetLocation);
                 CustomDropsProcessor.dropLoot(processingContext);
             }
         }
@@ -82,44 +82,31 @@ public class CustomBlockDropsListener {
 
     @Listener
     public void onItemDrop(DropItemEvent.Destruct event, @First Player player, @First BlockSnapshot block) {
-        final Config.BlocksDrops blocksDrops = Config.getBlocksDrops();
-        if (!blocksDrops.enabled) {
+        if (!Config.getBlocksDrops().enabled) {
             return;
         }
 
         Location<World> targetLocation = block.getLocation().orElseGet(() -> new Location<>(player.getWorld(), block.getPosition()));
-        Boolean result = requirementResultsTracker.getIfPresent(targetLocation);
-        requirementResultsTracker.invalidate(targetLocation);
-        if (result == null || !result) {
-            return;
-        }
-
-        Map<String, CustomLoot> drops = blocksDrops.drops;
-        CustomLoot customLoot = drops.get(block.getState().getType().getId());
-        if (customLoot != null) {
-            CustomDropsProcessor.handleDropItemEvent(event, customLoot, block);
+        List<CustomLoot> result = requirementResultsTracker.getIfPresent(targetLocation);
+        if (result != null) {
+            result.forEach(loot -> CustomDropsProcessor.handleDropItemEvent(event, loot, block));
         }
     }
 
     @Listener
-    public void onExpOrbSpawn(SpawnEntityEvent event) {
-        final Config.BlocksDrops blocksDrops = Config.getBlocksDrops();
-        if (!blocksDrops.enabled) {
+    public void onExpOrbSpawn(SpawnEntityEvent event, @First BlockSnapshot brokenBlock) {
+        if (!Config.getBlocksDrops().enabled) {
             return;
         }
 
-        for (Entity entity : event.getEntities()) {
-            if (!(entity instanceof ExperienceOrb)) {
-                continue;
-            }
-
-            for (Object cause : event.getCause().noneOf(ExperienceOrb.class)) {
-                if (cause instanceof BlockSnapshot) {
-                    Map<String, CustomLoot> drops = blocksDrops.drops;
-                    CustomLoot customLoot = drops.get(((BlockSnapshot) cause).getState().getType().getId());
-                    if (customLoot != null && customLoot.isExpOverwrite()) {
-                        event.setCancelled(true);
-                    }
+        List<CustomLoot> customLoot = brokenBlock.getLocation()
+                .map(requirementResultsTracker::getIfPresent)
+                .orElse(null);
+        if (customLoot != null) {
+            for (CustomLoot loot : customLoot) {
+                if (loot.isExpOverwrite()) {
+                    event.filterEntities(entity -> !(entity instanceof ExperienceOrb));
+                    break;
                 }
             }
         }

@@ -23,14 +23,14 @@
  */
 package io.github.rednesto.bou.api;
 
-import io.github.rednesto.bou.api.customdrops.CustomLoot;
+import io.github.rednesto.bou.api.customdrops.CustomLootProcessingContext;
 import org.spongepowered.api.event.cause.EventContextKey;
 
 public class BouEventContextKeys {
 
-    public static EventContextKey<CustomLoot> CUSTOM_LOOT = EventContextKey.builder(CustomLoot.class)
-            .id("box-o-utils:custom_loot")
-            .name("CustomLoot")
+    public static EventContextKey<CustomLootProcessingContext> CUSTOM_LOOT_PROCESSING_CONTEXT = EventContextKey.builder(CustomLootProcessingContext.class)
+            .id("box-o-utils:custom_loot_processing_context")
+            .name("CustomDrops Loot Context")
             .build();
 
     public static EventContextKey<Boolean> IS_FAST_HARVESTING = EventContextKey.builder(Boolean.class)

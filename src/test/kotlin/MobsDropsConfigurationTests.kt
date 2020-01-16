@@ -67,8 +67,8 @@ class MobsDropsConfigurationTests : PluginConfigurationTestCase<Config.MobsDrops
         }
 
         val expected = mapOf(
-                "minecraft:bat" to bat,
-                "minecraft:sheep" to sheep
+                "minecraft:bat" to listOf(bat),
+                "minecraft:sheep" to listOf(sheep)
         )
 
         assertTrue(config.enabled)

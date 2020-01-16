@@ -23,10 +23,7 @@
  */
 package io.github.rednesto.bou;
 
-import io.github.rednesto.bou.api.customdrops.CustomDropsProviderIntegrations;
-import io.github.rednesto.bou.api.customdrops.CustomLoot;
-import io.github.rednesto.bou.api.customdrops.CustomLootProcessingContext;
-import io.github.rednesto.bou.api.customdrops.ItemLoot;
+import io.github.rednesto.bou.api.customdrops.*;
 import io.github.rednesto.bou.api.lootReuse.LootReuse;
 import io.github.rednesto.bou.api.quantity.IntQuantity;
 import io.github.rednesto.bou.api.requirement.Requirement;
@@ -110,14 +107,16 @@ public class CustomDropsProcessor {
     }
 
     public static void dropLoot(CustomLootProcessingContext processingContext, boolean dropInWorld) {
-        CustomLoot loot = processingContext.getLoot();
-        loot.getComponents().forEach(components -> {
-            try {
-                components.processLoot(processingContext);
-            } catch (Throwable t) {
-                LOGGER.error("A CustomLootComponent encountered an exception during processing.", t);
+        List<CustomLoot> loots = processingContext.getLoots();
+        for (CustomLoot loot : loots) {
+            for (CustomLootComponent components : loot.getComponents()) {
+                try {
+                    components.processLoot(processingContext);
+                } catch (Throwable t) {
+                    LOGGER.error("A CustomLootComponent encountered an exception during processing.", t);
+                }
             }
-        });
+        }
 
         Consumer<ItemStack> lootStackConsumer;
         Player targetPlayer = processingContext.getTargetPlayer();
@@ -138,28 +137,30 @@ public class CustomDropsProcessor {
             return;
         }
 
-        for (ItemLoot itemLoot : loot.getItemLoots()) {
-            if (!itemLoot.shouldLoot()) {
-                continue;
-            }
+        for (CustomLoot loot : loots) {
+            for (ItemLoot itemLoot : loot.getItemLoots()) {
+                if (!itemLoot.shouldLoot()) {
+                    continue;
+                }
 
-            ItemStack itemStack = CustomDropsProviderIntegrations.getInstance()
-                    .createCustomDropStack(itemLoot.getProviderId(), itemLoot.getId(), targetPlayer)
-                    .orElse(null);
-            if (itemStack == null) {
-                continue;
-            }
+                ItemStack itemStack = CustomDropsProviderIntegrations.getInstance()
+                        .createCustomDropStack(itemLoot.getProviderId(), itemLoot.getId(), targetPlayer)
+                        .orElse(null);
+                if (itemStack == null) {
+                    continue;
+                }
 
-            IntQuantity quantity = itemLoot.getQuantity();
-            if (quantity != null) {
-                itemStack.setQuantity(quantity.get());
-            }
+                IntQuantity quantity = itemLoot.getQuantity();
+                if (quantity != null) {
+                    itemStack.setQuantity(quantity.get());
+                }
 
-            if (itemLoot.getDisplayname() != null) {
-                itemStack.offer(Keys.DISPLAY_NAME, TextSerializers.FORMATTING_CODE.deserialize(itemLoot.getDisplayname()));
-            }
+                if (itemLoot.getDisplayname() != null) {
+                    itemStack.offer(Keys.DISPLAY_NAME, TextSerializers.FORMATTING_CODE.deserialize(itemLoot.getDisplayname()));
+                }
 
-            lootStackConsumer.accept(itemStack);
+                lootStackConsumer.accept(itemStack);
+            }
         }
     }
 
@@ -230,5 +231,15 @@ public class CustomDropsProcessor {
             originalItem.setQuantity(restQuantity);
             result.add(originalItem);
         }
+    }
+
+    public static List<CustomLoot> getLootsToUse(List<CustomLoot> candidates, Object source, Cause cause) {
+        List<CustomLoot> lootsToUse = new ArrayList<>();
+        for (CustomLoot candidate : candidates) {
+            if (fulfillsRequirements(source, cause, candidate.getRequirements())) {
+                lootsToUse.add(candidate);
+            }
+        }
+        return lootsToUse;
     }
 }

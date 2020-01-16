@@ -43,6 +43,7 @@ import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -52,7 +53,7 @@ import javax.annotation.Nullable;
 
 public class CustomMobDropsListener {
 
-    private final Cache<UUID, Boolean> requirementResultsTracker = CacheBuilder.newBuilder()
+    private final Cache<UUID, List<CustomLoot>> requirementResultsTracker = CacheBuilder.newBuilder()
             .expireAfterWrite(15, TimeUnit.SECONDS)
             .build();
 
@@ -64,9 +65,15 @@ public class CustomMobDropsListener {
             return;
         }
 
-        Map<String, CustomLoot> drops = mobsDrops.drops;
-        CustomLoot loot = drops.get(targetEntity.getType().getId());
-        if (loot == null) {
+        Map<String, List<CustomLoot>> drops = mobsDrops.drops;
+        List<CustomLoot> loots = drops.get(targetEntity.getType().getId());
+        if (loots == null) {
+            return;
+        }
+
+        EntitySnapshot targetEntitySnapshot = targetEntity.createSnapshot();
+        List<CustomLoot> lootsToUse = CustomDropsProcessor.getLootsToUse(loots, targetEntitySnapshot, event.getCause());
+        if (lootsToUse.isEmpty()) {
             return;
         }
 
@@ -82,56 +89,38 @@ public class CustomMobDropsListener {
             return null;
         });
 
-        EntitySnapshot targetEntitySnapshot = targetEntity.createSnapshot();
-        boolean requirementsFulfilled = CustomDropsProcessor.fulfillsRequirements(targetEntitySnapshot, event.getCause(), loot.getRequirements());
-        requirementResultsTracker.put(targetEntity.getUniqueId(), requirementsFulfilled);
-        if (requirementsFulfilled) {
-            Location<World> targetLocation = targetEntity.getLocation();
-            CustomLootProcessingContext processingContext = new CustomLootProcessingContext(loot, event, targetEntitySnapshot, event.getCause(), player, targetLocation);
-            CustomDropsProcessor.dropLoot(processingContext);
-        }
+        requirementResultsTracker.put(targetEntity.getUniqueId(), lootsToUse);
+        Location<World> targetLocation = targetEntity.getLocation();
+        CustomLootProcessingContext processingContext = new CustomLootProcessingContext(lootsToUse, event, targetEntitySnapshot, event.getCause(), player, targetLocation);
+        CustomDropsProcessor.dropLoot(processingContext);
     }
 
     @Listener
     public void onItemDrop(DropItemEvent.Destruct event, @First Entity entity) {
-        final Config.MobsDrops mobsDrops = Config.getMobsDrops();
-        if (!mobsDrops.enabled) {
+        if (!Config.getMobsDrops().enabled) {
             return;
         }
 
         UUID entityId = entity.getUniqueId();
-        Boolean result = requirementResultsTracker.getIfPresent(entityId);
-        requirementResultsTracker.invalidate(entityId);
-        if (result == null || !result) {
-            return;
-        }
-
-        Map<String, CustomLoot> drops = mobsDrops.drops;
-        CustomLoot customLoot = drops.get(entity.getType().getId());
-        if (customLoot != null) {
-            CustomDropsProcessor.handleDropItemEvent(event, customLoot, entity.createSnapshot());
+        List<CustomLoot> customLoots = requirementResultsTracker.getIfPresent(entityId);
+        if (customLoots != null) {
+            customLoots.forEach(loot ->CustomDropsProcessor.handleDropItemEvent(event, loot, entity.createSnapshot()));
         }
     }
 
     @Listener
-    public void onExpOrbSpawn(SpawnEntityEvent event) {
-        final Config.MobsDrops mobsDrops = Config.getMobsDrops();
-        if (!mobsDrops.enabled) {
+    public void onExpOrbSpawn(SpawnEntityEvent event,
+                              @First(typeFilter = ExperienceOrb.class, inverse = true) Entity killedEntity) {
+        if (!Config.getMobsDrops().enabled) {
             return;
         }
 
-        for (Entity entity : event.getEntities()) {
-            if (!(entity instanceof ExperienceOrb)) {
-                continue;
-            }
-
-            for (Object cause : event.getCause().noneOf(ExperienceOrb.class)) {
-                if (cause instanceof Entity) {
-                    Map<String, CustomLoot> drops = mobsDrops.drops;
-                    CustomLoot customLoot = drops.get(((Entity) cause).getType().getId());
-                    if (customLoot != null && customLoot.isExpOverwrite()) {
-                        event.setCancelled(true);
-                    }
+        List<CustomLoot> customLoot = requirementResultsTracker.getIfPresent(killedEntity.getUniqueId());
+        if (customLoot != null) {
+            for (CustomLoot loot : customLoot) {
+                if (loot.isExpOverwrite()) {
+                    event.filterEntities(entity -> !(entity instanceof ExperienceOrb));
+                    break;
                 }
             }
         }
