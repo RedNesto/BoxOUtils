@@ -60,6 +60,7 @@ public class BouReloadCommand implements CommandExecutor {
 
     public static CommandCallable create() {
         return CommandSpec.builder()
+                .permission("boxoutils.reload")
                 .executor(new BouReloadCommand())
                 .build();
     }
