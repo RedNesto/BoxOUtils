@@ -28,9 +28,7 @@ import io.github.rednesto.bou.api.requirement.Requirement;
 import io.github.rednesto.bou.api.requirement.RequirementConfigurationException;
 import io.github.rednesto.bou.api.requirement.RequirementProvider;
 import ninja.leaping.configurate.ConfigurationNode;
-import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.util.TypeTokens;
 
 import java.util.*;
 
@@ -55,25 +53,21 @@ public class DataByKeyRequirementProvider<C extends ValueContainer<C>> implement
             throw new RequirementConfigurationException("A data requirement does not have any data keys to check");
         }
 
-        Map<String, List<String>> requiredData = new HashMap<>();
+        Map<String, List<Object>> requiredData = new HashMap<>();
         for (Map.Entry<Object, ? extends ConfigurationNode> pair : node.getChildrenMap().entrySet()) {
             String keyId = pair.getKey().toString();
             ConfigurationNode valueNode = pair.getValue();
 
             String expandedId = SpongeUtils.addSpongeImplNamespaceIfNeeded(keyId);
+            List<Object> expectedValues = new ArrayList<>();
             if (valueNode.hasListChildren()) {
-                try {
-                    ArrayList<String> requiredKeys = new ArrayList<>(valueNode.getList(TypeTokens.STRING_TOKEN));
-                    requiredData.put(expandedId, requiredKeys);
-                } catch (ObjectMappingException e) {
-                    throw new RequirementConfigurationException(e);
-                }
+                valueNode.getChildrenList().forEach(childNode -> expectedValues.add(childNode.getValue()));
             } else {
-                requiredData.put(expandedId, Collections.singletonList(valueNode.getString()));
+                expectedValues.add(valueNode.getValue());
             }
+            requiredData.put(expandedId, Collections.unmodifiableList(expectedValues));
         }
 
-
-        return new DataByKeyRequirement<>(getId(), this.requirementType, requiredData);
+        return new DataByKeyRequirement<>(getId(), this.requirementType, Collections.unmodifiableMap(requiredData));
     }
 }

@@ -28,9 +28,12 @@ import io.github.rednesto.bou.BoxOUtils;
 import io.github.rednesto.bou.api.requirement.AbstractRequirement;
 import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.World;
 
 import java.util.List;
 import java.util.Map;
@@ -38,36 +41,51 @@ import java.util.Optional;
 
 public class DataByKeyRequirement<C extends ValueContainer<C>> extends AbstractRequirement<C> {
 
-    private final Map<String, List<String>> requiredData;
+    private final Map<String, List<Object>> requiredData;
 
-    public DataByKeyRequirement(String id, Class<C> applicableType, Map<String, List<String>> requiredData) {
+    public DataByKeyRequirement(String id, Class<C> applicableType, Map<String, List<Object>> requiredData) {
         super(id, applicableType);
         this.requiredData = requiredData;
     }
 
     @Override
     public boolean fulfills(C source, Cause cause) {
-        for (Map.Entry<String, List<String>> entry : this.requiredData.entrySet()) {
+        for (Map.Entry<String, List<Object>> entry : this.requiredData.entrySet()) {
             String keyId = entry.getKey();
-            List<String> expectedValues = entry.getValue();
+            List<Object> expectedValues = entry.getValue();
 
+            //noinspection rawtypes
             Optional<Key> maybeDataKey = Sponge.getRegistry().getType(Key.class, keyId);
             if (!maybeDataKey.isPresent()) {
                 BoxOUtils.getInstance().getLogger().warn("Could not find a data key for id '{}'", keyId);
                 continue;
             }
 
+            // We use raw types because we have no idea what type the compared values are
+            //noinspection rawtypes
             Key dataKey = maybeDataKey.get();
-            if (!source.supports(dataKey)) {
+            Object dataValue = null;
+            if (source.supports(dataKey)) {
+                //noinspection unchecked
+                dataValue = source.getOrNull(dataKey);
+            } else if (source instanceof BlockSnapshot) {
+                // Workaround to access BlockState data. Unfortunately, it is too late to query TileEntity data.
+                Location<World> location = ((BlockSnapshot) source).getLocation().orElse(null);
+                if (location != null && location.supports(dataKey)) {
+                    //noinspection unchecked
+                    dataValue = location.getOrNull(dataKey);
+                }
+            }
+
+            if (dataValue == null) {
                 BoxOUtils.getInstance().getLogger().warn("Data container does not support '{}'", keyId);
                 continue;
             }
 
-            // We use raw types because we have no idea what type the compared values are
-            //noinspection unchecked
-            Object dataValue = source.getOrNull(dataKey);
             if (dataValue instanceof CatalogType) {
                 return expectedValues.contains(((CatalogType) dataValue).getId());
+            } else {
+                return expectedValues.contains(dataValue);
             }
         }
 
