@@ -27,6 +27,8 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import io.github.rednesto.bou.Config;
 import io.github.rednesto.bou.CustomDropsProcessor;
+import io.github.rednesto.bou.IdSelector;
+import io.github.rednesto.bou.SpongeConfig;
 import io.github.rednesto.bou.api.customdrops.CustomLoot;
 import io.github.rednesto.bou.api.customdrops.CustomLootProcessingContext;
 import org.spongepowered.api.block.BlockSnapshot;
@@ -45,7 +47,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-public class CustomBlockDropsListener {
+public class CustomBlockDropsListener implements SpongeConfig.ReloadableListener {
 
     // I'd like to find a better thing to use as block identifier, something that does not rely on location,
     // entities unique id are great for that, but I don't know anything similar for blocks
@@ -54,6 +56,7 @@ public class CustomBlockDropsListener {
             // but this should not be too high because the requirements test results may change quickly
             .expireAfterWrite(15, TimeUnit.SECONDS)
             .build();
+    private final IdSelector.Cache idsMappingCache = new IdSelector.Cache();
 
     @Listener
     public void onBlockBreak(ChangeBlockEvent.Break event, @First Player player) {
@@ -65,7 +68,7 @@ public class CustomBlockDropsListener {
         Map<String, List<CustomLoot>> drops = blocksDrops.drops;
         for (Transaction<BlockSnapshot> transaction : event.getTransactions()) {
             BlockSnapshot originalBlock = transaction.getOriginal();
-            List<CustomLoot> loots = drops.get(originalBlock.getState().getType().getId());
+            List<CustomLoot> loots = idsMappingCache.get(drops, originalBlock.getState().getType().getId());
             if (loots == null) {
                 continue;
             }
@@ -110,5 +113,10 @@ public class CustomBlockDropsListener {
                 }
             }
         }
+    }
+
+    @Override
+    public void reload() {
+        idsMappingCache.clear();
     }
 }

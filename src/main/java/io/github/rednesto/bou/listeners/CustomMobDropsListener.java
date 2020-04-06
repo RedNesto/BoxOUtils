@@ -27,6 +27,8 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import io.github.rednesto.bou.Config;
 import io.github.rednesto.bou.CustomDropsProcessor;
+import io.github.rednesto.bou.IdSelector;
+import io.github.rednesto.bou.SpongeConfig;
 import io.github.rednesto.bou.api.customdrops.CustomLoot;
 import io.github.rednesto.bou.api.customdrops.CustomLootProcessingContext;
 import org.spongepowered.api.entity.Entity;
@@ -51,11 +53,12 @@ import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Nullable;
 
-public class CustomMobDropsListener {
+public class CustomMobDropsListener implements SpongeConfig.ReloadableListener {
 
     private final Cache<UUID, List<CustomLoot>> requirementResultsTracker = CacheBuilder.newBuilder()
             .expireAfterWrite(15, TimeUnit.SECONDS)
             .build();
+    private final IdSelector.Cache idsMappingCache = new IdSelector.Cache();
 
     @Listener
     public void onMobDeath(DestructEntityEvent.Death event) {
@@ -66,7 +69,7 @@ public class CustomMobDropsListener {
         }
 
         Map<String, List<CustomLoot>> drops = mobsDrops.drops;
-        List<CustomLoot> loots = drops.get(targetEntity.getType().getId());
+        List<CustomLoot> loots = idsMappingCache.get(drops, targetEntity.getType().getId());
         if (loots == null) {
             return;
         }
@@ -124,5 +127,10 @@ public class CustomMobDropsListener {
                 }
             }
         }
+    }
+
+    @Override
+    public void reload() {
+        idsMappingCache.clear();
     }
 }

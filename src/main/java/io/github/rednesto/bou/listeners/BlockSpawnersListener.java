@@ -25,6 +25,8 @@ package io.github.rednesto.bou.listeners;
 
 import com.flowpowered.math.vector.Vector3i;
 import io.github.rednesto.bou.Config;
+import io.github.rednesto.bou.IdSelector;
+import io.github.rednesto.bou.SpongeConfig;
 import io.github.rednesto.bou.api.blockspawners.SpawnedMob;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.EntityType;
@@ -37,7 +39,9 @@ import org.spongepowered.api.world.World;
 import java.util.List;
 import java.util.Map;
 
-public class BlockSpawnersListener {
+public class BlockSpawnersListener implements SpongeConfig.ReloadableListener {
+
+    private final IdSelector.Cache idsMappingCache = new IdSelector.Cache();
 
     @Listener
     public void onBlockBreak(ChangeBlockEvent.Break event, @First Player player) {
@@ -48,7 +52,7 @@ public class BlockSpawnersListener {
 
         Map<String, List<SpawnedMob>> spawners = blockSpawners.spawners;
         event.getTransactions().forEach(transaction -> {
-            List<SpawnedMob> toSpawnMobs = spawners.get(transaction.getOriginal().getState().getType().getId());
+            List<SpawnedMob> toSpawnMobs = idsMappingCache.get(spawners, transaction.getOriginal().getState().getType().getId());
             if (toSpawnMobs == null) {
                 return;
             }
@@ -75,5 +79,10 @@ public class BlockSpawnersListener {
                 }
             });
         });
+    }
+
+    @Override
+    public void reload() {
+        idsMappingCache.clear();
     }
 }

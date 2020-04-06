@@ -69,6 +69,15 @@ public class SpongeUtils {
     }
 
     @Nullable
+    public static String getModId(String id) {
+        String[] parts = id.split(":", 2);
+        if (parts.length >= 2) {
+            return parts[0];
+        }
+        return null;
+    }
+
+    @Nullable
     public static ConfigurationNode getNthParent(ConfigurationNode node, int nth) {
         ConfigurationNode parent = node.getParent();
         for (int i = 1; i < nth; i++) {

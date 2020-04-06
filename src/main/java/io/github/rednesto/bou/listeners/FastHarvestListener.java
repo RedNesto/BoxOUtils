@@ -23,9 +23,7 @@
  */
 package io.github.rednesto.bou.listeners;
 
-import io.github.rednesto.bou.Config;
-import io.github.rednesto.bou.CropsAlgoritm;
-import io.github.rednesto.bou.CustomDropsProcessor;
+import io.github.rednesto.bou.*;
 import io.github.rednesto.bou.api.BouEventContextKeys;
 import io.github.rednesto.bou.api.customdrops.CustomLoot;
 import io.github.rednesto.bou.api.customdrops.CustomLootProcessingContext;
@@ -61,7 +59,7 @@ import javax.annotation.Nullable;
 
 import static io.github.rednesto.bou.Config.FastHarvest;
 
-public class FastHarvestListener {
+public class FastHarvestListener implements SpongeConfig.ReloadableListener {
 
     private static final Map<String, CropDefinition> DEFINITIONS = new HashMap<>();
 
@@ -73,6 +71,8 @@ public class FastHarvestListener {
         DEFINITIONS.put("minecraft:cocoa", new CropDefinition(2, ItemTypes.DYE, 3, null, 0));
         DEFINITIONS.put("minecraft:nether_wart", new CropDefinition(3, ItemTypes.NETHER_WART, 2, null, 0));
     }
+
+    private final IdSelector.Cache idsMappingCache = new IdSelector.Cache();
 
     @Listener
     public void onSecondaryClick(InteractBlockEvent.Secondary.MainHand event, @First Player player) {
@@ -97,7 +97,7 @@ public class FastHarvestListener {
         Location<World> entitiesSpawnLocation = targetBlock.getLocation().orElse(player.getLocation());
 
         Map<String, List<CustomLoot>> drops = Config.getBlocksDrops().drops;
-        List<CustomLoot> customLoots = drops.get(targetBlock.getState().getType().getId());
+        List<CustomLoot> customLoots = idsMappingCache.get(drops, targetBlock.getState().getType().getId());
         CustomLootProcessingContext processingContext = null;
         List<CustomLoot> lootsToUse = Collections.emptyList();
         if (customLoots != null) {
@@ -134,9 +134,9 @@ public class FastHarvestListener {
                 FastHarvestCrop productConfig = null;
                 ItemType productType = cropDefinition.product;
                 if (cropsControl.enabled) {
-                    seedConfig = cropsControl.crops.get(cropDefinition.seed.getId());
+                    seedConfig = idsMappingCache.get(cropsControl.crops, cropDefinition.seed.getId());
                     if (productType != null) {
-                        productConfig = cropsControl.crops.get(productType.getId());
+                        productConfig = idsMappingCache.get(cropsControl.crops, productType.getId());
                     }
                 } else {
 
@@ -236,6 +236,11 @@ public class FastHarvestListener {
         for (CustomLoot loot : processingContext.getLoots()) {
             CustomDropsProcessor.handleDropItemEvent(event, loot, blockSnapshot);
         }
+    }
+
+    @Override
+    public void reload() {
+        idsMappingCache.clear();
     }
 
     @Nullable
