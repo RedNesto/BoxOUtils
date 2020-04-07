@@ -68,8 +68,12 @@ public final class Config {
         return BoxOUtils.getInstance().getCropsControl();
     }
 
+    public interface ToggleableConfig {
+        boolean isEnabled();
+    }
+
     @ConfigSerializable
-    public static class BlocksDrops {
+    public static class BlocksDrops implements ToggleableConfig {
 
         @Setting("enabled")
         public boolean enabled;
@@ -82,10 +86,15 @@ public final class Config {
             this.enabled = enabled;
             this.drops = drops;
         }
+
+        @Override
+        public boolean isEnabled() {
+            return enabled;
+        }
     }
 
     @ConfigSerializable
-    public static class MobsDrops {
+    public static class MobsDrops implements ToggleableConfig {
 
         @Setting("enabled")
         public boolean enabled;
@@ -98,10 +107,15 @@ public final class Config {
             this.enabled = enabled;
             this.drops = drops;
         }
+
+        @Override
+        public boolean isEnabled() {
+            return enabled;
+        }
     }
 
     @ConfigSerializable
-    public static class BlockSpawners {
+    public static class BlockSpawners implements ToggleableConfig {
 
         @Setting("enabled")
         public boolean enabled;
@@ -114,10 +128,15 @@ public final class Config {
             this.enabled = enabled;
             this.spawners = spawners;
         }
+
+        @Override
+        public boolean isEnabled() {
+            return enabled;
+        }
     }
 
     @ConfigSerializable
-    public static class FastHarvest {
+    public static class FastHarvest implements ToggleableConfig {
 
         @Setting("enabled")
         public boolean enabled;
@@ -140,10 +159,15 @@ public final class Config {
             FastHarvestTools tools = new FastHarvestTools(false, true, true, new ArrayList<>());
             return new FastHarvest(false, true, tools);
         }
+
+        @Override
+        public boolean isEnabled() {
+            return enabled;
+        }
     }
 
     @ConfigSerializable
-    public static class CropsControl {
+    public static class CropsControl implements ToggleableConfig {
 
         @Setting("enabled")
         public boolean enabled;
@@ -156,6 +180,11 @@ public final class Config {
         public CropsControl(boolean enabled, Map<String, FastHarvestCrop> crops) {
             this.enabled = enabled;
             this.crops = crops;
+        }
+
+        @Override
+        public boolean isEnabled() {
+            return enabled;
         }
 
         public static CropsControl createDefault() {

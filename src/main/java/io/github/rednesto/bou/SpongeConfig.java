@@ -43,93 +43,74 @@ import org.spongepowered.api.asset.Asset;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
-import java.util.function.Consumer;
+import java.util.function.BiConsumer;
+import java.util.function.Supplier;
+
+import javax.annotation.Nullable;
 
 public class SpongeConfig {
 
     private static final boolean IS_TESTING = BouUtils.isTesting();
 
-    private static boolean fastHarvestListenersRegistered = false;
-    private static boolean blockDropsListenersRegistered = false;
-    private static boolean mobDropsListenersRegistered = false;
-    private static boolean blockSpawnersListenersRegistered = false;
+    private static final List<Feature<?, ?>> FEATURES = Arrays.asList(
+            new Feature<>("fastharvest.conf", "FastHarvest", BouTypeTokens.CONFIG_FAST_HARVEST, BoxOUtils::setFastHarvest, FastHarvestListener::new),
+            new Feature<>("cropscontrol.conf", "CropsControl", BouTypeTokens.CONFIG_CROPS_CONTROL, BoxOUtils::setCropsControl),
+            new Feature<>("blocksdrops.conf", "BlocksDrops", BouTypeTokens.CONFIG_BLOCKS_DROPS, BoxOUtils::setBlocksDrops, CustomBlockDropsListener::new),
+            new Feature<>("mobsdrops.conf", "MobsDrops", BouTypeTokens.CONFIG_MOBS_DROPS, BoxOUtils::setMobsDrops, CustomMobDropsListener::new),
+            new Feature<>("blockspawners.conf", "BlockSpawners", BouTypeTokens.CONFIG_BLOCK_SPAWNERS, BoxOUtils::setBlockSpawners, BlockSpawnersListener::new)
+    );
 
     public static void loadConf(BoxOUtils plugin) throws IOException {
         Files.createDirectories(plugin.getConfigDir());
-
-        loadFastHarvest(plugin);
-        loadCropsControl(plugin);
-        loadBlocksDrops(plugin);
-        loadMobsDrops(plugin);
-        loadBlockSpawners(plugin);
-    }
-
-    private static void loadFastHarvest(BoxOUtils plugin) throws IOException {
-        doLoad(plugin, "fastharvest.conf", "FastHarvest", BouTypeTokens.CONFIG_FAST_HARVEST, config -> {
-            plugin.setFastHarvest(config);
-            if (config.enabled && !fastHarvestListenersRegistered && !IS_TESTING) {
-                Sponge.getEventManager().registerListeners(plugin, new FastHarvestListener());
-                fastHarvestListenersRegistered = true;
-            }
-        });
-    }
-
-    private static void loadCropsControl(BoxOUtils plugin) throws IOException {
-        doLoad(plugin, "cropscontrol.conf", "CropsControl", BouTypeTokens.CONFIG_CROPS_CONTROL, config -> {
-            plugin.setCropsControl(config);
-            if (config.enabled && !fastHarvestListenersRegistered && !IS_TESTING) {
-                Sponge.getEventManager().registerListeners(plugin, new FastHarvestListener());
-                fastHarvestListenersRegistered = true;
-            }
-        });
-    }
-
-    private static void loadBlocksDrops(BoxOUtils plugin) throws IOException {
-        doLoad(plugin, "blocksdrops.conf", "BlocksDrops", BouTypeTokens.CONFIG_BLOCKS_DROPS, config -> {
-            plugin.setBlocksDrops(config);
-            if (config.enabled && !blockDropsListenersRegistered && !IS_TESTING) {
-                Sponge.getEventManager().registerListeners(plugin, new CustomBlockDropsListener());
-                blockDropsListenersRegistered = true;
-            }
-        });
-    }
-
-    private static void loadMobsDrops(BoxOUtils plugin) throws IOException {
-        doLoad(plugin, "mobsdrops.conf", "MobsDrops", BouTypeTokens.CONFIG_MOBS_DROPS, config -> {
-            plugin.setMobsDrops(config);
-            if (config.enabled && !mobDropsListenersRegistered && !IS_TESTING) {
-                Sponge.getEventManager().registerListeners(plugin, new CustomMobDropsListener());
-                mobDropsListenersRegistered = true;
-            }
-        });
-    }
-
-    private static void loadBlockSpawners(BoxOUtils plugin) throws IOException {
-        doLoad(plugin, "blockspawners.conf", "BlockSpawners", BouTypeTokens.CONFIG_BLOCK_SPAWNERS, config -> {
-            plugin.setBlockSpawners(config);
-            if (config.enabled && !blockSpawnersListenersRegistered && !IS_TESTING) {
-                Sponge.getEventManager().registerListeners(plugin, new BlockSpawnersListener());
-                blockSpawnersListenersRegistered = true;
-            }
-        });
-    }
-
-    private static <T> void doLoad(BoxOUtils plugin, String filename, String presentableConfigName, TypeToken<T> configToken, Consumer<T> loadCallback) throws IOException {
-        ConfigurationNode rootNode = loadFileSafely(plugin, filename, presentableConfigName);
-
-        T loadedConfig = null;
-        try {
-            loadedConfig = rootNode.getValue(configToken);
-        } catch (ObjectMappingException e) {
-            plugin.getLogger().error("Unable to read " + presentableConfigName + " configuration.", e);
+        for (Feature<?, ?> feature : FEATURES) {
+            loadFeature(plugin, feature);
         }
+    }
 
-        if (loadedConfig == null) {
+    private static <C, L> void loadFeature(BoxOUtils plugin, Feature<C, L> feature) throws IOException {
+        ConfigurationNode rootNode = loadFileSafely(plugin, feature.filename, feature.presentableConfigName);
+
+        try {
+            C loadedConfig = rootNode.getValue(feature.configToken);
+            if (loadedConfig != null) {
+                feature.configSetter.accept(plugin, loadedConfig);
+            }
+
+            ListenerWrapper<L> listenerWrapper = feature.listener;
+            if (listenerWrapper != null) {
+                if (loadedConfig instanceof Config.ToggleableConfig) {
+                    L existingListener = listenerWrapper.listener;
+                    if (((Config.ToggleableConfig) loadedConfig).isEnabled()) {
+                        registerOrReloadListener(plugin, listenerWrapper);
+                    } else if (existingListener != null) {
+                        listenerWrapper.listener = null;
+                        Sponge.getEventManager().unregisterListeners(existingListener);
+                    }
+                } else {
+                    registerOrReloadListener(plugin, listenerWrapper);
+                }
+            }
+        } catch (ObjectMappingException e) {
+            plugin.getLogger().error("Unable to read " + feature.presentableConfigName + " configuration.", e);
+        }
+    }
+
+    private static <L> void registerOrReloadListener(BoxOUtils plugin, ListenerWrapper<L> wrapper) {
+        if (IS_TESTING) {
             return;
         }
 
-        loadCallback.accept(loadedConfig);
+        L existingListener = wrapper.listener;
+        if (existingListener == null) {
+            L newListener = wrapper.listenerSupplier.get();
+            Sponge.getEventManager().registerListeners(plugin, newListener);
+            wrapper.listener = newListener;
+        } else if (existingListener instanceof ReloadableListener) {
+            ((ReloadableListener) existingListener).reload();
+        }
     }
 
     private static ConfigurationNode loadFileSafely(BoxOUtils plugin, String filename, String presentableConfigName) throws IOException {
@@ -187,5 +168,47 @@ public class SpongeConfig {
                 .registerType(BouTypeTokens.FAST_HARVEST_TOOLS, new FastHarvestToolsSerializer())
                 // Configurations
                 .registerType(BouTypeTokens.CONFIG_BLOCK_SPAWNERS, new ConfigBlockSpawnerSerializer());
+    }
+
+    private static class ListenerWrapper<L> {
+
+        private final Supplier<L> listenerSupplier;
+        @Nullable
+        private L listener;
+
+        private ListenerWrapper(Supplier<L> listenerSupplier) {
+            this.listenerSupplier = listenerSupplier;
+        }
+    }
+
+    private static class Feature<C, L> {
+
+        private final String filename;
+        private final String presentableConfigName;
+        private final TypeToken<C> configToken;
+        private final BiConsumer<BoxOUtils, C> configSetter;
+        @Nullable
+        private final ListenerWrapper<L> listener;
+
+        private Feature(String filename, String presentableConfigName, TypeToken<C> configToken, BiConsumer<BoxOUtils, C> configSetter, @Nullable ListenerWrapper<L> listener) {
+            this.filename = filename;
+            this.presentableConfigName = presentableConfigName;
+            this.configToken = configToken;
+            this.configSetter = configSetter;
+            this.listener = listener;
+        }
+
+        private Feature(String filename, String presentableConfigName, TypeToken<C> configToken, BiConsumer<BoxOUtils, C> configSetter, Supplier<L> listenerSupplier) {
+            this(filename, presentableConfigName, configToken, configSetter, new ListenerWrapper<>(listenerSupplier));
+        }
+
+        private Feature(String filename, String presentableConfigName, TypeToken<C> configToken, BiConsumer<BoxOUtils, C> configSetter) {
+            this(filename, presentableConfigName, configToken, configSetter, (ListenerWrapper<L>) null);
+        }
+    }
+
+    public interface ReloadableListener {
+
+        void reload();
     }
 }
