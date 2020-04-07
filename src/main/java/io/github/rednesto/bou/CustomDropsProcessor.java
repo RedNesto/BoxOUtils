@@ -129,6 +129,7 @@ public class CustomDropsProcessor {
             lootStackConsumer = itemStack -> {
                 Entity itemEntity = targetLocation.createEntity(EntityTypes.ITEM);
                 itemEntity.offer(Keys.REPRESENTED_ITEM, itemStack.createSnapshot());
+                itemEntity.offer(Keys.PICKUP_DELAY, 10);
                 targetLocation.spawnEntity(itemEntity);
             };
         } else if (targetPlayer != null) {

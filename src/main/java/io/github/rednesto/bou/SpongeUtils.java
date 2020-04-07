@@ -26,6 +26,10 @@ package io.github.rednesto.bou;
 import ninja.leaping.configurate.ConfigurationNode;
 import org.spongepowered.api.Platform;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.block.BlockSnapshot;
+import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.World;
+import org.spongepowered.api.world.extent.Extent;
 
 import javax.annotation.Nullable;
 
@@ -89,5 +93,13 @@ public class SpongeUtils {
         }
 
         return parent;
+    }
+
+    public static Location<World> getCenteredLocation(BlockSnapshot snapshot, World world) {
+        return center(snapshot.getLocation().orElseGet(() -> new Location<>(world, snapshot.getPosition())));
+    }
+
+    public static <E extends Extent> Location<E> center(Location<E> location) {
+        return location.add(0.5, 0.5, 0.5);
     }
 }

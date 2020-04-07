@@ -25,10 +25,7 @@ package io.github.rednesto.bou.listeners;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import io.github.rednesto.bou.Config;
-import io.github.rednesto.bou.CustomDropsProcessor;
-import io.github.rednesto.bou.IdSelector;
-import io.github.rednesto.bou.SpongeConfig;
+import io.github.rednesto.bou.*;
 import io.github.rednesto.bou.api.customdrops.CustomLoot;
 import io.github.rednesto.bou.api.customdrops.CustomLootProcessingContext;
 import org.spongepowered.api.block.BlockSnapshot;
@@ -75,7 +72,7 @@ public class CustomBlockDropsListener implements SpongeConfig.ReloadableListener
 
             List<CustomLoot> lootsToUse = CustomDropsProcessor.getLootsToUse(loots, originalBlock, event.getCause());
             if (!lootsToUse.isEmpty()) {
-                Location<World> targetLocation = originalBlock.getLocation().orElseGet(() -> new Location<>(player.getWorld(), originalBlock.getPosition()));
+                Location<World> targetLocation = SpongeUtils.getCenteredLocation(originalBlock, player.getWorld());
                 requirementResultsTracker.put(targetLocation, lootsToUse);
                 CustomLootProcessingContext processingContext = new CustomLootProcessingContext(lootsToUse, event, originalBlock, event.getCause(), player, targetLocation);
                 CustomDropsProcessor.dropLoot(processingContext);
@@ -89,7 +86,7 @@ public class CustomBlockDropsListener implements SpongeConfig.ReloadableListener
             return;
         }
 
-        Location<World> targetLocation = block.getLocation().orElseGet(() -> new Location<>(player.getWorld(), block.getPosition()));
+        Location<World> targetLocation = SpongeUtils.getCenteredLocation(block, player.getWorld());
         List<CustomLoot> result = requirementResultsTracker.getIfPresent(targetLocation);
         if (result != null) {
             result.forEach(loot -> CustomDropsProcessor.handleDropItemEvent(event, loot, block));
@@ -103,6 +100,7 @@ public class CustomBlockDropsListener implements SpongeConfig.ReloadableListener
         }
 
         List<CustomLoot> customLoot = brokenBlock.getLocation()
+                .map(SpongeUtils::center)
                 .map(requirementResultsTracker::getIfPresent)
                 .orElse(null);
         if (customLoot != null) {

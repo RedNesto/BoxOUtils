@@ -94,7 +94,7 @@ public class FastHarvestListener implements SpongeConfig.ReloadableListener {
             return;
         }
 
-        Location<World> entitiesSpawnLocation = targetBlock.getLocation().orElse(player.getLocation());
+        Location<World> entitiesSpawnLocation = SpongeUtils.getCenteredLocation(targetBlock, player.getWorld());
 
         Map<String, List<CustomLoot>> drops = Config.getBlocksDrops().drops;
         List<CustomLoot> customLoots = idsMappingCache.get(drops, targetBlock.getState().getType().getId());
@@ -272,6 +272,7 @@ public class FastHarvestListener implements SpongeConfig.ReloadableListener {
         ItemStackSnapshot representedItem = itemStack.createSnapshot();
         Entity entity = spawnLocation.createEntity(EntityTypes.ITEM);
         entity.offer(Keys.REPRESENTED_ITEM, representedItem);
+        entity.offer(Keys.PICKUP_DELAY, 10);
         spawnLocation.spawnEntity(entity);
     }
 
