@@ -45,10 +45,7 @@ import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Nullable;
@@ -107,7 +104,11 @@ public class CustomMobDropsListener implements SpongeConfig.ReloadableListener {
         UUID entityId = entity.getUniqueId();
         List<CustomLoot> customLoots = requirementResultsTracker.getIfPresent(entityId);
         if (customLoots != null) {
-            customLoots.forEach(loot ->CustomDropsProcessor.handleDropItemEvent(event, loot, entity.createSnapshot()));
+            customLoots.forEach(loot -> {
+                Player targetPlayer = event.getCause().first(Player.class).orElse(null);
+                CustomLootProcessingContext context = new CustomLootProcessingContext(Collections.singletonList(loot), event, entity.createSnapshot(), event.getCause(), targetPlayer, entity.getLocation());
+                CustomDropsProcessor.handleDropItemEvent(event, loot, context);
+            });
         }
     }
 

@@ -40,6 +40,7 @@ import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -89,7 +90,10 @@ public class CustomBlockDropsListener implements SpongeConfig.ReloadableListener
         Location<World> targetLocation = SpongeUtils.getCenteredLocation(block, player.getWorld());
         List<CustomLoot> result = requirementResultsTracker.getIfPresent(targetLocation);
         if (result != null) {
-            result.forEach(loot -> CustomDropsProcessor.handleDropItemEvent(event, loot, block));
+            result.forEach(loot -> {
+                CustomLootProcessingContext context = new CustomLootProcessingContext(Collections.singletonList(loot), event, block, event.getCause(), player, targetLocation);
+                CustomDropsProcessor.handleDropItemEvent(event, loot, context);
+            });
         }
     }
 

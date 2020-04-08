@@ -25,10 +25,13 @@ package io.github.rednesto.bou;
 
 import io.github.rednesto.bou.api.customdrops.CustomDropsProviderIntegrations;
 import io.github.rednesto.bou.api.customdrops.CustomLootComponentProviderIntegrations;
+import io.github.rednesto.bou.api.customdrops.CustomLootRecipientProviderIntegrations;
 import io.github.rednesto.bou.api.requirement.RequirementProviderIntegrations;
 import io.github.rednesto.bou.integration.customdrops.CommandLootComponent;
 import io.github.rednesto.bou.integration.customdrops.ExperienceLootComponent;
 import io.github.rednesto.bou.integration.customdrops.MoneyLootComponent;
+import io.github.rednesto.bou.integration.customdrops.recipients.ContextLocationLootRecipient;
+import io.github.rednesto.bou.integration.customdrops.recipients.PlayerInventoryLootRecipient;
 import io.github.rednesto.bou.integration.vanilla.VanillaCustomDropsProvider;
 import io.github.rednesto.bou.requirements.DataByKeyRequirementProvider;
 import io.github.rednesto.bou.requirements.EnchantmentsRequirement;
@@ -44,6 +47,7 @@ public final class IntegrationsManager {
     private CustomDropsProviderIntegrations customDropsProviderIntegrations = new CustomDropsProviderIntegrations(new VanillaCustomDropsProvider());
     private RequirementProviderIntegrations requirementProviderIntegrations = new RequirementProviderIntegrations();
     private CustomLootComponentProviderIntegrations customLootComponentProviderIntegrations = new CustomLootComponentProviderIntegrations();
+    private CustomLootRecipientProviderIntegrations customLootRecipientProviderIntegrations = new CustomLootRecipientProviderIntegrations();
 
     public void loadVanillaBuiltins() {
         if (vanillaBuiltinsLoaded) {
@@ -61,18 +65,23 @@ public final class IntegrationsManager {
         customLootComponentProviderIntegrations.register(new CommandLootComponent.Provider(), true);
         customLootComponentProviderIntegrations.register(new ExperienceLootComponent.Provider(), true);
         customLootComponentProviderIntegrations.register(new MoneyLootComponent.Provider(), true);
+
+        customLootRecipientProviderIntegrations.register(new ContextLocationLootRecipient.Provider(), true);
+        customLootRecipientProviderIntegrations.register(new PlayerInventoryLootRecipient.Provider(), true);
     }
 
     public void initIntegrations(BoxOUtils plugin) {
         customDropsProviderIntegrations.initIntegrations(plugin);
         requirementProviderIntegrations.initIntegrations(plugin);
         customLootComponentProviderIntegrations.initIntegrations(plugin);
+        customLootRecipientProviderIntegrations.initIntegrations(plugin);
     }
 
     public void reloadIntegrations(BoxOUtils plugin) {
         customDropsProviderIntegrations.reloadIntegrations(plugin);
         requirementProviderIntegrations.reloadIntegrations(plugin);
         customLootComponentProviderIntegrations.reloadIntegrations(plugin);
+        customLootRecipientProviderIntegrations.reloadIntegrations(plugin);
     }
 
     public CustomDropsProviderIntegrations getCustomDropsProviderIntegrations() {
@@ -85,6 +94,10 @@ public final class IntegrationsManager {
 
     public CustomLootComponentProviderIntegrations getCustomLootComponentProviderIntegrations() {
         return customLootComponentProviderIntegrations;
+    }
+
+    public CustomLootRecipientProviderIntegrations getCustomLootRecipientProviderIntegrations() {
+        return customLootRecipientProviderIntegrations;
     }
 
     public static IntegrationsManager getInstance() {

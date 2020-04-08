@@ -32,6 +32,7 @@ import io.github.rednesto.bou.api.lootReuse.SimpleLootReuse
 import io.github.rednesto.bou.api.quantity.BoundedIntQuantity
 import io.github.rednesto.bou.config.serializers.BouTypeTokens
 import io.github.rednesto.bou.integration.customdrops.MoneyLootComponent
+import io.github.rednesto.bou.integration.customdrops.recipients.ContextLocationLootRecipient
 import io.github.rednesto.bou.integration.griefprevention.GriefPreventionRegionRequirement
 import io.github.rednesto.bou.requirements.DataByKeyRequirement
 import io.github.rednesto.bou.tests.framework.PluginConfigurationTestCase
@@ -58,12 +59,12 @@ class MobsDropsConfigurationTests : PluginConfigurationTestCase<Config.MobsDrops
             val drops = listOf(
                     ItemLoot("waw_sword", "byte-items", null, 0.0, null),
                     ItemLoot("test", "file-inv", null, 0.0, BoundedIntQuantity(0, 2)))
-            CustomLoot(drops, true, false, requirements, reuse, listOf(money))
+            CustomLoot(drops, true, false, ContextLocationLootRecipient.INSTANCE,  requirements, reuse, listOf(money))
         }
 
         val bat = run {
             val drops = listOf(ItemLoot("minecraft:ghast_tear", null, null, 33.33, null))
-            CustomLoot(drops, false, false, emptyList(), null, emptyList())
+            CustomLoot(drops, false, false, ContextLocationLootRecipient.INSTANCE, emptyList(), null, emptyList())
         }
 
         val expected = mapOf(

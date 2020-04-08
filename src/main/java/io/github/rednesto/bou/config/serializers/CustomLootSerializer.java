@@ -26,6 +26,7 @@ package io.github.rednesto.bou.config.serializers;
 import com.google.common.reflect.TypeToken;
 import io.github.rednesto.bou.api.customdrops.*;
 import io.github.rednesto.bou.api.requirement.Requirement;
+import io.github.rednesto.bou.integration.customdrops.recipients.ContextLocationLootRecipient;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import ninja.leaping.configurate.objectmapping.serialize.TypeSerializer;
@@ -57,6 +58,8 @@ public class CustomLootSerializer implements TypeSerializer<CustomLoot> {
         boolean overwrite = value.getNode("overwrite").getBoolean(false);
         boolean expOverwrite = value.getNode("exp-overwrite").getBoolean(false);
 
+        CustomLootRecipient recipient = value.getNode("recipient").getValue(BouTypeTokens.CUSTOM_LOOT_RECIPIENT, ContextLocationLootRecipient.INSTANCE);
+
         CustomLootComponentProviderIntegrations componentProviderIntegrations = CustomLootComponentProviderIntegrations.getInstance();
         List<CustomLootComponent> components = new ArrayList<>();
         value.getChildrenMap().forEach((key, node) -> {
@@ -73,7 +76,7 @@ public class CustomLootSerializer implements TypeSerializer<CustomLoot> {
             }
         });
 
-        return new CustomLoot(itemLoots, overwrite, expOverwrite, requirements, reuse, components);
+        return new CustomLoot(itemLoots, overwrite, expOverwrite, recipient, requirements, reuse, components);
     }
 
     @Override

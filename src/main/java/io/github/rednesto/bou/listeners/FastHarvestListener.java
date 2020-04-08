@@ -72,7 +72,9 @@ public class FastHarvestListener implements SpongeConfig.ReloadableListener {
         DEFINITIONS.put("minecraft:nether_wart", new CropDefinition(3, ItemTypes.NETHER_WART, 2, null, 0));
     }
 
-    private final IdSelector.Cache idsMappingCache = new IdSelector.Cache();
+    private final IdSelector.Cache blocksDropIdsMappingCache = new IdSelector.Cache();
+    private final IdSelector.Cache seedIdsMappingCache = new IdSelector.Cache();
+    private final IdSelector.Cache productIdsMappingCache = new IdSelector.Cache();
 
     @Listener
     public void onSecondaryClick(InteractBlockEvent.Secondary.MainHand event, @First Player player) {
@@ -97,19 +99,19 @@ public class FastHarvestListener implements SpongeConfig.ReloadableListener {
         Location<World> entitiesSpawnLocation = SpongeUtils.getCenteredLocation(targetBlock, player.getWorld());
 
         Map<String, List<CustomLoot>> drops = Config.getBlocksDrops().drops;
-        List<CustomLoot> customLoots = idsMappingCache.get(drops, targetBlock.getState().getType().getId());
-        CustomLootProcessingContext processingContext = null;
+        List<CustomLoot> customLoots = blocksDropIdsMappingCache.get(drops, targetBlock.getState().getType().getId());
         List<CustomLoot> lootsToUse = Collections.emptyList();
         if (customLoots != null) {
             lootsToUse = CustomDropsProcessor.getLootsToUse(customLoots, targetBlock, event.getCause());
-            if (!lootsToUse.isEmpty()) {
-                processingContext = new CustomLootProcessingContext(lootsToUse, event, targetBlock, event.getCause(), player, entitiesSpawnLocation);
-                CustomDropsProcessor.dropLoot(processingContext, fastHarvest.dropInWorld);
-            }
+        }
+
+        CustomLootProcessingContext processingContext = new CustomLootProcessingContext(lootsToUse, event, targetBlock, event.getCause(), player, entitiesSpawnLocation);
+        if (!lootsToUse.isEmpty()) {
+            CustomDropsProcessor.dropLoot(processingContext, fastHarvest.dropInWorld);
         }
 
         try (CauseStackManager.StackFrame stackFrame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            if (processingContext != null) {
+            if (!processingContext.getLoots().isEmpty()) {
                 stackFrame.addContext(BouEventContextKeys.CUSTOM_LOOT_PROCESSING_CONTEXT, processingContext);
             }
             stackFrame.addContext(BouEventContextKeys.IS_FAST_HARVESTING, true);
@@ -119,13 +121,11 @@ public class FastHarvestListener implements SpongeConfig.ReloadableListener {
             Config.CropsControl cropsControl = Config.getCropsControl();
 
             boolean overwrite = false;
-            if (processingContext != null) {
-                List<CustomLoot> loots = processingContext.getLoots();
-                for (CustomLoot loot : loots) {
-                    if (loot.isOverwrite()) {
-                        overwrite = true;
-                        break;
-                    }
+            List<CustomLoot> loots = processingContext.getLoots();
+            for (CustomLoot loot : loots) {
+                if (loot.isOverwrite()) {
+                    overwrite = true;
+                    break;
                 }
             }
 
@@ -134,9 +134,9 @@ public class FastHarvestListener implements SpongeConfig.ReloadableListener {
                 FastHarvestCrop productConfig = null;
                 ItemType productType = cropDefinition.product;
                 if (cropsControl.enabled) {
-                    seedConfig = idsMappingCache.get(cropsControl.crops, cropDefinition.seed.getId());
+                    seedConfig = seedIdsMappingCache.get(cropsControl.crops, cropDefinition.seed.getId());
                     if (productType != null) {
-                        productConfig = idsMappingCache.get(cropsControl.crops, productType.getId());
+                        productConfig = productIdsMappingCache.get(cropsControl.crops, productType.getId());
                     }
                 } else {
 
@@ -161,13 +161,11 @@ public class FastHarvestListener implements SpongeConfig.ReloadableListener {
 
                 if (seedConfig != null) {
                     // We decrement because we consume the seed to plant it again
-                    process(age, maxAge, fortuneLevel, seedConfig, cropDefinition.seed, true,
-                            player, fastHarvest.dropInWorld, entitiesSpawnLocation, lootsToUse);
+                    process(age, maxAge, fortuneLevel, seedConfig, cropDefinition.seed, true, fastHarvest.dropInWorld, processingContext);
                 }
 
                 if (productType != null && productConfig != null) {
-                    process(age, maxAge, fortuneLevel, productConfig, productType, false,
-                            player, fastHarvest.dropInWorld, entitiesSpawnLocation, lootsToUse);
+                    process(age, maxAge, fortuneLevel, productConfig, productType, false, fastHarvest.dropInWorld, processingContext);
                 }
             }
         }
@@ -188,36 +186,32 @@ public class FastHarvestListener implements SpongeConfig.ReloadableListener {
     }
 
     private static void process(int age, int maxAge, int fortuneLevel, FastHarvestCrop cropConfig,
-                                ItemType itemType, boolean decrementQuantity, Player player, boolean spawnInWorld,
-                                Location<World> spawnLocation, List<CustomLoot> customLoots) {
+                                ItemType itemType, boolean decrementQuantity, boolean dropInWorld, CustomLootProcessingContext context) {
         ItemStack itemStack = createItemStack(age, maxAge, fortuneLevel, cropConfig, itemType, decrementQuantity);
         if (itemStack == null) {
             return;
         }
 
-        if (spawnInWorld) {
-            spawnItem(spawnLocation, itemStack);
-        } else {
-            if (!customLoots.isEmpty()) {
-                for (CustomLoot loot : customLoots) {
-                    CustomLoot.Reuse lootReuse = loot.getReuse();
-                    if (lootReuse != null) {
-                        List<ItemStack> reuseResult = new ArrayList<>();
-                        CustomDropsProcessor.computeSingleItemReuse(lootReuse, reuseResult, itemStack);
-                        if (!reuseResult.isEmpty()) {
-                            if (reuseResult.size() == 1) {
-                                player.getInventory().offer(reuseResult.get(0));
-                            } else {
-                                reuseResult.forEach(player.getInventory()::offer);
-                            }
+        if (context.getLoots().isEmpty()) {
+            if (dropInWorld && context.getTargetLocation() != null) {
+                spawnItem(context.getTargetLocation(), itemStack);
+            } else if (context.getTargetPlayer() != null) {
+                context.getTargetPlayer().getInventory().offer(itemStack);
+            }
+            return;
+        }
 
-                            reuseResult.clear();
-                        }
-                    }
-                }
+        for (CustomLoot loot : context.getLoots()) {
+            CustomLoot.Reuse reuse = loot.getReuse();
+            if (reuse == null) {
+                continue;
             }
 
-            player.getInventory().offer(itemStack);
+            List<ItemStack> reuseResult = new ArrayList<>();
+            CustomDropsProcessor.computeSingleItemReuse(reuse, reuseResult, itemStack);
+
+            CustomLootProcessingContext reuseContext = context.withLoots(Collections.singletonList(loot));
+            reuseResult.forEach(item -> loot.getRecipient().receive(reuseContext, item));
         }
     }
 
@@ -234,13 +228,15 @@ public class FastHarvestListener implements SpongeConfig.ReloadableListener {
         }
 
         for (CustomLoot loot : processingContext.getLoots()) {
-            CustomDropsProcessor.handleDropItemEvent(event, loot, blockSnapshot);
+            CustomDropsProcessor.handleDropItemEvent(event, loot, processingContext.withLoots(Collections.singletonList(loot)));
         }
     }
 
     @Override
     public void reload() {
-        idsMappingCache.clear();
+        blocksDropIdsMappingCache.clear();
+        seedIdsMappingCache.clear();
+        productIdsMappingCache.clear();
     }
 
     @Nullable

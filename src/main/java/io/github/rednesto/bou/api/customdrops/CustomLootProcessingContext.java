@@ -85,6 +85,10 @@ public class CustomLootProcessingContext {
         return targetLocation;
     }
 
+    public CustomLootProcessingContext withLoots(List<CustomLoot> loots) {
+        return new CustomLootProcessingContext(loots, this.event, this.source, this.cause, this.targetPlayer, this.targetLocation);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {

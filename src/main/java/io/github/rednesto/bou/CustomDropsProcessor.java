@@ -31,7 +31,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.Item;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.cause.Cause;
@@ -39,18 +38,15 @@ import org.spongepowered.api.event.entity.AffectEntityEvent;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.text.serializer.TextSerializers;
-import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.World;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
 
 public class CustomDropsProcessor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CustomDropsProcessor.class);
 
-    public static void handleDropItemEvent(AffectEntityEvent event, CustomLoot customLoot, Object source) {
+    public static void handleDropItemEvent(AffectEntityEvent event, CustomLoot customLoot, CustomLootProcessingContext context) {
         if (customLoot.isOverwrite()) {
             event.setCancelled(true);
             return;
@@ -58,7 +54,7 @@ public class CustomDropsProcessor {
 
         CustomLoot.Reuse reuse = customLoot.getReuse();
         if (reuse != null) {
-            if (!fulfillsRequirements(source, event.getCause(), reuse.getRequirements())) {
+            if (!fulfillsRequirements(context.getSource(), event.getCause(), reuse.getRequirements())) {
                 return;
             }
 
@@ -69,6 +65,18 @@ public class CustomDropsProcessor {
 
             List<Entity> newDroppedItems = computeItemsReuse(droppedItems, reuse);
             event.getEntities().addAll(newDroppedItems);
+
+            CustomLootRecipient recipient = customLoot.getRecipient();
+            event.getEntities().removeIf(entity -> {
+                ItemStack itemStack = entity.get(Keys.REPRESENTED_ITEM)
+                        .map(ItemStackSnapshot::createStack)
+                        .orElse(null);
+                if (itemStack != null) {
+                    recipient.receive(context, itemStack);
+                    return true;
+                }
+                return false;
+            });
         }
     }
 
@@ -118,26 +126,7 @@ public class CustomDropsProcessor {
             }
         }
 
-        Consumer<ItemStack> lootStackConsumer;
         Player targetPlayer = processingContext.getTargetPlayer();
-        if (dropInWorld) {
-            Location<World> targetLocation = processingContext.getTargetLocation();
-            if (targetLocation == null) {
-                return;
-            }
-
-            lootStackConsumer = itemStack -> {
-                Entity itemEntity = targetLocation.createEntity(EntityTypes.ITEM);
-                itemEntity.offer(Keys.REPRESENTED_ITEM, itemStack.createSnapshot());
-                itemEntity.offer(Keys.PICKUP_DELAY, 10);
-                targetLocation.spawnEntity(itemEntity);
-            };
-        } else if (targetPlayer != null) {
-            lootStackConsumer = itemStack -> targetPlayer.getInventory().offer(itemStack);
-        } else {
-            return;
-        }
-
         for (CustomLoot loot : loots) {
             for (ItemLoot itemLoot : loot.getItemLoots()) {
                 if (!itemLoot.shouldLoot()) {
@@ -160,7 +149,7 @@ public class CustomDropsProcessor {
                     itemStack.offer(Keys.DISPLAY_NAME, TextSerializers.FORMATTING_CODE.deserialize(itemLoot.getDisplayname()));
                 }
 
-                lootStackConsumer.accept(itemStack);
+                loot.getRecipient().receive(processingContext, itemStack);
             }
         }
     }
