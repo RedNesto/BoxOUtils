@@ -31,7 +31,6 @@ import io.github.rednesto.bou.api.quantity.BoundedIntQuantity
 import io.github.rednesto.bou.api.quantity.FixedIntQuantity
 import io.github.rednesto.bou.config.serializers.BouTypeTokens
 import io.github.rednesto.bou.integration.customdrops.MoneyLootComponent
-import io.github.rednesto.bou.integration.customdrops.recipients.ContextLocationLootRecipient
 import io.github.rednesto.bou.integration.customdrops.recipients.PlayerInventoryLootRecipient
 import io.github.rednesto.bou.integration.griefprevention.GriefPreventionRegionRequirement
 import io.github.rednesto.bou.requirements.DataByKeyRequirement

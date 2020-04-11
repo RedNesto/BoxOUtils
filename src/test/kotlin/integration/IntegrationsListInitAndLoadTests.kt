@@ -32,8 +32,6 @@ import org.junit.jupiter.api.Test
 import java.nio.file.Path
 import java.nio.file.Paths
 
-private typealias ThrowableSupplier = () -> Throwable
-
 class IntegrationsListInitAndLoadTests : BouTestCase(false) {
 
     @Test

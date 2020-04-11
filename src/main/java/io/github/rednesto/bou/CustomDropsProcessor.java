@@ -87,6 +87,7 @@ public class CustomDropsProcessor {
 
         for (List<Requirement<?>> requirementsList : requirements) {
             boolean failed = false;
+            //noinspection rawtypes
             for (Requirement value : requirementsList) {
                 try {
                     //noinspection unchecked
@@ -111,10 +112,6 @@ public class CustomDropsProcessor {
     }
 
     public static void dropLoot(CustomLootProcessingContext processingContext) {
-        dropLoot(processingContext, true);
-    }
-
-    public static void dropLoot(CustomLootProcessingContext processingContext, boolean dropInWorld) {
         List<CustomLoot> loots = processingContext.getLoots();
         for (CustomLoot loot : loots) {
             for (CustomLootComponent components : loot.getComponents()) {

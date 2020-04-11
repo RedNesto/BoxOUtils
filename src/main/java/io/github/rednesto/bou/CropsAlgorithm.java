@@ -27,7 +27,7 @@ import io.github.rednesto.bou.api.fastharvest.FastHarvestCrop;
 
 import java.util.Random;
 
-public enum CropsAlgoritm {
+public enum CropsAlgorithm {
 
     ALG_18() {
         @Override
@@ -106,7 +106,7 @@ public enum CropsAlgoritm {
      * @param fortune the level of fortune of the tool used
      * @param fortuneFactor the number which will be multiplied to the fortune param
      * @param chance the chances for having a drop in the total drops, set either this or chanceOf to -1 to disable custom chances
-     * @param chanceOf the maximum number wich will be used to compute the chance, exclusive, set either this or chance to -1 to disable custom chances
+     * @param chanceOf the maximum number which will be used to compute the chance, exclusive, set either this or chance to -1 to disable custom chances
      *
      * @return the total amount of drops
      */

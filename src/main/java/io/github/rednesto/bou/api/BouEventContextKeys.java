@@ -28,12 +28,12 @@ import org.spongepowered.api.event.cause.EventContextKey;
 
 public class BouEventContextKeys {
 
-    public static EventContextKey<CustomLootProcessingContext> CUSTOM_LOOT_PROCESSING_CONTEXT = EventContextKey.builder(CustomLootProcessingContext.class)
+    public static final EventContextKey<CustomLootProcessingContext> CUSTOM_LOOT_PROCESSING_CONTEXT = EventContextKey.builder(CustomLootProcessingContext.class)
             .id("box-o-utils:custom_loot_processing_context")
             .name("CustomDrops Loot Context")
             .build();
 
-    public static EventContextKey<Boolean> IS_FAST_HARVESTING = EventContextKey.builder(Boolean.class)
+    public static final EventContextKey<Boolean> IS_FAST_HARVESTING = EventContextKey.builder(Boolean.class)
             .id("box-o-utils:is_fast_harvesting")
             .name("Is FastHarvesting")
             .build();

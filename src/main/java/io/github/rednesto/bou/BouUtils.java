@@ -71,6 +71,7 @@ public final class BouUtils {
     // Integrations are not on the plugin's classpath, so we use reflection to get them
     private static <T> void reflectiveRegistration(String className, Consumer<T> registration, String friendlyClassName, String integrationName, boolean ignoreCNF) {
         try {
+            //noinspection unchecked
             Class<T> clazz = (Class<T>) Class.forName(className);
             registration.accept(clazz.newInstance());
         } catch (InstantiationException | IllegalAccessException e) {

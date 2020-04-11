@@ -35,6 +35,8 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
+import javax.annotation.Nullable;
+
 public class ContextLocationLootRecipient implements CustomLootRecipient {
 
     public static final ContextLocationLootRecipient INSTANCE = new ContextLocationLootRecipient();
@@ -62,7 +64,7 @@ public class ContextLocationLootRecipient implements CustomLootRecipient {
     public static class Provider implements CustomLootRecipientProvider {
 
         @Override
-        public CustomLootRecipient provide(ConfigurationNode node) {
+        public CustomLootRecipient provide(@Nullable ConfigurationNode node) {
             return INSTANCE;
         }
 

@@ -107,7 +107,7 @@ public class FastHarvestListener implements SpongeConfig.ReloadableListener {
 
         CustomLootProcessingContext processingContext = new CustomLootProcessingContext(lootsToUse, event, targetBlock, event.getCause(), player, entitiesSpawnLocation);
         if (!lootsToUse.isEmpty()) {
-            CustomDropsProcessor.dropLoot(processingContext, fastHarvest.dropInWorld);
+            CustomDropsProcessor.dropLoot(processingContext);
         }
 
         try (CauseStackManager.StackFrame stackFrame = Sponge.getCauseStackManager().pushCauseFrame()) {
@@ -242,9 +242,9 @@ public class FastHarvestListener implements SpongeConfig.ReloadableListener {
     @Nullable
     private static ItemStack createItemStack(int age, int maxAge, int fortuneLevel, FastHarvestCrop cropConfig,
                                              ItemType itemType, boolean decrementQuantity) {
-        CropsAlgoritm algorithm = CropsAlgoritm.ALG_19;
+        CropsAlgorithm algorithm = CropsAlgorithm.ALG_19;
         if (itemType == ItemTypes.NETHER_WART) {
-            algorithm = CropsAlgoritm.NETHER_WART;
+            algorithm = CropsAlgorithm.NETHER_WART;
         }
 
         int quantity = algorithm.compute(cropConfig, age, maxAge, fortuneLevel);
