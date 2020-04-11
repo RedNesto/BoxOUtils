@@ -39,6 +39,7 @@ public class CustomLoot {
     private final boolean overwrite;
     private final boolean expOverwrite;
     private final CustomLootRecipient recipient;
+    private final boolean redirectBaseDropsToRecipient;
     private final List<List<Requirement<?>>> requirements;
     @Nullable
     private final Reuse reuse;
@@ -48,6 +49,7 @@ public class CustomLoot {
                       boolean overwrite,
                       boolean expOverwrite,
                       CustomLootRecipient recipient,
+                      boolean redirectBaseDropsToRecipient,
                       List<List<Requirement<?>>> requirements,
                       @Nullable Reuse reuse,
                       List<CustomLootComponent> components) {
@@ -55,6 +57,7 @@ public class CustomLoot {
         this.overwrite = overwrite;
         this.expOverwrite = expOverwrite;
         this.recipient = recipient;
+        this.redirectBaseDropsToRecipient = redirectBaseDropsToRecipient;
         this.requirements = requirements;
         this.reuse = reuse;
         this.components = components;
@@ -74,6 +77,10 @@ public class CustomLoot {
 
     public CustomLootRecipient getRecipient() {
         return recipient;
+    }
+
+    public boolean isRedirectBaseDropsToRecipient() {
+        return redirectBaseDropsToRecipient;
     }
 
     public List<List<Requirement<?>>> getRequirements() {
@@ -102,6 +109,7 @@ public class CustomLoot {
         return overwrite == that.overwrite &&
                 expOverwrite == that.expOverwrite &&
                 recipient == that.recipient &&
+                redirectBaseDropsToRecipient == that.redirectBaseDropsToRecipient &&
                 itemLoots.equals(that.itemLoots) &&
                 requirements.equals(that.requirements) &&
                 Objects.equals(reuse, that.reuse) &&
@@ -110,7 +118,7 @@ public class CustomLoot {
 
     @Override
     public int hashCode() {
-        return Objects.hash(itemLoots, overwrite, expOverwrite, recipient, requirements, reuse, components);
+        return Objects.hash(itemLoots, overwrite, expOverwrite, recipient, redirectBaseDropsToRecipient, requirements, reuse, components);
     }
 
     @Override
@@ -120,6 +128,7 @@ public class CustomLoot {
                 .add("overwrite", overwrite)
                 .add("expOverwrite", expOverwrite)
                 .add("recipient", recipient)
+                .add("redirectBaseDropsToRecipient", redirectBaseDropsToRecipient)
                 .add("requirements", requirements)
                 .add("reuse", reuse)
                 .add("components", components)

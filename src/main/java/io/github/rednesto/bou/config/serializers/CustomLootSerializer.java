@@ -59,6 +59,7 @@ public class CustomLootSerializer implements TypeSerializer<CustomLoot> {
         boolean expOverwrite = value.getNode("exp-overwrite").getBoolean(false);
 
         CustomLootRecipient recipient = value.getNode("recipient").getValue(BouTypeTokens.CUSTOM_LOOT_RECIPIENT, ContextLocationLootRecipient.INSTANCE);
+        boolean redirectBaseDropsToRecipient = value.getNode("base-drops-to-recipient").getBoolean(true);
 
         CustomLootComponentProviderIntegrations componentProviderIntegrations = CustomLootComponentProviderIntegrations.getInstance();
         List<CustomLootComponent> components = new ArrayList<>();
@@ -76,7 +77,7 @@ public class CustomLootSerializer implements TypeSerializer<CustomLoot> {
             }
         });
 
-        return new CustomLoot(itemLoots, overwrite, expOverwrite, recipient, requirements, reuse, components);
+        return new CustomLoot(itemLoots, overwrite, expOverwrite, recipient, redirectBaseDropsToRecipient, requirements, reuse, components);
     }
 
     @Override

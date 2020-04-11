@@ -27,6 +27,7 @@ import io.github.rednesto.bou.api.customdrops.*;
 import io.github.rednesto.bou.api.lootReuse.LootReuse;
 import io.github.rednesto.bou.api.quantity.IntQuantity;
 import io.github.rednesto.bou.api.requirement.Requirement;
+import io.github.rednesto.bou.integration.customdrops.recipients.ContextLocationLootRecipient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spongepowered.api.data.key.Keys;
@@ -65,17 +66,19 @@ public class CustomDropsProcessor {
 
             List<Entity> newDroppedItems = computeItemsReuse(droppedItems, reuse);
             event.getEntities().addAll(newDroppedItems);
+        }
 
-            CustomLootRecipient recipient = customLoot.getRecipient();
-            event.getEntities().removeIf(entity -> {
+        CustomLootRecipient recipient = customLoot.getRecipient();
+        if (customLoot.isRedirectBaseDropsToRecipient() && !recipient.equals(ContextLocationLootRecipient.INSTANCE)) {
+            event.filterEntities(entity -> {
                 ItemStack itemStack = entity.get(Keys.REPRESENTED_ITEM)
                         .map(ItemStackSnapshot::createStack)
                         .orElse(null);
                 if (itemStack != null) {
                     recipient.receive(context, itemStack);
-                    return true;
+                    return false;
                 }
-                return false;
+                return true;
             });
         }
     }

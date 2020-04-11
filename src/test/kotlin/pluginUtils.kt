@@ -37,10 +37,11 @@ fun customLoot(
         overwrite: Boolean = false,
         expOverwrite: Boolean = false,
         recipient: CustomLootRecipient = ContextLocationLootRecipient.INSTANCE,
+        redirectBaseDropsToRecipient: Boolean = true,
         requirements: List<List<Requirement<*>>> = emptyList(),
         reuse: CustomLoot.Reuse? = null,
         components: List<CustomLootComponent> = emptyList()
-) = CustomLoot(itemLoots, overwrite, expOverwrite, recipient, requirements, reuse, components)
+) = CustomLoot(itemLoots, overwrite, expOverwrite, recipient, redirectBaseDropsToRecipient, requirements, reuse, components)
 
 fun customReuse(
         multiplier: Float = 1f,
