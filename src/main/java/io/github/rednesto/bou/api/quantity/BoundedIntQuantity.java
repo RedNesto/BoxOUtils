@@ -29,8 +29,8 @@ import java.util.Random;
 
 public class BoundedIntQuantity implements IntQuantity {
 
-    private int from;
-    private int to;
+    private final int from;
+    private final int to;
 
     private static final Random RANDOM = new Random();
 
@@ -39,6 +39,7 @@ public class BoundedIntQuantity implements IntQuantity {
         this.to = to;
     }
 
+    @Override
     public int get() {
         if (from == to) {
             return to;

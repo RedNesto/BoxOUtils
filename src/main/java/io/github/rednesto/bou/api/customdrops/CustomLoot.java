@@ -35,14 +35,14 @@ import javax.annotation.Nullable;
 
 public class CustomLoot {
 
-    private List<ItemLoot> itemLoots;
-    private boolean overwrite;
-    private boolean expOverwrite;
-    private CustomLootRecipient recipient;
-    private List<List<Requirement<?>>> requirements;
+    private final List<ItemLoot> itemLoots;
+    private final boolean overwrite;
+    private final boolean expOverwrite;
+    private final CustomLootRecipient recipient;
+    private final List<List<Requirement<?>>> requirements;
     @Nullable
-    private Reuse reuse;
-    private List<CustomLootComponent> components;
+    private final Reuse reuse;
+    private final List<CustomLootComponent> components;
 
     public CustomLoot(List<ItemLoot> itemLoots,
                       boolean overwrite,
@@ -128,9 +128,9 @@ public class CustomLoot {
 
     public static class Reuse {
 
-        private float multiplier;
-        private Map<String, LootReuse> items;
-        private List<List<Requirement<?>>> requirements;
+        private final float multiplier;
+        private final List<List<Requirement<?>>> requirements;
+        private final Map<String, LootReuse> items;
 
         public Reuse(float multiplier, Map<String, LootReuse> items, List<List<Requirement<?>>> requirements) {
             this.multiplier = multiplier;

@@ -32,10 +32,10 @@ import javax.annotation.Nullable;
 
 public class SpawnedMob {
 
-    private String id;
-    private double chance;
+    private final String id;
+    private final double chance;
     @Nullable
-    private IntQuantity quantity;
+    private final IntQuantity quantity;
 
     public SpawnedMob(String id, double chance, @Nullable IntQuantity quantity) {
         this.id = id;

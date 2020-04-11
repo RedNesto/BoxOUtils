@@ -32,12 +32,12 @@ import javax.annotation.Nullable;
 
 public class MoneyLoot {
 
-    private IntQuantity amount;
+    private final IntQuantity amount;
     @Nullable
-    private String currencyId;
-    private double chance;
+    private final String currencyId;
+    private final double chance;
     @Nullable
-    private String message;
+    private final String message;
 
     public MoneyLoot(IntQuantity amount, @Nullable String currencyId, double chance, @Nullable String message) {
         this.amount = amount;

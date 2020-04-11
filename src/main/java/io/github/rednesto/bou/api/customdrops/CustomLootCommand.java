@@ -30,10 +30,10 @@ import java.util.List;
 
 public class CustomLootCommand {
 
-    private String rawCommand;
-    private SenderMode senderMode;
-    private double chance;
-    private List<List<Requirement<?>>> requirements;
+    private final String rawCommand;
+    private final SenderMode senderMode;
+    private final double chance;
+    private final List<List<Requirement<?>>> requirements;
 
     public CustomLootCommand(String rawCommand, SenderMode senderMode, double chance, List<List<Requirement<?>>> requirements) {
         this.rawCommand = rawCommand;

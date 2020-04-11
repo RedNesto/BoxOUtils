@@ -32,7 +32,7 @@ import java.util.stream.Collectors;
 
 public class SelectiveIntRange implements IntRange {
 
-    private List<Integer> values;
+    private final List<Integer> values;
 
     public SelectiveIntRange(List<Integer> values) {
         this.values = values;

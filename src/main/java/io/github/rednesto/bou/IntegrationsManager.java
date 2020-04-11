@@ -44,10 +44,10 @@ public final class IntegrationsManager {
 
     private boolean vanillaBuiltinsLoaded = false;
 
-    private CustomDropsProviderIntegrations customDropsProviderIntegrations = new CustomDropsProviderIntegrations(new VanillaCustomDropsProvider());
-    private RequirementProviderIntegrations requirementProviderIntegrations = new RequirementProviderIntegrations();
-    private CustomLootComponentProviderIntegrations customLootComponentProviderIntegrations = new CustomLootComponentProviderIntegrations();
-    private CustomLootRecipientProviderIntegrations customLootRecipientProviderIntegrations = new CustomLootRecipientProviderIntegrations();
+    private final CustomDropsProviderIntegrations customDropsProviderIntegrations = new CustomDropsProviderIntegrations(new VanillaCustomDropsProvider());
+    private final RequirementProviderIntegrations requirementProviderIntegrations = new RequirementProviderIntegrations();
+    private final CustomLootComponentProviderIntegrations customLootComponentProviderIntegrations = new CustomLootComponentProviderIntegrations();
+    private final CustomLootRecipientProviderIntegrations customLootRecipientProviderIntegrations = new CustomLootRecipientProviderIntegrations();
 
     public void loadVanillaBuiltins() {
         if (vanillaBuiltinsLoaded) {

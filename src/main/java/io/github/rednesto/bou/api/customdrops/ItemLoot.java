@@ -32,14 +32,14 @@ import javax.annotation.Nullable;
 
 public class ItemLoot {
 
-    private String id;
+    private final String id;
     @Nullable
-    private String providerId;
+    private final String providerId;
     @Nullable
-    private String displayname;
-    private double chance;
+    private final String displayname;
+    private final double chance;
     @Nullable
-    private IntQuantity quantity;
+    private final IntQuantity quantity;
 
     public ItemLoot(String id, @Nullable String providerId, @Nullable String displayname, double chance, @Nullable IntQuantity quantity) {
         this.id = id;

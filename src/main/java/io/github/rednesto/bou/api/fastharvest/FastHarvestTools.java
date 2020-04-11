@@ -29,10 +29,10 @@ import java.util.List;
 
 public class FastHarvestTools {
 
-    private boolean enabled;
-    private boolean damageOnUse;
-    private boolean isWhitelist;
-    private List<String> toolsIds;
+    private final boolean enabled;
+    private final boolean damageOnUse;
+    private final boolean isWhitelist;
+    private final List<String> toolsIds;
 
     public FastHarvestTools(boolean enabled, boolean damageOnUse, boolean isWhitelist, List<String> toolsIds) {
         this.enabled = enabled;

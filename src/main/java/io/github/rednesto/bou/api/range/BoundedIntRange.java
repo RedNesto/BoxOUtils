@@ -29,8 +29,8 @@ import java.util.Objects;
 
 public class BoundedIntRange implements IntRange {
 
-    private int min;
-    private int max;
+    private final int min;
+    private final int max;
 
     public BoundedIntRange(int min, int max) {
         this.min = min;

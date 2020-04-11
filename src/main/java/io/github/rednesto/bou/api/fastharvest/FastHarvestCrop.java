@@ -27,11 +27,11 @@ import com.google.common.base.MoreObjects;
 
 public class FastHarvestCrop {
 
-    private int chance;
-    private int chanceOf;
-    private int count;
-    private int fortuneFactor;
-    private int minimum;
+    private final int chance;
+    private final int chanceOf;
+    private final int count;
+    private final int fortuneFactor;
+    private final int minimum;
 
     public FastHarvestCrop(int chance, int chanceOf, int count, int fortuneFactor, int minimum) {
         this.chance = chance;

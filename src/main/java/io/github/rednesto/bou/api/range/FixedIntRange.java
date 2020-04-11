@@ -29,7 +29,7 @@ import java.util.Objects;
 
 public class FixedIntRange implements IntRange {
 
-    private int value;
+    private final int value;
 
     public FixedIntRange(int value) {
         this.value = value;

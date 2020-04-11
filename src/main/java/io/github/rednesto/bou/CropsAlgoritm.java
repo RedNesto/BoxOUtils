@@ -94,7 +94,7 @@ public enum CropsAlgoritm {
         }
     };
 
-    private static Random random = new Random();
+    private static final Random random = new Random();
 
     /**
      * Computes the amount of drops for crops, usually seeds (wheat, beetroot), carrots and potatoes

@@ -39,7 +39,7 @@ import javax.annotation.Nullable;
 public class SimpleConfigIncluderFile implements ConfigIncluder, ConfigIncluderFile {
 
     private final Path basePath;
-    private ConfigIncluder fallback;
+    private final ConfigIncluder fallback;
 
     public SimpleConfigIncluderFile(Path basePath) {
         this(basePath, null);
