@@ -43,6 +43,8 @@ public class PlayerInventoryLootRecipient implements CustomLootRecipient {
         Player targetPlayer = context.getTargetPlayer();
         if (targetPlayer != null) {
             targetPlayer.getInventory().offer(stack);
+        } else {
+            ContextLocationLootRecipient.INSTANCE.receive(context, stack);
         }
     }
 
