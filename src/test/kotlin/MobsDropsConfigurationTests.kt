@@ -24,15 +24,12 @@
 package io.github.rednesto.bou.tests
 
 import io.github.rednesto.bou.Config
-import io.github.rednesto.bou.api.customdrops.CustomLoot
-import io.github.rednesto.bou.api.customdrops.ItemLoot
 import io.github.rednesto.bou.api.customdrops.MoneyLoot
 import io.github.rednesto.bou.api.lootReuse.MultiplyLootReuse
 import io.github.rednesto.bou.api.lootReuse.SimpleLootReuse
 import io.github.rednesto.bou.api.quantity.BoundedIntQuantity
 import io.github.rednesto.bou.config.serializers.BouTypeTokens
 import io.github.rednesto.bou.integration.customdrops.MoneyLootComponent
-import io.github.rednesto.bou.integration.customdrops.recipients.ContextLocationLootRecipient
 import io.github.rednesto.bou.integration.griefprevention.GriefPreventionRegionRequirement
 import io.github.rednesto.bou.requirements.DataByKeyRequirement
 import io.github.rednesto.bou.tests.framework.PluginConfigurationTestCase
@@ -54,17 +51,17 @@ class MobsDropsConfigurationTests : PluginConfigurationTestCase<Config.MobsDrops
             val reuseItems = mapOf(
                     "minecraft:mutton" to SimpleLootReuse(BoundedIntQuantity(2, 5)),
                     "minecraft:wool" to MultiplyLootReuse(3f))
-            val reuse = CustomLoot.Reuse(2f, reuseItems, emptyList())
+            val reuse = customReuse(multiplier = 2f, items = reuseItems)
             val money = MoneyLootComponent(MoneyLoot(BoundedIntQuantity(5, 25), null, 50.0, "&aYou earned {money_amount}"))
             val drops = listOf(
-                    ItemLoot("waw_sword", "byte-items", null, 0.0, null),
-                    ItemLoot("test", "file-inv", null, 0.0, BoundedIntQuantity(0, 2)))
-            CustomLoot(drops, true, false, ContextLocationLootRecipient.INSTANCE,  requirements, reuse, listOf(money))
+                    itemLoot("waw_sword", "byte-items"),
+                    itemLoot("test", "file-inv", quantity = BoundedIntQuantity(0, 2)))
+            customLoot(drops, overwrite = true, requirements = requirements, reuse = reuse, components = listOf(money))
         }
 
         val bat = run {
-            val drops = listOf(ItemLoot("minecraft:ghast_tear", null, null, 33.33, null))
-            CustomLoot(drops, false, false, ContextLocationLootRecipient.INSTANCE, emptyList(), null, emptyList())
+            val drops = listOf(itemLoot("minecraft:ghast_tear", chance = 33.33))
+            customLoot(drops)
         }
 
         val expected = mapOf(
