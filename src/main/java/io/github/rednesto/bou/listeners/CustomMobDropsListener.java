@@ -37,6 +37,7 @@ import org.spongepowered.api.entity.ExperienceOrb;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
+import org.spongepowered.api.event.cause.entity.damage.source.EntityDamageSource;
 import org.spongepowered.api.event.cause.entity.damage.source.IndirectEntityDamageSource;
 import org.spongepowered.api.event.entity.DestructEntityEvent;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
@@ -83,6 +84,14 @@ public class CustomMobDropsListener implements SpongeConfig.ReloadableListener {
                 Entity indirectSource = maybeIndirectSource.get().getIndirectSource();
                 if (indirectSource instanceof Player) {
                     return (Player) indirectSource;
+                }
+            }
+
+            Optional<EntityDamageSource> maybeEntitySource = event.getCause().first(EntityDamageSource.class);
+            if (maybeEntitySource.isPresent()) {
+                Entity source = maybeEntitySource.get().getSource();
+                if (source instanceof Player) {
+                    return (Player) source;
                 }
             }
 
