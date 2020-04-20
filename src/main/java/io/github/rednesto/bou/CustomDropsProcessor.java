@@ -42,6 +42,7 @@ import org.spongepowered.api.text.serializer.TextSerializers;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BiConsumer;
 
 public class CustomDropsProcessor {
 
@@ -114,20 +115,22 @@ public class CustomDropsProcessor {
         return false;
     }
 
-    public static void dropLoot(CustomLootProcessingContext processingContext) {
-        List<CustomLoot> loots = processingContext.getLoots();
+    public static void dropLoot(CustomLootProcessingContext context) {
+        processLoots(context, (loot, itemStack) -> loot.getRecipient().receive(context, itemStack));
+    }
+
+    public static void processLoots(CustomLootProcessingContext context, BiConsumer<CustomLoot, ItemStack> dropsConsumer) {
+        List<CustomLoot> loots = context.getLoots();
+        Player targetPlayer = context.getTargetPlayer();
         for (CustomLoot loot : loots) {
             for (CustomLootComponent components : loot.getComponents()) {
                 try {
-                    components.processLoot(processingContext);
+                    components.processLoot(context);
                 } catch (Throwable t) {
                     LOGGER.error("A CustomLootComponent encountered an exception during processing.", t);
                 }
             }
-        }
 
-        Player targetPlayer = processingContext.getTargetPlayer();
-        for (CustomLoot loot : loots) {
             for (ItemLoot itemLoot : loot.getItemLoots()) {
                 if (!itemLoot.shouldLoot()) {
                     continue;
@@ -149,7 +152,7 @@ public class CustomDropsProcessor {
                     itemStack.offer(Keys.DISPLAY_NAME, TextSerializers.FORMATTING_CODE.deserialize(itemLoot.getDisplayname()));
                 }
 
-                loot.getRecipient().receive(processingContext, itemStack);
+                dropsConsumer.accept(loot, itemStack);
             }
         }
     }

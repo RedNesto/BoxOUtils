@@ -56,6 +56,10 @@ public final class Config {
         return BoxOUtils.getInstance().getMobsDrops();
     }
 
+    public static FishingDrops getFishingDrops() {
+        return BoxOUtils.getInstance().getFishingDrops();
+    }
+
     public static BlockSpawners getBlockSpawners() {
         return BoxOUtils.getInstance().getBlockSpawners();
     }
@@ -106,6 +110,27 @@ public final class Config {
         public MobsDrops(boolean enabled, Map<String, List<CustomLoot>> drops) {
             this.enabled = enabled;
             this.drops = drops;
+        }
+
+        @Override
+        public boolean isEnabled() {
+            return enabled;
+        }
+    }
+
+    @ConfigSerializable
+    public static class FishingDrops implements ToggleableConfig {
+
+        @Setting("enabled")
+        public boolean enabled;
+        @Setting("loots")
+        public List<CustomLoot> loots;
+
+        public FishingDrops() {}
+
+        public FishingDrops(boolean enabled, List<CustomLoot> loots) {
+            this.enabled = enabled;
+            this.loots = loots;
         }
 
         @Override

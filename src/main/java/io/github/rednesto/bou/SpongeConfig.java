@@ -27,10 +27,7 @@ import com.google.common.reflect.TypeToken;
 import com.typesafe.config.ConfigParseOptions;
 import io.github.rednesto.bou.config.SimpleConfigIncluderFile;
 import io.github.rednesto.bou.config.serializers.*;
-import io.github.rednesto.bou.listeners.BlockSpawnersListener;
-import io.github.rednesto.bou.listeners.CustomBlockDropsListener;
-import io.github.rednesto.bou.listeners.CustomMobDropsListener;
-import io.github.rednesto.bou.listeners.FastHarvestListener;
+import io.github.rednesto.bou.listeners.*;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.ConfigurationOptions;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
@@ -59,6 +56,7 @@ public class SpongeConfig {
             new Feature<>("fastharvest.conf", "FastHarvest", BouTypeTokens.CONFIG_FAST_HARVEST, BoxOUtils::setFastHarvest, FastHarvestListener::new),
             new Feature<>("cropscontrol.conf", "CropsControl", BouTypeTokens.CONFIG_CROPS_CONTROL, BoxOUtils::setCropsControl),
             new Feature<>("blocksdrops.conf", "BlocksDrops", BouTypeTokens.CONFIG_BLOCKS_DROPS, BoxOUtils::setBlocksDrops, CustomBlockDropsListener::new),
+            new Feature<>("fishingdrops.conf", "FishingDrops", BouTypeTokens.CONFIG_FISHING_DROPS, BoxOUtils::setFishingDrops, CustomFishingDropsListener::new),
             new Feature<>("mobsdrops.conf", "MobsDrops", BouTypeTokens.CONFIG_MOBS_DROPS, BoxOUtils::setMobsDrops, CustomMobDropsListener::new),
             new Feature<>("blockspawners.conf", "BlockSpawners", BouTypeTokens.CONFIG_BLOCK_SPAWNERS, BoxOUtils::setBlockSpawners, BlockSpawnersListener::new)
     );

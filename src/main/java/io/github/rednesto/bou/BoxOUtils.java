@@ -44,6 +44,7 @@ import org.spongepowered.api.text.format.TextColors;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 @Plugin(
@@ -68,6 +69,7 @@ public class BoxOUtils {
 
     private Config.BlocksDrops blocksDrops = new Config.BlocksDrops(false, new HashMap<>());
     private Config.MobsDrops mobsDrops = new Config.MobsDrops(false, new HashMap<>());
+    private Config.FishingDrops fishingDrops = new Config.FishingDrops(false, new ArrayList<>());
     private Config.BlockSpawners blockSpawners = new Config.BlockSpawners(false, new HashMap<>());
     private Config.FastHarvest fastHarvest = Config.FastHarvest.createDefault();
     private Config.CropsControl cropsControl = Config.CropsControl.createDefault();
@@ -154,6 +156,14 @@ public class BoxOUtils {
 
     public void setMobsDrops(Config.MobsDrops mobsDrops) {
         this.mobsDrops = mobsDrops;
+    }
+
+    public Config.FishingDrops getFishingDrops() {
+        return fishingDrops;
+    }
+
+    public void setFishingDrops(Config.FishingDrops fishingDrops) {
+        this.fishingDrops = fishingDrops;
     }
 
     public Config.BlockSpawners getBlockSpawners() {
