@@ -24,6 +24,7 @@
 package io.github.rednesto.bou.integration.customdrops;
 
 import com.google.common.base.MoreObjects;
+import io.github.rednesto.bou.SpongeUtils;
 import io.github.rednesto.bou.api.customdrops.CustomLootComponent;
 import io.github.rednesto.bou.api.customdrops.CustomLootComponentConfigurationException;
 import io.github.rednesto.bou.api.customdrops.CustomLootComponentProvider;
@@ -32,9 +33,7 @@ import io.github.rednesto.bou.api.quantity.IntQuantity;
 import io.github.rednesto.bou.config.serializers.BouTypeTokens;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
-import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.entity.EntityTypes;
+import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
@@ -50,15 +49,15 @@ public class ExperienceLootComponent implements CustomLootComponent {
     public void processLoot(CustomLootProcessingContext processingContext) {
         Location<World> targetLocation = processingContext.getTargetLocation();
         if (targetLocation == null) {
-            return;
+            Player targetPlayer = processingContext.getTargetPlayer();
+            if (targetPlayer != null) {
+                targetLocation = targetPlayer.getLocation();
+            } else {
+                return;
+            }
         }
 
-        int experienceAmount = experienceQuantity.get();
-        if (experienceAmount > 0) {
-            Entity experienceOrb = targetLocation.createEntity(EntityTypes.EXPERIENCE_ORB);
-            experienceOrb.offer(Keys.CONTAINED_EXPERIENCE, experienceAmount);
-            targetLocation.spawnEntity(experienceOrb);
-        }
+        SpongeUtils.spawnExpOrbs(targetLocation, experienceQuantity.get());
     }
 
     @Override

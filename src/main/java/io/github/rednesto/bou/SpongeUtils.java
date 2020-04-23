@@ -27,6 +27,9 @@ import ninja.leaping.configurate.ConfigurationNode;
 import org.spongepowered.api.Platform;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
+import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.extent.Extent;
@@ -101,5 +104,41 @@ public class SpongeUtils {
 
     public static <E extends Extent> Location<E> center(Location<E> location) {
         return location.add(0.5, 0.5, 0.5);
+    }
+
+    public static void spawnExpOrbs(Location<World> location, int amount) {
+        int remaining = amount;
+        while (remaining > 0) {
+            int split = getXPSplit(remaining);
+            remaining -= split;
+            Entity orb = location.createEntity(EntityTypes.EXPERIENCE_ORB);
+            orb.offer(Keys.CONTAINED_EXPERIENCE, split);
+            location.spawnEntity(orb);
+        }
+    }
+
+    public static int getXPSplit(int expValue) {
+        // Taken from MCP's EntityXPOrb
+        if (expValue >= 2477) {
+            return 2477;
+        } else if (expValue >= 1237) {
+            return 1237;
+        } else if (expValue >= 617) {
+            return 617;
+        } else if (expValue >= 307) {
+            return 307;
+        } else if (expValue >= 149) {
+            return 149;
+        } else if (expValue >= 73) {
+            return 73;
+        } else if (expValue >= 37) {
+            return 37;
+        } else if (expValue >= 17) {
+            return 17;
+        } else if (expValue >= 7) {
+            return 7;
+        } else {
+            return expValue >= 3 ? 3 : 1;
+        }
     }
 }
