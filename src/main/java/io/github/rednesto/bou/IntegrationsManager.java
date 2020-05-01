@@ -33,10 +33,7 @@ import io.github.rednesto.bou.integration.customdrops.MoneyLootComponent;
 import io.github.rednesto.bou.integration.customdrops.recipients.ContextLocationLootRecipient;
 import io.github.rednesto.bou.integration.customdrops.recipients.PlayerInventoryLootRecipient;
 import io.github.rednesto.bou.integration.vanilla.VanillaCustomDropsProvider;
-import io.github.rednesto.bou.requirements.DataByKeyRequirementProvider;
-import io.github.rednesto.bou.requirements.EnchantmentsRequirement;
-import io.github.rednesto.bou.requirements.PermissionsRequirement;
-import io.github.rednesto.bou.requirements.WorldsRequirement;
+import io.github.rednesto.bou.requirements.*;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.entity.EntitySnapshot;
 
@@ -56,6 +53,7 @@ public final class IntegrationsManager {
 
         vanillaBuiltinsLoaded = true;
 
+        requirementProviderIntegrations.register(new BiomesRequirement.Provider(), true);
         requirementProviderIntegrations.register(new DataByKeyRequirementProvider<>("box-o-utils:block_data", BlockSnapshot.class), true);
         requirementProviderIntegrations.register(new DataByKeyRequirementProvider<>("box-o-utils:entity_data", EntitySnapshot.class), true);
         requirementProviderIntegrations.register(new EnchantmentsRequirement.Provider(), true);
