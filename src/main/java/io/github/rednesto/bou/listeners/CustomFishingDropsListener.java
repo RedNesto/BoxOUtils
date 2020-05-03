@@ -23,25 +23,32 @@
  */
 package io.github.rednesto.bou.listeners;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import io.github.rednesto.bou.Config;
 import io.github.rednesto.bou.CustomDropsProcessor;
 import io.github.rednesto.bou.api.customdrops.CustomLoot;
 import io.github.rednesto.bou.api.customdrops.CustomLootProcessingContext;
 import org.spongepowered.api.data.Transaction;
+import org.spongepowered.api.entity.ExperienceOrb;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.action.FishingEvent;
+import org.spongepowered.api.event.entity.SpawnEntityEvent;
+import org.spongepowered.api.event.filter.cause.First;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.ListIterator;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 public class CustomFishingDropsListener {
+
+    private final Cache<UUID, List<CustomLoot>> requirementResultsTracker = CacheBuilder.newBuilder()
+        .expireAfterWrite(1, TimeUnit.SECONDS)
+        .build();
 
     @Listener
     public void onFishingDrop(FishingEvent.Stop event) {
@@ -60,12 +67,16 @@ public class CustomFishingDropsListener {
             return;
         }
 
+        Player player = event.getCause().first(Player.class).orElse(null);
+        if (player != null) {
+            requirementResultsTracker.put(player.getUniqueId(), loots);
+        }
+
         boolean overwritten = processOverwrite(transactions, loots);
         if (!overwritten) {
             processReuse(transactions, loots);
         }
 
-        Player player = event.getCause().first(Player.class).orElse(null);
         Location<World> location = event.getFishHook().getLocation();
         CustomLootProcessingContext context = new CustomLootProcessingContext(loots, event, event.getFishHook(), event.getCause(), player, location);
         CustomDropsProcessor.processLoots(context, (loot, itemStack) -> transactions.add(new Transaction<>(ItemStackSnapshot.NONE, itemStack.createSnapshot())));
@@ -99,6 +110,23 @@ public class CustomFishingDropsListener {
                     Iterator<ItemStack> reuseResultIterator = itemsResult.iterator();
                     transaction.setCustom(reuseResultIterator.next().createSnapshot());
                     reuseResultIterator.forEachRemaining(stack -> transactionsIterator.add(new Transaction<>(transaction.getFinal(), stack.createSnapshot())));
+                }
+            }
+        }
+    }
+
+    @Listener
+    public void onExpOrbSpawn(SpawnEntityEvent event, @First Player player) {
+        if (!Config.getFishingDrops().enabled) {
+            return;
+        }
+
+        List<CustomLoot> loots = requirementResultsTracker.getIfPresent(player.getUniqueId());
+        if (loots != null) {
+            for (CustomLoot loot : loots) {
+                if (loot.isExpOverwrite()) {
+                    event.filterEntities(entity -> !(entity instanceof ExperienceOrb));
+                    break;
                 }
             }
         }
