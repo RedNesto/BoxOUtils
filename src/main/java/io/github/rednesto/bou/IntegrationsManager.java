@@ -23,7 +23,7 @@
  */
 package io.github.rednesto.bou;
 
-import io.github.rednesto.bou.api.customdrops.CustomDropsProviderIntegrations;
+import io.github.rednesto.bou.api.customdrops.CustomDropsProviderFactoryIntegrations;
 import io.github.rednesto.bou.api.customdrops.CustomLootComponentProviderIntegrations;
 import io.github.rednesto.bou.api.customdrops.CustomLootRecipientProviderIntegrations;
 import io.github.rednesto.bou.api.requirement.RequirementProviderIntegrations;
@@ -41,7 +41,7 @@ public final class IntegrationsManager {
 
     private boolean vanillaBuiltinsLoaded = false;
 
-    private final CustomDropsProviderIntegrations customDropsProviderIntegrations = new CustomDropsProviderIntegrations(new VanillaCustomDropsProvider());
+    private final CustomDropsProviderFactoryIntegrations customDropsProviderFactoryIntegrations = new CustomDropsProviderFactoryIntegrations();
     private final RequirementProviderIntegrations requirementProviderIntegrations = new RequirementProviderIntegrations();
     private final CustomLootComponentProviderIntegrations customLootComponentProviderIntegrations = new CustomLootComponentProviderIntegrations();
     private final CustomLootRecipientProviderIntegrations customLootRecipientProviderIntegrations = new CustomLootRecipientProviderIntegrations();
@@ -52,6 +52,8 @@ public final class IntegrationsManager {
         }
 
         vanillaBuiltinsLoaded = true;
+
+        customDropsProviderFactoryIntegrations.register(new VanillaCustomDropsProvider.Factory(), true);
 
         requirementProviderIntegrations.register(new BiomesRequirement.Provider(), true);
         requirementProviderIntegrations.register(new DataByKeyRequirementProvider<>("box-o-utils:block_data", BlockSnapshot.class), true);
@@ -70,21 +72,21 @@ public final class IntegrationsManager {
     }
 
     public void initIntegrations(BoxOUtils plugin) {
-        customDropsProviderIntegrations.initIntegrations(plugin);
+        customDropsProviderFactoryIntegrations.initIntegrations(plugin);
         requirementProviderIntegrations.initIntegrations(plugin);
         customLootComponentProviderIntegrations.initIntegrations(plugin);
         customLootRecipientProviderIntegrations.initIntegrations(plugin);
     }
 
     public void reloadIntegrations(BoxOUtils plugin) {
-        customDropsProviderIntegrations.reloadIntegrations(plugin);
+        customDropsProviderFactoryIntegrations.reloadIntegrations(plugin);
         requirementProviderIntegrations.reloadIntegrations(plugin);
         customLootComponentProviderIntegrations.reloadIntegrations(plugin);
         customLootRecipientProviderIntegrations.reloadIntegrations(plugin);
     }
 
-    public CustomDropsProviderIntegrations getCustomDropsProviderIntegrations() {
-        return customDropsProviderIntegrations;
+    public CustomDropsProviderFactoryIntegrations getCustomDropsProviderFactoryIntegrations() {
+        return customDropsProviderFactoryIntegrations;
     }
 
     public RequirementProviderIntegrations getRequirementsProviderIntegrations() {

@@ -24,10 +24,12 @@
 package io.github.rednesto.bou.integration.fileinventories;
 
 import io.github.rednesto.bou.BoxOUtils;
-import io.github.rednesto.bou.api.customdrops.CustomDropsProvider;
+import io.github.rednesto.bou.api.customdrops.BasicCustomDropsProvider;
+import io.github.rednesto.bou.api.customdrops.CustomLootProcessingContext;
+import io.github.rednesto.bou.api.quantity.IntQuantity;
 import io.github.rednesto.fileinventories.api.FileInventoriesService;
+import ninja.leaping.configurate.ConfigurationNode;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.inventory.ItemStack;
 
 import java.io.IOException;
@@ -38,53 +40,73 @@ import java.util.stream.Stream;
 
 import javax.annotation.Nullable;
 
-public class FileInventoriesCustomDropsProvider implements CustomDropsProvider {
+public class FileInventoriesCustomDropsProvider extends BasicCustomDropsProvider {
 
-    @Override
-    public String getId() {
-        return "box-o-utils:file-inv";
+    public FileInventoriesCustomDropsProvider(String itemId,
+                                                 @Nullable String displayname,
+                                                 double chance,
+                                                 @Nullable IntQuantity quantity) {
+        super(itemId, displayname, chance, quantity);
     }
 
+    @Nullable
     @Override
-    public void load(BoxOUtils plugin) {
-        FileInventoriesService fileInvService = Sponge.getServiceManager().provide(FileInventoriesService.class).orElse(null);
-        if (fileInvService == null) {
-            plugin.getLogger().error("FileInventoriesService is not available. CustomDrops using FileItems will be ignored.");
-            return;
-        }
-
-        Path fileitems = plugin.getConfigDir().resolve("fileitems");
-        if (!Files.isDirectory(fileitems)) {
-            return;
-        }
-
-        try (Stream<Path> files = Files.walk(fileitems)) {
-            files.filter(path -> Files.isRegularFile(path) && path.getFileName().toString().endsWith(".json"))
-                    .forEach(path -> {
-                        try {
-                            fileInvService.load(FileInventoriesService.LoadTarget.ITEMS, path);
-                        } catch (IOException e) {
-                            plugin.getLogger().error("Could not load fileitems '" + path.getFileName().toString() + "'.", e);
-                        }
-                    });
-        } catch (IOException e) {
-            plugin.getLogger().error("Unable to walk in directory " + fileitems.toAbsolutePath(), e);
-        }
-    }
-
-    @Override
-    public Optional<ItemStack> createItemStack(String id, @Nullable Player targetPlayer) {
+    protected ItemStack createStack(CustomLootProcessingContext context, String itemId) {
         Optional<FileInventoriesService> maybeService = Sponge.getServiceManager().provide(FileInventoriesService.class);
         if (!maybeService.isPresent()) {
             BoxOUtils.getInstance().getLogger().error("The FileInventoriesService cannot be found. Has FileInventories been installed on this server?");
-            return Optional.empty();
+            return null;
         }
 
-        Optional<ItemStack> item = maybeService.get().getItem(id, targetPlayer);
+        Optional<ItemStack> item = maybeService.get().getItem(itemId, context.getTargetPlayer());
         if (!item.isPresent()) {
-            BoxOUtils.getInstance().getLogger().error("The FileItem for ID " + id + " cannot be found");
+            BoxOUtils.getInstance().getLogger().error("The FileItem for ID " + itemId + " cannot be found");
         }
 
-        return item;
+        return item.orElse(null);
+    }
+
+    public static class Factory extends BasicFactory {
+
+        @Override
+        protected BasicCustomDropsProvider provide(@Nullable ConfigurationNode node,
+                                                   String itemId,
+                                                   @Nullable String displayname,
+                                                   double chance,
+                                                   @Nullable IntQuantity quantity) {
+            return new FileInventoriesCustomDropsProvider(itemId, displayname, chance, quantity);
+        }
+
+        @Override
+        public void load(BoxOUtils plugin) {
+            FileInventoriesService fileInvService = Sponge.getServiceManager().provide(FileInventoriesService.class).orElse(null);
+            if (fileInvService == null) {
+                plugin.getLogger().error("FileInventoriesService is not available. CustomDrops using FileItems will be ignored.");
+                return;
+            }
+
+            Path fileitems = plugin.getConfigDir().resolve("fileitems");
+            if (!Files.isDirectory(fileitems)) {
+                return;
+            }
+
+            try (Stream<Path> files = Files.walk(fileitems)) {
+                files.filter(path -> Files.isRegularFile(path) && path.getFileName().toString().endsWith(".json"))
+                        .forEach(path -> {
+                            try {
+                                fileInvService.load(FileInventoriesService.LoadTarget.ITEMS, path);
+                            } catch (IOException e) {
+                                plugin.getLogger().error("Could not load fileitems '" + path.getFileName().toString() + "'.", e);
+                            }
+                        });
+            } catch (IOException e) {
+                plugin.getLogger().error("Unable to walk in directory " + fileitems.toAbsolutePath(), e);
+            }
+        }
+
+        @Override
+        public String getId() {
+            return "box-o-utils:file-inv";
+        }
     }
 }

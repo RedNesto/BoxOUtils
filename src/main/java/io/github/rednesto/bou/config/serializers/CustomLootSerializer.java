@@ -36,6 +36,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -46,7 +47,7 @@ public class CustomLootSerializer implements TypeSerializer<CustomLoot> {
     @Nullable
     @Override
     public CustomLoot deserialize(@NonNull TypeToken<?> type, @NonNull ConfigurationNode value) throws ObjectMappingException {
-        List<ItemLoot> itemLoots = new ArrayList<>(value.getNode("drops").getList(BouTypeTokens.ITEM_LOOT));
+        List<CustomDropsProvider> itemLoots = new ArrayList<>(value.getNode("drops").getValue(BouTypeTokens.CUSTOM_DROPS_PROVIDER_LIST, Collections.emptyList()));
         itemLoots.removeIf(Objects::isNull);
 
         ConfigurationNode reuseNode = value.getNode("reuse");

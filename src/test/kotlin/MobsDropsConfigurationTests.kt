@@ -54,13 +54,13 @@ class MobsDropsConfigurationTests : PluginConfigurationTestCase<Config.MobsDrops
             val reuse = customReuse(multiplier = 2f, items = reuseItems)
             val money = MoneyLootComponent(MoneyLoot(BoundedIntQuantity(5, 25), null, 50.0, "&aYou earned {money_amount}"))
             val drops = listOf(
-                    itemLoot("waw_sword", "byte-items"),
-                    itemLoot("test", "file-inv", quantity = BoundedIntQuantity(0, 2)))
+                    byteItemsDrop("waw_sword"),
+                    fileInvDrop("test", quantity = BoundedIntQuantity(0, 2)))
             customLoot(drops, overwrite = true, requirements = requirements, reuse = reuse, components = listOf(money))
         }
 
         val bat = run {
-            val drops = listOf(itemLoot("minecraft:ghast_tear", chance = 33.33))
+            val drops = listOf(vanillaDrop("minecraft:ghast_tear", chance = 33.33))
             customLoot(drops)
         }
 

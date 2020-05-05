@@ -24,45 +24,60 @@
 package io.github.rednesto.bou.example;
 
 import io.github.rednesto.bou.BoxOUtils;
-import io.github.rednesto.bou.api.customdrops.CustomDropsProvider;
-import io.github.rednesto.bou.api.customdrops.CustomDropsProviderIntegrations;
+import io.github.rednesto.bou.api.customdrops.BasicCustomDropsProvider;
+import io.github.rednesto.bou.api.customdrops.CustomLootProcessingContext;
+import io.github.rednesto.bou.api.quantity.IntQuantity;
+import ninja.leaping.configurate.ConfigurationNode;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.enchantment.Enchantment;
 import org.spongepowered.api.item.enchantment.EnchantmentTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
 
 import java.util.Collections;
-import java.util.Optional;
 
 import javax.annotation.Nullable;
 
-public class EnchantCustomDropsProvider implements CustomDropsProvider {
+public class EnchantCustomDropsProvider extends BasicCustomDropsProvider {
 
-    private final BouIntegrationExample plugin;
-
-    public EnchantCustomDropsProvider(BouIntegrationExample plugin) {
-        this.plugin = plugin;
+    public EnchantCustomDropsProvider(String itemId,
+                                      @Nullable String displayname,
+                                      double chance,
+                                      @Nullable IntQuantity quantity) {
+        super(itemId, displayname, chance, quantity);
     }
 
     @Override
-    public String getId() {
-        return "bou-integration-example:auto-enchant";
+    protected ItemStack transform(CustomLootProcessingContext context, ItemStack stack) {
+        Enchantment enchant = Enchantment.of(EnchantmentTypes.KNOCKBACK, 1);
+        stack.offer(Keys.ITEM_ENCHANTMENTS, Collections.singletonList(enchant));
+        return stack;
     }
 
-    @Override
-    public void init(BoxOUtils plugin) {
-        this.plugin.logger.info("Initializing EnchantCustomDropsProvider");
-    }
+    public static class Factory extends BasicFactory {
 
-    @Override
-    public Optional<ItemStack> createItemStack(String id, @Nullable Player targetPlayer) {
-        return CustomDropsProviderIntegrations.getInstance().getDefaultIntegration().createItemStack(id, targetPlayer)
-                .map((ItemStack item) -> {
-                    Enchantment enchant = Enchantment.of(EnchantmentTypes.KNOCKBACK, 1);
-                    item.offer(Keys.ITEM_ENCHANTMENTS, Collections.singletonList(enchant));
+        private final BouIntegrationExample plugin;
 
-                    return item;
-                });
+        public Factory(BouIntegrationExample plugin) {
+            this.plugin = plugin;
+        }
+
+        @Override
+        protected BasicCustomDropsProvider provide(@Nullable ConfigurationNode node,
+                                                   String itemId,
+                                                   @Nullable String displayname,
+                                                   double chance,
+                                                   @Nullable IntQuantity quantity) {
+            return new EnchantCustomDropsProvider(itemId, displayname, chance, quantity);
+        }
+
+        @Override
+        public void init(BoxOUtils plugin) {
+            this.plugin.logger.info("Initializing EnchantCustomDropsProvider.Factory");
+        }
+
+        @Override
+        public String getId() {
+            return "bou-integration-example:auto-enchant";
+        }
     }
 }

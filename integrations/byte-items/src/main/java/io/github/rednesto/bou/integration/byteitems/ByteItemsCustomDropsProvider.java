@@ -24,27 +24,48 @@
 package io.github.rednesto.bou.integration.byteitems;
 
 import de.randombyte.byteitems.api.ByteItemsService;
-import io.github.rednesto.bou.api.customdrops.CustomDropsProvider;
+import io.github.rednesto.bou.api.customdrops.BasicCustomDropsProvider;
+import io.github.rednesto.bou.api.customdrops.CustomLootProcessingContext;
+import io.github.rednesto.bou.api.quantity.IntQuantity;
+import ninja.leaping.configurate.ConfigurationNode;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 
-import java.util.Optional;
-
 import javax.annotation.Nullable;
 
-public class ByteItemsCustomDropsProvider implements CustomDropsProvider {
+public class ByteItemsCustomDropsProvider extends BasicCustomDropsProvider {
 
-    @Override
-    public String getId() {
-        return "box-o-utils:byte-items";
+    public ByteItemsCustomDropsProvider(String itemId,
+                                           @Nullable String displayname,
+                                           double chance,
+                                           @Nullable IntQuantity quantity) {
+        super(itemId, displayname, chance, quantity);
     }
 
+    @Nullable
     @Override
-    public Optional<ItemStack> createItemStack(String id, @Nullable Player targetPlayer) {
+    protected ItemStack createStack(CustomLootProcessingContext context, String itemId) {
         return Sponge.getServiceManager().provide(ByteItemsService.class)
-                .flatMap(service -> service.get(id))
-                .map(ItemStackSnapshot::createStack);
+                .flatMap(service -> service.get(itemId))
+                .map(ItemStackSnapshot::createStack)
+                .orElse(null);
+    }
+
+    public static class Factory extends BasicFactory {
+
+        @Override
+        protected BasicCustomDropsProvider provide(@Nullable ConfigurationNode node,
+                                                   String itemId,
+                                                   @Nullable String displayname,
+                                                   double chance,
+                                                   @Nullable IntQuantity quantity) {
+            return new ByteItemsCustomDropsProvider(itemId, displayname, chance, quantity);
+        }
+
+        @Override
+        public String getId() {
+            return "box-o-utils:byte-items";
+        }
     }
 }

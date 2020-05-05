@@ -35,7 +35,7 @@ import javax.annotation.Nullable;
 
 public class CustomLoot {
 
-    private final List<ItemLoot> itemLoots;
+    private final List<CustomDropsProvider> dropsProviders;
     private final boolean overwrite;
     private final boolean expOverwrite;
     private final CustomLootRecipient recipient;
@@ -45,7 +45,7 @@ public class CustomLoot {
     private final Reuse reuse;
     private final List<CustomLootComponent> components;
 
-    public CustomLoot(List<ItemLoot> itemLoots,
+    public CustomLoot(List<CustomDropsProvider> dropsProviders,
                       boolean overwrite,
                       boolean expOverwrite,
                       CustomLootRecipient recipient,
@@ -53,7 +53,7 @@ public class CustomLoot {
                       List<List<Requirement>> requirements,
                       @Nullable Reuse reuse,
                       List<CustomLootComponent> components) {
-        this.itemLoots = itemLoots;
+        this.dropsProviders = dropsProviders;
         this.overwrite = overwrite;
         this.expOverwrite = expOverwrite;
         this.recipient = recipient;
@@ -63,8 +63,8 @@ public class CustomLoot {
         this.components = components;
     }
 
-    public List<ItemLoot> getItemLoots() {
-        return itemLoots;
+    public List<CustomDropsProvider> getDropsProviders() {
+        return dropsProviders;
     }
 
     public boolean isOverwrite() {
@@ -110,7 +110,7 @@ public class CustomLoot {
                 expOverwrite == that.expOverwrite &&
                 recipient == that.recipient &&
                 redirectBaseDropsToRecipient == that.redirectBaseDropsToRecipient &&
-                itemLoots.equals(that.itemLoots) &&
+                dropsProviders.equals(that.dropsProviders) &&
                 requirements.equals(that.requirements) &&
                 Objects.equals(reuse, that.reuse) &&
                 components.equals(that.components);
@@ -118,13 +118,13 @@ public class CustomLoot {
 
     @Override
     public int hashCode() {
-        return Objects.hash(itemLoots, overwrite, expOverwrite, recipient, redirectBaseDropsToRecipient, requirements, reuse, components);
+        return Objects.hash(dropsProviders, overwrite, expOverwrite, recipient, redirectBaseDropsToRecipient, requirements, reuse, components);
     }
 
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
-                .add("itemLoots", itemLoots)
+                .add("itemLoots", dropsProviders)
                 .add("overwrite", overwrite)
                 .add("expOverwrite", expOverwrite)
                 .add("recipient", recipient)

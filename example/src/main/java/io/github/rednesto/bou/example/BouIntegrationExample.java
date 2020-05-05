@@ -24,7 +24,7 @@
 package io.github.rednesto.bou.example;
 
 import com.google.inject.Inject;
-import io.github.rednesto.bou.api.customdrops.CustomDropsProviderIntegrations;
+import io.github.rednesto.bou.api.customdrops.CustomDropsProviderFactoryIntegrations;
 import org.slf4j.Logger;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.game.state.GamePostInitializationEvent;
@@ -42,6 +42,6 @@ public class BouIntegrationExample {
     @Listener
     public void onPostInit(GamePostInitializationEvent event) {
         logger.info("Registering example CustomDropsProvider");
-        CustomDropsProviderIntegrations.getInstance().register(new EnchantCustomDropsProvider(this));
+        CustomDropsProviderFactoryIntegrations.getInstance().register(new EnchantCustomDropsProvider.Factory(this));
     }
 }

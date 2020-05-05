@@ -23,25 +23,34 @@
  */
 package io.github.rednesto.bou.integration.vanilla;
 
-import io.github.rednesto.bou.api.customdrops.CustomDropsProvider;
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.item.ItemType;
-import org.spongepowered.api.item.inventory.ItemStack;
-
-import java.util.Optional;
+import io.github.rednesto.bou.api.customdrops.BasicCustomDropsProvider;
+import io.github.rednesto.bou.api.quantity.IntQuantity;
+import ninja.leaping.configurate.ConfigurationNode;
 
 import javax.annotation.Nullable;
 
-public class VanillaCustomDropsProvider implements CustomDropsProvider {
+public class VanillaCustomDropsProvider extends BasicCustomDropsProvider {
 
-    @Override
-    public String getId() {
-        return "box-o-utils:vanilla";
+    public VanillaCustomDropsProvider(String itemId, @Nullable String displayname, double chance, @Nullable IntQuantity quantity) {
+        super(itemId, displayname, chance, quantity);
     }
 
-    @Override
-    public Optional<ItemStack> createItemStack(String id, @Nullable Player targetPlayer) {
-        return Sponge.getRegistry().getType(ItemType.class, id).map(ItemStack::of);
+    public static class Factory extends BasicFactory {
+
+        public static final String ID = "box-o-utils:vanilla";
+
+        @Override
+        protected BasicCustomDropsProvider provide(@Nullable ConfigurationNode node,
+                                                   String itemId,
+                                                   @Nullable String displayname,
+                                                   double chance,
+                                                   @Nullable IntQuantity quantity) {
+            return new VanillaCustomDropsProvider(itemId, displayname, chance, quantity);
+        }
+
+        @Override
+        public String getId() {
+            return ID;
+        }
     }
 }

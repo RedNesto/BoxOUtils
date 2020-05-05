@@ -23,8 +23,8 @@
  */
 package io.github.rednesto.bou;
 
-import io.github.rednesto.bou.api.customdrops.CustomDropsProvider;
-import io.github.rednesto.bou.api.customdrops.CustomDropsProviderIntegrations;
+import io.github.rednesto.bou.api.customdrops.CustomDropsProviderFactory;
+import io.github.rednesto.bou.api.customdrops.CustomDropsProviderFactoryIntegrations;
 import io.github.rednesto.bou.api.requirement.RequirementProvider;
 import io.github.rednesto.bou.api.requirement.RequirementProviderIntegrations;
 import org.spongepowered.api.Sponge;
@@ -38,16 +38,16 @@ public final class BouUtils {
     }
 
     public static void registerIntegrations(IntegrationsManager integrationsManager, boolean forceLoad) {
-        CustomDropsProviderIntegrations customDropsProviders = integrationsManager.getCustomDropsProviderIntegrations();
-        Consumer<CustomDropsProvider> customDropsProviderRegistration = provider -> customDropsProviders.register(provider, true);
+        CustomDropsProviderFactoryIntegrations customDropsProviders = integrationsManager.getCustomDropsProviderFactoryIntegrations();
+        Consumer<CustomDropsProviderFactory> customDropsProviderRegistration = provider -> customDropsProviders.register(provider, true);
         if (forceLoad || Sponge.getPluginManager().isLoaded("file-inventories")) {
-            reflectiveRegistration("io.github.rednesto.bou.integration.fileinventories.FileInventoriesCustomDropsProvider",
-                    customDropsProviderRegistration, "FileInventoriesCustomDropsProvider", "FileInventories");
+            reflectiveRegistration("io.github.rednesto.bou.integration.fileinventories.FileInventoriesCustomDropsProvider$Factory",
+                    customDropsProviderRegistration, "FileInventoriesCustomDropsProvider.Factory", "FileInventories");
         }
 
         if (forceLoad || Sponge.getPluginManager().isLoaded("byte-items")) {
-            reflectiveRegistration("io.github.rednesto.bou.integration.byteitems.ByteItemsCustomDropsProvider",
-                    customDropsProviderRegistration, "ByteItemsCustomDropsProvider", "ByteItems");
+            reflectiveRegistration("io.github.rednesto.bou.integration.byteitems.ByteItemsCustomDropsProvider$Factory",
+                    customDropsProviderRegistration, "ByteItemsCustomDropsProvider.Factory", "ByteItems");
         }
 
         RequirementProviderIntegrations requirementsProviders = integrationsManager.getRequirementsProviderIntegrations();

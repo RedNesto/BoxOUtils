@@ -23,15 +23,11 @@
  */
 package io.github.rednesto.bou.api.customdrops;
 
-import io.github.rednesto.bou.api.integration.Integration;
-import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.inventory.ItemStack;
 
-import java.util.Optional;
+import java.util.Collection;
 
-import javax.annotation.Nullable;
+public interface CustomDropsProvider {
 
-public interface CustomDropsProvider extends Integration {
-
-    Optional<ItemStack> createItemStack(String id, @Nullable Player targetPlayer);
+    Collection<ItemStack> createStacks(CustomLootProcessingContext context);
 }

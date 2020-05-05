@@ -35,17 +35,18 @@ import io.github.rednesto.bou.api.range.IntRange;
 import io.github.rednesto.bou.api.requirement.Requirement;
 import io.github.rednesto.bou.api.utils.EnchantmentsFilter;
 
+import java.util.List;
 import java.util.Map;
 
 public final class BouTypeTokens {
 
     public static final TypeToken<CustomLoot> CUSTOM_LOOT = TypeToken.of(CustomLoot.class);
+    public static final TypeToken<List<CustomDropsProvider>> CUSTOM_DROPS_PROVIDER_LIST = new TypeToken<List<CustomDropsProvider>>() {};
     public static final TypeToken<CustomLootRecipient> CUSTOM_LOOT_RECIPIENT = TypeToken.of(CustomLootRecipient.class);
     public static final TypeToken<CustomLoot.Reuse> CUSTOM_LOOT_REUSE = TypeToken.of(CustomLoot.Reuse.class);
     public static final TypeToken<CustomLootCommand> CUSTOM_LOOT_COMMAND = TypeToken.of(CustomLootCommand.class);
     public static final TypeToken<IntQuantity> INT_QUANTITY = TypeToken.of(IntQuantity.class);
     public static final TypeToken<IntRange> INT_RANGE = TypeToken.of(IntRange.class);
-    public static final TypeToken<ItemLoot> ITEM_LOOT = TypeToken.of(ItemLoot.class);
     public static final TypeToken<LootReuse> LOOT_REUSE = TypeToken.of(LootReuse.class);
     public static final TypeToken<MoneyLoot> MONEY_LOOT = TypeToken.of(MoneyLoot.class);
     public static final TypeToken<Requirement> REQUIREMENT = new TypeToken<Requirement>() {};

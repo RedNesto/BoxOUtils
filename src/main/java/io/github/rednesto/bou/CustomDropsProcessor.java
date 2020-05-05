@@ -25,7 +25,6 @@ package io.github.rednesto.bou;
 
 import io.github.rednesto.bou.api.customdrops.*;
 import io.github.rednesto.bou.api.lootReuse.LootReuse;
-import io.github.rednesto.bou.api.quantity.IntQuantity;
 import io.github.rednesto.bou.api.requirement.Requirement;
 import io.github.rednesto.bou.integration.customdrops.recipients.ContextLocationLootRecipient;
 import org.slf4j.Logger;
@@ -33,13 +32,12 @@ import org.slf4j.LoggerFactory;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.Item;
-import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.entity.AffectEntityEvent;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
-import org.spongepowered.api.text.serializer.TextSerializers;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.function.BiConsumer;
 
@@ -115,7 +113,6 @@ public class CustomDropsProcessor {
 
     public static void processLoots(CustomLootProcessingContext context, BiConsumer<CustomLoot, ItemStack> dropsConsumer) {
         List<CustomLoot> loots = context.getLoots();
-        Player targetPlayer = context.getTargetPlayer();
         for (CustomLoot loot : loots) {
             for (CustomLootComponent components : loot.getComponents()) {
                 try {
@@ -125,28 +122,15 @@ public class CustomDropsProcessor {
                 }
             }
 
-            for (ItemLoot itemLoot : loot.getItemLoots()) {
-                if (!itemLoot.shouldLoot()) {
-                    continue;
+            for (CustomDropsProvider dropsProvider : loot.getDropsProviders()) {
+                try {
+                    Collection<ItemStack> stacks = dropsProvider.createStacks(context);
+                    for (ItemStack stack : stacks) {
+                        dropsConsumer.accept(loot, stack);
+                    }
+                } catch (Throwable t) {
+                    LOGGER.error("Unhandled error throw by CustomDropsProvider {} when creating stacks.", dropsProvider, t);
                 }
-
-                ItemStack itemStack = CustomDropsProviderIntegrations.getInstance()
-                        .createCustomDropStack(itemLoot.getProviderId(), itemLoot.getId(), targetPlayer)
-                        .orElse(null);
-                if (itemStack == null) {
-                    continue;
-                }
-
-                IntQuantity quantity = itemLoot.getQuantity();
-                if (quantity != null) {
-                    itemStack.setQuantity(quantity.get());
-                }
-
-                if (itemLoot.getDisplayname() != null) {
-                    itemStack.offer(Keys.DISPLAY_NAME, TextSerializers.FORMATTING_CODE.deserialize(itemLoot.getDisplayname()));
-                }
-
-                dropsConsumer.accept(loot, itemStack);
             }
         }
     }

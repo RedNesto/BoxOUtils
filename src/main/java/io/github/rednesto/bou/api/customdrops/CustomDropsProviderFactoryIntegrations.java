@@ -21,26 +21,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.github.rednesto.bou.tests
+package io.github.rednesto.bou.api.customdrops;
 
-import io.github.rednesto.bou.Config
-import io.github.rednesto.bou.api.quantity.BoundedIntQuantity
-import io.github.rednesto.bou.config.serializers.BouTypeTokens
-import io.github.rednesto.bou.tests.framework.PluginConfigurationTestCase
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.Test
+import io.github.rednesto.bou.IntegrationsManager;
+import io.github.rednesto.bou.api.integration.IntegrationsList;
 
-class FishingDropsConfigurationTests : PluginConfigurationTestCase<Config.FishingDrops>("fishingdrops", BouTypeTokens.CONFIG_FISHING_DROPS) {
+public class CustomDropsProviderFactoryIntegrations extends IntegrationsList<CustomDropsProviderFactory> {
 
-    @Test
-    fun `simple 1`() {
-        val config = loadConfig("simple1")
+    public CustomDropsProviderFactoryIntegrations() {
+        super("CustomDropsProviderFactory Integrations", "box-o-utils");
+    }
 
-        val drops = listOf(vanillaDrop("minecraft:iron_ingot", quantity = BoundedIntQuantity(0, 3)))
-        val expected = listOf(customLoot(drops))
-
-        assertTrue(config.enabled)
-        assertEquals(expected, config.loots)
+    public static CustomDropsProviderFactoryIntegrations getInstance() {
+        return IntegrationsManager.getInstance().getCustomDropsProviderFactoryIntegrations();
     }
 }

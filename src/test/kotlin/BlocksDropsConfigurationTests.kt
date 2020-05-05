@@ -47,15 +47,15 @@ class BlocksDropsConfigurationTests : PluginConfigurationTestCase<Config.BlocksD
         val config = loadConfig("complex1")
 
         val leaves = run {
-            val drops = listOf(itemLoot("minecraft:coal", chance = 25.0, quantity = FixedIntQuantity(1)))
+            val drops = listOf(vanillaDrop("minecraft:coal", chance = 25.0, quantity = FixedIntQuantity(1)))
             val money = MoneyLootComponent(MoneyLoot(BoundedIntQuantity(10, 30), "economylite:coin", 25.0, "&aYou earned {money_amount}"))
             customLoot(drops, overwrite = true, components = listOf(money))
         }
 
         val leaves2 = run {
             val drops = listOf(
-                    itemLoot("minecraft:coal", chance = 25.0, quantity = FixedIntQuantity(1)),
-                    itemLoot("minecraft:dirt", chance = 25.0, quantity = FixedIntQuantity(1)))
+                    vanillaDrop("minecraft:coal", chance = 25.0, quantity = FixedIntQuantity(1)),
+                    vanillaDrop("minecraft:dirt", chance = 25.0, quantity = FixedIntQuantity(1)))
             val money  = MoneyLootComponent(MoneyLoot(BoundedIntQuantity(10, 30), "economylite:coin", 25.0, "&aYou earned {money_amount}"))
             customLoot(drops, overwrite = true, components = listOf(money))
         }
@@ -63,7 +63,7 @@ class BlocksDropsConfigurationTests : PluginConfigurationTestCase<Config.BlocksD
         val ironOre = run {
             val reuse = customReuse(multiplier = 2f, items = mapOf("minecraft:iron_ore" to SimpleLootReuse(BoundedIntQuantity(1, 3))))
             val money = MoneyLootComponent(MoneyLoot(BoundedIntQuantity(1, 15), null, 25.0, "&aYou earned {money_amount}"))
-            val drops = listOf(itemLoot("minecraft:cobblestone", chance = 25.0))
+            val drops = listOf(vanillaDrop("minecraft:cobblestone", chance = 25.0))
             customLoot(drops, reuse = reuse, components = listOf(money))
         }
 
@@ -95,6 +95,69 @@ class BlocksDropsConfigurationTests : PluginConfigurationTestCase<Config.BlocksD
     }
 
     @Test
+    fun `drops by provider 1`() {
+        val config = loadConfig("dropsByProvider1")
+
+        val drops = listOf(
+                byteItemsDrop("the_item"),
+                vanillaDrop("minecraft:cobblestone")
+        )
+        val customLoot = customLoot(drops)
+        val expected = mapOf("minecraft:iron_ore" to listOf(customLoot))
+
+        assertTrue(config.enabled)
+        assertEquals(expected, config.drops)
+    }
+
+    @Test
+    fun `drops by provider 2`() {
+        val config = loadConfig("dropsByProvider2")
+
+        val drops = listOf(
+                vanillaDrop("minecraft:cobblestone"),
+                byteItemsDrop("the_item", quantity = FixedIntQuantity(2))
+        )
+        val customLoot = customLoot(drops)
+        val expected = mapOf("minecraft:iron_ore" to listOf(customLoot))
+
+        assertTrue(config.enabled)
+        assertEquals(expected, config.drops)
+    }
+
+    @Test
+    fun `drops by provider 3`() {
+        val config = loadConfig("dropsByProvider3")
+
+        val drops = listOf(
+                byteItemsDrop("the_item", chance = 10.0),
+                byteItemsDrop("the_item"),
+                vanillaDrop("minecraft:cobblestone"),
+                vanillaDrop("minecraft:stone", chance = 25.0)
+        )
+        val customLoot = customLoot(drops)
+        val expected = mapOf("minecraft:iron_ore" to listOf(customLoot))
+
+        assertTrue(config.enabled)
+        assertEquals(expected, config.drops)
+    }
+
+    @Test
+    fun `mixed drops 1`() {
+        val config = loadConfig("mixedDrops1")
+
+        val drops = listOf(
+                vanillaDrop("minecraft:stone"),
+                vanillaDrop("minecraft:cobblestone", chance = 25.0),
+                byteItemsDrop("the_item", quantity = FixedIntQuantity(2))
+        )
+        val customLoot = customLoot(drops)
+        val expected = mapOf("minecraft:iron_ore" to listOf(customLoot))
+
+        assertTrue(config.enabled)
+        assertEquals(expected, config.drops)
+    }
+
+    @Test
     fun `requirements 1`() {
         val config = loadConfig("requirements1")
 
@@ -110,7 +173,7 @@ class BlocksDropsConfigurationTests : PluginConfigurationTestCase<Config.BlocksD
     fun `simple 1`() {
         val config = loadConfig("simple1")
 
-        val itemLoots = listOf(itemLoot("minecraft:cobblestone", chance = 25.0))
+        val itemLoots = listOf(vanillaDrop("minecraft:cobblestone", chance = 25.0))
         val customLoot = customLoot(itemLoots, recipient = PlayerInventoryLootRecipient.INSTANCE)
         val expected = mapOf("minecraft:iron_ore" to listOf(customLoot))
 
@@ -123,9 +186,45 @@ class BlocksDropsConfigurationTests : PluginConfigurationTestCase<Config.BlocksD
         val config = loadConfig("simple2")
 
         val moneyLoot = MoneyLootComponent(MoneyLoot(BoundedIntQuantity(10, 30), "economylite:coin", 25.0, "&aYou earned {money_amount}"))
-        val itemLoots = listOf(itemLoot("minecraft:coal", chance = 25.0, quantity = FixedIntQuantity(1)))
+        val itemLoots = listOf(vanillaDrop("minecraft:coal", chance = 25.0, quantity = FixedIntQuantity(1)))
         val customLoot = customLoot(itemLoots, overwrite = true, components = listOf(moneyLoot))
         val expected = mapOf("minecraft:leaves" to listOf(customLoot))
+
+        assertTrue(config.enabled)
+        assertEquals(expected, config.drops)
+    }
+
+    @Test
+    fun `simple drop 1`() {
+        val config = loadConfig("simpleDrop1")
+
+        val drops = listOf(vanillaDrop("minecraft:cobblestone"))
+        val customLoot = customLoot(drops)
+        val expected = mapOf("minecraft:iron_ore" to listOf(customLoot))
+
+        assertTrue(config.enabled)
+        assertEquals(expected, config.drops)
+    }
+
+    @Test
+    fun `simple drop 2`() {
+        val config = loadConfig("simpleDrop2")
+
+        val drops = listOf(vanillaDrop("minecraft:cobblestone", quantity = BoundedIntQuantity(0, 2)))
+        val customLoot = customLoot(drops)
+        val expected = mapOf("minecraft:iron_ore" to listOf(customLoot))
+
+        assertTrue(config.enabled)
+        assertEquals(expected, config.drops)
+    }
+
+    @Test
+    fun `simplest drop`() {
+        val config = loadConfig("simplestDrop")
+
+        val drops = listOf(vanillaDrop("minecraft:cobblestone"))
+        val customLoot = customLoot(drops)
+        val expected = mapOf("minecraft:iron_ore" to listOf(customLoot))
 
         assertTrue(config.enabled)
         assertEquals(expected, config.drops)

@@ -150,7 +150,7 @@ public class SpongeConfig {
                 // MobsDrops / BlocksDrops
                 .registerType(BouTypeTokens.CUSTOM_LOOT, new CustomLootSerializer())
                 .registerType(BouTypeTokens.CUSTOM_LOOT_RECIPIENT, new CustomLootRecipientSerializer())
-                .registerType(BouTypeTokens.ITEM_LOOT, new ItemLootSerializer())
+                .registerType(BouTypeTokens.CUSTOM_DROPS_PROVIDER_LIST, new CustomDropsProviderListSerializer())
                 .registerType(BouTypeTokens.CUSTOM_LOOT_REUSE, new CustomLootReuseSerializer())
                 .registerType(BouTypeTokens.CUSTOM_LOOT_COMMAND, new CustomLootCommandSerializer())
                 .registerType(BouTypeTokens.REQUIREMENT, new RequirementSerializer())
