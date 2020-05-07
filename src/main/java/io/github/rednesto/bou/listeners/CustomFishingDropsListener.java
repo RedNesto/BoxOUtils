@@ -27,6 +27,7 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import io.github.rednesto.bou.Config;
 import io.github.rednesto.bou.CustomDropsProcessor;
+import io.github.rednesto.bou.SpongeUtils;
 import io.github.rednesto.bou.api.customdrops.CustomLoot;
 import io.github.rednesto.bou.api.customdrops.CustomLootProcessingContext;
 import org.spongepowered.api.data.Transaction;
@@ -78,7 +79,8 @@ public class CustomFishingDropsListener {
         }
 
         Location<World> location = event.getFishHook().getLocation();
-        CustomLootProcessingContext context = new CustomLootProcessingContext(loots, event, event.getFishHook(), event.getCause(), player, location);
+        Location<World> experienceSpawnLocation = SpongeUtils.center(player != null ? player.getLocation() : location);
+        CustomLootProcessingContext context = new CustomLootProcessingContext(loots, event, event.getFishHook(), event.getCause(), player, location, experienceSpawnLocation);
         CustomDropsProcessor.processLoots(context, (loot, itemStack) -> transactions.add(new Transaction<>(ItemStackSnapshot.NONE, itemStack.createSnapshot())));
     }
 

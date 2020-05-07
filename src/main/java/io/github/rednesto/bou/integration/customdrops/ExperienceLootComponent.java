@@ -47,17 +47,20 @@ public class ExperienceLootComponent implements CustomLootComponent {
 
     @Override
     public void processLoot(CustomLootProcessingContext processingContext) {
-        Location<World> targetLocation = processingContext.getTargetLocation();
+        Location<World> targetLocation = processingContext.getExperienceSpawnLocation();
+        if (targetLocation == null) {
+            targetLocation = processingContext.getTargetLocation();
+        }
         if (targetLocation == null) {
             Player targetPlayer = processingContext.getTargetPlayer();
             if (targetPlayer != null) {
                 targetLocation = targetPlayer.getLocation();
-            } else {
-                return;
             }
         }
 
-        SpongeUtils.spawnExpOrbs(targetLocation, experienceQuantity.get());
+        if (targetLocation != null) {
+            SpongeUtils.spawnExpOrbs(targetLocation, experienceQuantity.get());
+        }
     }
 
     @Override

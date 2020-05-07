@@ -47,15 +47,24 @@ public class CustomLootProcessingContext {
     private final Player targetPlayer;
     @Nullable
     private final Location<World> targetLocation;
+    @Nullable
+    private final Location<World> experienceSpawnLocation;
 
     public CustomLootProcessingContext(List<CustomLoot> loots, @Nullable Event event, Object source, Cause cause,
                                        @Nullable Player targetPlayer, @Nullable Location<World> targetLocation) {
+        this(loots, event, source, cause, targetPlayer, targetLocation, targetLocation);
+    }
+
+    public CustomLootProcessingContext(List<CustomLoot> loots, @Nullable Event event, Object source, Cause cause,
+                                       @Nullable Player targetPlayer, @Nullable Location<World> targetLocation,
+                                       @Nullable Location<World> experienceSpawnLocation) {
         this.loots = Collections.unmodifiableList(loots);
         this.event = event;
         this.source = source;
         this.cause = cause;
         this.targetPlayer = targetPlayer;
         this.targetLocation = targetLocation;
+        this.experienceSpawnLocation = experienceSpawnLocation;
     }
 
     public List<CustomLoot> getLoots() {
@@ -85,8 +94,13 @@ public class CustomLootProcessingContext {
         return targetLocation;
     }
 
+    @Nullable
+    public Location<World> getExperienceSpawnLocation() {
+        return experienceSpawnLocation;
+    }
+
     public CustomLootProcessingContext withLoots(List<CustomLoot> loots) {
-        return new CustomLootProcessingContext(loots, this.event, this.source, this.cause, this.targetPlayer, this.targetLocation);
+        return new CustomLootProcessingContext(loots, this.event, this.source, this.cause, this.targetPlayer, this.targetLocation, this.experienceSpawnLocation);
     }
 
     @Override
@@ -104,12 +118,13 @@ public class CustomLootProcessingContext {
                 source.equals(that.source) &&
                 cause.equals(that.cause) &&
                 Objects.equals(targetPlayer, that.targetPlayer) &&
-                Objects.equals(targetLocation, that.targetLocation);
+                Objects.equals(targetLocation, that.targetLocation) &&
+                Objects.equals(experienceSpawnLocation, that.experienceSpawnLocation);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(loots, event, source, cause, targetPlayer, targetLocation);
+        return Objects.hash(loots, event, source, cause, targetPlayer, targetLocation, experienceSpawnLocation);
     }
 
     @Override
@@ -121,6 +136,7 @@ public class CustomLootProcessingContext {
                 .add("cause", cause)
                 .add("targetPlayer", targetPlayer)
                 .add("targetLocation", targetLocation)
+                .add("experienceSpawnLocation", experienceSpawnLocation)
                 .toString();
     }
 }
