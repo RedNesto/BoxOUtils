@@ -24,6 +24,7 @@
 package io.github.rednesto.bou.requirements;
 
 import io.github.rednesto.bou.BoxOUtils;
+import io.github.rednesto.bou.api.customdrops.CustomLootProcessingContext;
 import io.github.rednesto.bou.api.requirement.AbstractRequirement;
 import io.github.rednesto.bou.api.requirement.Requirement;
 import io.github.rednesto.bou.api.requirement.RequirementConfigurationException;
@@ -33,7 +34,6 @@ import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import org.slf4j.Marker;
 import org.slf4j.MarkerFactory;
 import org.spongepowered.api.data.LocatableSnapshot;
-import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.util.TypeTokens;
 import org.spongepowered.api.world.Locatable;
 import org.spongepowered.api.world.Location;
@@ -41,18 +41,19 @@ import org.spongepowered.api.world.biome.BiomeType;
 
 import java.util.Collection;
 
-public class BiomesRequirement extends AbstractRequirement<Object> {
+public class BiomesRequirement extends AbstractRequirement {
 
     private static final Marker logMarker = MarkerFactory.getMarker("BiomesRequirement");
     private final Collection<String> acceptedBiomes;
 
     public BiomesRequirement(Collection<String> acceptedBiomes) {
-        super("biomes", Object.class);
+        super("biomes");
         this.acceptedBiomes = acceptedBiomes;
     }
 
     @Override
-    public boolean fulfills(Object source, Cause cause) {
+    public boolean fulfills(CustomLootProcessingContext context) {
+        Object source = context.getSource();
         BiomeType biome;
         if (source instanceof LocatableSnapshot) {
             biome = ((LocatableSnapshot<?>) source).getLocation().map(Location::getBiome).orElse(null);
@@ -72,14 +73,14 @@ public class BiomesRequirement extends AbstractRequirement<Object> {
     }
 
     @Override
-    public boolean appliesTo(Object source, Cause cause) {
-        return source instanceof LocatableSnapshot || source instanceof Locatable;
+    public boolean appliesTo(CustomLootProcessingContext context) {
+        return context.getSource() instanceof LocatableSnapshot || context.getSource() instanceof Locatable;
     }
 
     public static class Provider implements RequirementProvider {
 
         @Override
-        public Requirement<?> provide(ConfigurationNode node) throws RequirementConfigurationException {
+        public Requirement provide(ConfigurationNode node) throws RequirementConfigurationException {
             try {
                 return new BiomesRequirement(node.getList(TypeTokens.STRING_TOKEN));
             } catch (ObjectMappingException e) {

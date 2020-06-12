@@ -24,6 +24,7 @@
 package io.github.rednesto.bou.integration.griefprevention;
 
 import com.google.common.base.MoreObjects;
+import io.github.rednesto.bou.api.customdrops.CustomLootProcessingContext;
 import io.github.rednesto.bou.api.requirement.AbstractRequirement;
 import io.github.rednesto.bou.api.requirement.Requirement;
 import io.github.rednesto.bou.api.requirement.RequirementConfigurationException;
@@ -34,7 +35,6 @@ import me.ryanhamshire.griefprevention.api.claim.ClaimManager;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import org.spongepowered.api.data.LocatableSnapshot;
-import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.util.TypeTokens;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
@@ -44,13 +44,13 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-public class GriefPreventionRegionRequirement extends AbstractRequirement<LocatableSnapshot> {
+public class GriefPreventionRegionRequirement extends AbstractRequirement {
 
     private final List<Object> regions;
     private final boolean isWhitelist;
 
     public GriefPreventionRegionRequirement(List<String> regions, boolean isWhitelist) {
-        super("griefprevention", LocatableSnapshot.class);
+        super("griefprevention");
         this.regions = regions.stream().map(id -> {
             try {
                 return UUID.fromString(id);
@@ -62,12 +62,18 @@ public class GriefPreventionRegionRequirement extends AbstractRequirement<Locata
     }
 
     @Override
-    public boolean fulfills(LocatableSnapshot source, Cause cause) {
+    public boolean appliesTo(CustomLootProcessingContext context) {
+        return context.getSource() instanceof LocatableSnapshot;
+    }
+
+    @Override
+    public boolean fulfills(CustomLootProcessingContext context) {
+        LocatableSnapshot<?> source = (LocatableSnapshot<?>) context.getSource();
         if (!source.getLocation().isPresent()) {
             return false;
         }
 
-        Location<World> location = (Location<World>) source.getLocation().get();
+        Location<World> location = source.getLocation().get();
         ClaimManager claimManager = GriefPrevention.getApi().getClaimManager(location.getExtent());
         Claim hereClaim = claimManager.getClaimAt(location);
         for (Object regionId : this.regions) {
@@ -109,7 +115,6 @@ public class GriefPreventionRegionRequirement extends AbstractRequirement<Locata
     public String toString() {
         return MoreObjects.toStringHelper(this)
                 .add("id", getId())
-                .add("applicableType", getApplicableType())
                 .add("regions", regions)
                 .add("isWhitelist", isWhitelist)
                 .toString();
@@ -123,7 +128,7 @@ public class GriefPreventionRegionRequirement extends AbstractRequirement<Locata
         }
 
         @Override
-        public Requirement<?> provide(ConfigurationNode node) throws RequirementConfigurationException {
+        public Requirement provide(ConfigurationNode node) throws RequirementConfigurationException {
             try {
                 String listType = node.getNode("list-type").getString("whitelist");
                 boolean isWhitelist;

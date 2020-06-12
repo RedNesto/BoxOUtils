@@ -25,6 +25,7 @@ package io.github.rednesto.bou.tests.configuration
 
 import com.google.common.base.MoreObjects
 import com.google.common.reflect.TypeToken
+import io.github.rednesto.bou.api.customdrops.CustomLootProcessingContext
 import io.github.rednesto.bou.api.requirement.AbstractRequirement
 import io.github.rednesto.bou.api.requirement.Requirement
 import io.github.rednesto.bou.api.requirement.RequirementProvider
@@ -38,15 +39,14 @@ import ninja.leaping.configurate.objectmapping.serialize.TypeSerializerCollectio
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.spongepowered.api.event.cause.Cause
 import org.spongepowered.api.util.TypeTokens
 import java.nio.file.Paths
 import java.util.*
 import kotlin.collections.ArrayList
 
-private val TOKEN = object : TypeToken<MutableList<MutableList<Requirement<*>>>>() {}
+private val TOKEN = object : TypeToken<MutableList<MutableList<Requirement>>>() {}
 
-class RequirementsConfigurationTests : ConfigurationTestCase<MutableList<MutableList<Requirement<*>>>>("requirements", TOKEN) {
+class RequirementsConfigurationTests : ConfigurationTestCase<MutableList<MutableList<Requirement>>>("requirements", TOKEN) {
 
     val pluginFixture = BouFixture({ Paths.get("config") })
 
@@ -72,7 +72,8 @@ requirements {
         val expected = listOf(listOf(
                 TestRequirement("bou-test:req1", "some string"),
                 TestRequirement("bou-test:req2", listOf("yes", "no", "maybe"))))
-        assertEquals(expected, loadConfig(config))
+        val result = loadConfig(config).onEach { it.sortBy(Requirement::getId)}
+        assertEquals(expected, result)
     }
 
     @Test
@@ -106,7 +107,7 @@ requirements=[
                 .registerType(BouTypeTokens.REQUIREMENTS_MAP, RequirementsMapSerializer())
     }
 
-    override fun loadConfig(configuration: String): MutableList<MutableList<Requirement<*>>> {
+    override fun loadConfig(configuration: String): MutableList<MutableList<Requirement>> {
         val rootNode = configHelper.loadNode(configuration)
         return RequirementSerializer.getRequirementGroups(rootNode.getNode("requirements"))
     }
@@ -125,10 +126,10 @@ requirements=[
     }
 }
 
-private class TestRequirement(id: String, val configurationValue: Any) : AbstractRequirement<Any>(id, Any::class.java) {
+private class TestRequirement(id: String, val configurationValue: Any) : AbstractRequirement(id) {
 
     // We don't care about fulfills since we only test requirements configuration loading here
-    override fun fulfills(source: Any, cause: Cause): Boolean = true
+    override fun fulfills(context: CustomLootProcessingContext): Boolean = true
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -141,13 +142,12 @@ private class TestRequirement(id: String, val configurationValue: Any) : Abstrac
     }
 
     override fun hashCode(): Int {
-        return Objects.hash(id, applicableType, configurationValue)
+        return Objects.hash(id, configurationValue)
     }
 
     override fun toString(): String {
         return MoreObjects.toStringHelper(this)
                 .add("id", id)
-                .add("applicableType", applicableType)
                 .add("configurationValue", configurationValue)
                 .toString()
     }
@@ -156,7 +156,7 @@ private class TestRequirement(id: String, val configurationValue: Any) : Abstrac
 
         override fun getId(): String = id
 
-        override fun provide(node: ConfigurationNode): Requirement<*> {
+        override fun provide(node: ConfigurationNode): Requirement? {
             return TestRequirement(id, configLoader(node))
         }
     }

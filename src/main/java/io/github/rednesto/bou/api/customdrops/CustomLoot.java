@@ -40,7 +40,7 @@ public class CustomLoot {
     private final boolean expOverwrite;
     private final CustomLootRecipient recipient;
     private final boolean redirectBaseDropsToRecipient;
-    private final List<List<Requirement<?>>> requirements;
+    private final List<List<Requirement>> requirements;
     @Nullable
     private final Reuse reuse;
     private final List<CustomLootComponent> components;
@@ -50,7 +50,7 @@ public class CustomLoot {
                       boolean expOverwrite,
                       CustomLootRecipient recipient,
                       boolean redirectBaseDropsToRecipient,
-                      List<List<Requirement<?>>> requirements,
+                      List<List<Requirement>> requirements,
                       @Nullable Reuse reuse,
                       List<CustomLootComponent> components) {
         this.itemLoots = itemLoots;
@@ -83,7 +83,7 @@ public class CustomLoot {
         return redirectBaseDropsToRecipient;
     }
 
-    public List<List<Requirement<?>>> getRequirements() {
+    public List<List<Requirement>> getRequirements() {
         return requirements;
     }
 
@@ -138,10 +138,10 @@ public class CustomLoot {
     public static class Reuse {
 
         private final float multiplier;
-        private final List<List<Requirement<?>>> requirements;
+        private final List<List<Requirement>> requirements;
         private final Map<String, LootReuse> items;
 
-        public Reuse(float multiplier, Map<String, LootReuse> items, List<List<Requirement<?>>> requirements) {
+        public Reuse(float multiplier, Map<String, LootReuse> items, List<List<Requirement>> requirements) {
             this.multiplier = multiplier;
             this.items = items;
             this.requirements = requirements;
@@ -155,7 +155,7 @@ public class CustomLoot {
             return items;
         }
 
-        public List<List<Requirement<?>>> getRequirements() {
+        public List<List<Requirement>> getRequirements() {
             return requirements;
         }
 

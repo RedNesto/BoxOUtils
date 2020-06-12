@@ -48,7 +48,7 @@ public class DataByKeyRequirementProvider<C extends ValueContainer<C>> implement
     }
 
     @Override
-    public Requirement<?> provide(ConfigurationNode node) throws RequirementConfigurationException {
+    public Requirement provide(ConfigurationNode node) throws RequirementConfigurationException {
         if (!node.hasMapChildren()) {
             throw new RequirementConfigurationException("A data requirement does not have any data keys to check");
         }

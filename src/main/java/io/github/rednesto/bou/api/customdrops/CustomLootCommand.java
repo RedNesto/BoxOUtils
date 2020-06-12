@@ -33,9 +33,9 @@ public class CustomLootCommand {
     private final String rawCommand;
     private final SenderMode senderMode;
     private final double chance;
-    private final List<List<Requirement<?>>> requirements;
+    private final List<List<Requirement>> requirements;
 
-    public CustomLootCommand(String rawCommand, SenderMode senderMode, double chance, List<List<Requirement<?>>> requirements) {
+    public CustomLootCommand(String rawCommand, SenderMode senderMode, double chance, List<List<Requirement>> requirements) {
         this.rawCommand = rawCommand;
         this.senderMode = senderMode;
         this.chance = chance / 100;
@@ -58,7 +58,7 @@ public class CustomLootCommand {
         return chance;
     }
 
-    public List<List<Requirement<?>>> getRequirements() {
+    public List<List<Requirement>> getRequirements() {
         return requirements;
     }
 

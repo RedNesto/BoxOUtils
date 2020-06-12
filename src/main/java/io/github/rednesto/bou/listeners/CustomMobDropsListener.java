@@ -72,12 +72,6 @@ public class CustomMobDropsListener implements SpongeConfig.ReloadableListener {
             return;
         }
 
-        EntitySnapshot targetEntitySnapshot = targetEntity.createSnapshot();
-        List<CustomLoot> lootsToUse = CustomDropsProcessor.getLootsToUse(loots, targetEntitySnapshot, event.getCause());
-        if (lootsToUse.isEmpty()) {
-            return;
-        }
-
         @Nullable Player player = event.getCause().first(Player.class).orElseGet(() -> {
             Optional<IndirectEntityDamageSource> maybeIndirectSource = event.getCause().first(IndirectEntityDamageSource.class);
             if (maybeIndirectSource.isPresent()) {
@@ -98,10 +92,16 @@ public class CustomMobDropsListener implements SpongeConfig.ReloadableListener {
             return null;
         });
 
-        requirementResultsTracker.put(targetEntity.getUniqueId(), lootsToUse);
+        EntitySnapshot targetEntitySnapshot = targetEntity.createSnapshot();
         Location<World> targetLocation = targetEntity.getLocation();
-        CustomLootProcessingContext processingContext = new CustomLootProcessingContext(lootsToUse, event, targetEntitySnapshot, event.getCause(), player, targetLocation);
-        CustomDropsProcessor.dropLoot(processingContext);
+        CustomLootProcessingContext processingContext = new CustomLootProcessingContext(Collections.emptyList(), event, targetEntitySnapshot, event.getCause(), player, targetLocation);
+        List<CustomLoot> lootsToUse = CustomDropsProcessor.getLootsToUse(loots, processingContext);
+        if (lootsToUse.isEmpty()) {
+            return;
+        }
+
+        requirementResultsTracker.put(targetEntity.getUniqueId(), lootsToUse);
+        CustomDropsProcessor.dropLoot(processingContext.withLoots(lootsToUse));
     }
 
     @Listener

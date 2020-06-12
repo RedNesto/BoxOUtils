@@ -38,10 +38,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class RequirementSerializer implements TypeSerializer<Requirement<?>> {
+public class RequirementSerializer implements TypeSerializer<Requirement> {
 
     @Override
-    public @Nullable Requirement<?> deserialize(@NonNull TypeToken<?> type, @NonNull ConfigurationNode value) throws ObjectMappingException {
+    public @Nullable Requirement deserialize(@NonNull TypeToken<?> type, @NonNull ConfigurationNode value) throws ObjectMappingException {
         String key = (String) value.getKey();
         if (key == null) {
             return null;
@@ -62,15 +62,15 @@ public class RequirementSerializer implements TypeSerializer<Requirement<?>> {
     }
 
     @Override
-    public void serialize(@NonNull TypeToken<?> type, @Nullable Requirement<?> obj, @NonNull ConfigurationNode value) {
+    public void serialize(@NonNull TypeToken<?> type, @Nullable Requirement obj, @NonNull ConfigurationNode value) {
         throw new UnsupportedOperationException();
     }
 
-    public static List<List<Requirement<?>>> getRequirementGroups(ConfigurationNode requirementsNode) throws ObjectMappingException {
-        List<Map<String, Requirement<?>>> requirementsMaps = requirementsNode.getList(BouTypeTokens.REQUIREMENTS_MAP);
-        ArrayList<List<Requirement<?>>> lists = new ArrayList<>();
-        for (Map<String, Requirement<?>> requirementsMap : requirementsMaps) {
-            ArrayList<Requirement<?>> requirements = new ArrayList<>(requirementsMap.values());
+    public static List<List<Requirement>> getRequirementGroups(ConfigurationNode requirementsNode) throws ObjectMappingException {
+        List<Map<String, Requirement>> requirementsMaps = requirementsNode.getList(BouTypeTokens.REQUIREMENTS_MAP);
+        ArrayList<List<Requirement>> lists = new ArrayList<>();
+        for (Map<String, Requirement> requirementsMap : requirementsMaps) {
+            ArrayList<Requirement> requirements = new ArrayList<>(requirementsMap.values());
             lists.add(requirements);
         }
 

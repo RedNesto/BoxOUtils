@@ -25,24 +25,17 @@ package io.github.rednesto.bou.api.requirement;
 
 import com.google.common.base.MoreObjects;
 
-public abstract class AbstractRequirement<T> implements Requirement<T> {
+public abstract class AbstractRequirement implements Requirement {
 
     private final String id;
-    private final Class<T> applicableType;
 
-    protected AbstractRequirement(String id, Class<T> applicableType) {
+    protected AbstractRequirement(String id) {
         this.id = id;
-        this.applicableType = applicableType;
     }
 
     @Override
     public String getId() {
         return this.id;
-    }
-
-    @Override
-    public Class<T> getApplicableType() {
-        return this.applicableType;
     }
 
     @Override
@@ -54,16 +47,14 @@ public abstract class AbstractRequirement<T> implements Requirement<T> {
             return false;
         }
 
-        AbstractRequirement<?> that = (AbstractRequirement<?>) o;
-        return id.equals(that.id) &&
-                applicableType.equals(that.applicableType);
+        AbstractRequirement that = (AbstractRequirement) o;
+        return id.equals(that.id);
     }
 
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
                 .add("id", id)
-                .add("applicableType", applicableType)
                 .toString();
     }
 }

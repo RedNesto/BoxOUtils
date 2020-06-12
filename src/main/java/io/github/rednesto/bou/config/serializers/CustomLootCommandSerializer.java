@@ -42,7 +42,7 @@ public class CustomLootCommandSerializer implements TypeSerializer<CustomLootCom
         String rawCommand;
         CustomLootCommand.SenderMode senderMode = CustomLootCommand.SenderMode.SERVER;
         double chance = 0;
-        List<List<Requirement<?>>> requirements;
+        List<List<Requirement>> requirements;
         if (value.hasMapChildren()) {
             rawCommand = value.getNode("command").getString();
 

@@ -34,13 +34,13 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 
-public class RequirementsMapSerializer implements TypeSerializer<Map<String, Requirement<?>>> {
+public class RequirementsMapSerializer implements TypeSerializer<Map<String, Requirement>> {
 
     @Override
-    public @Nullable Map<String, Requirement<?>> deserialize(@NonNull TypeToken<?> type, @NonNull ConfigurationNode value) throws ObjectMappingException {
-        Map<String, Requirement<?>> requirements = new HashMap<>();
+    public @Nullable Map<String, Requirement> deserialize(@NonNull TypeToken<?> type, @NonNull ConfigurationNode value) throws ObjectMappingException {
+        Map<String, Requirement> requirements = new HashMap<>();
         for (ConfigurationNode requirementNode : value.getChildrenMap().values()) {
-            Requirement<?> requirement = requirementNode.getValue(BouTypeTokens.REQUIREMENT);
+            Requirement requirement = requirementNode.getValue(BouTypeTokens.REQUIREMENT);
             if (requirement != null) {
                 requirements.put(((String) requirementNode.getKey()), requirement);
             }
@@ -50,7 +50,7 @@ public class RequirementsMapSerializer implements TypeSerializer<Map<String, Req
     }
 
     @Override
-    public void serialize(@NonNull TypeToken<?> type, @Nullable Map<String, Requirement<?>> obj, @NonNull ConfigurationNode value) {
+    public void serialize(@NonNull TypeToken<?> type, @Nullable Map<String, Requirement> obj, @NonNull ConfigurationNode value) {
         throw new UnsupportedOperationException();
     }
 }

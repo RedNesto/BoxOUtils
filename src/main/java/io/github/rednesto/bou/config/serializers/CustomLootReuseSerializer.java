@@ -54,7 +54,7 @@ public class CustomLootReuseSerializer implements TypeSerializer<CustomLoot.Reus
         }
 
         ConfigurationNode requirementsNode = value.getNode("requirements");
-        List<List<Requirement<?>>> requirements = RequirementSerializer.getRequirementGroups(requirementsNode);
+        List<List<Requirement>> requirements = RequirementSerializer.getRequirementGroups(requirementsNode);
 
         return new CustomLoot.Reuse(multiplier, reuses, requirements);
     }

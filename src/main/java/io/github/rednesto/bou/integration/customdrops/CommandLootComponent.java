@@ -32,7 +32,6 @@ import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.event.cause.Cause;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -53,10 +52,8 @@ public class CommandLootComponent implements CustomLootComponent {
             return;
         }
 
-        Object source = processingContext.getSource();
-        Cause cause = processingContext.getCause();
         commands.forEach(command -> {
-            if (!command.shouldExecute() || !CustomDropsProcessor.fulfillsRequirements(source, cause, command.getRequirements())) {
+            if (!command.shouldExecute() || !CustomDropsProcessor.fulfillsRequirements(processingContext, command.getRequirements())) {
                 return;
             }
 

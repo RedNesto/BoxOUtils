@@ -71,12 +71,12 @@ public class CustomBlockDropsListener implements SpongeConfig.ReloadableListener
                 continue;
             }
 
-            List<CustomLoot> lootsToUse = CustomDropsProcessor.getLootsToUse(loots, originalBlock, event.getCause());
+            Location<World> targetLocation = SpongeUtils.getCenteredLocation(originalBlock, player.getWorld());
+            CustomLootProcessingContext context = new CustomLootProcessingContext(Collections.emptyList(), event, originalBlock, event.getCause(), player, targetLocation);
+            List<CustomLoot> lootsToUse = CustomDropsProcessor.getLootsToUse(loots, context);
             if (!lootsToUse.isEmpty()) {
-                Location<World> targetLocation = SpongeUtils.getCenteredLocation(originalBlock, player.getWorld());
                 requirementResultsTracker.put(targetLocation, lootsToUse);
-                CustomLootProcessingContext processingContext = new CustomLootProcessingContext(lootsToUse, event, originalBlock, event.getCause(), player, targetLocation);
-                CustomDropsProcessor.dropLoot(processingContext);
+                CustomDropsProcessor.dropLoot(context.withLoots(lootsToUse));
             }
         }
     }

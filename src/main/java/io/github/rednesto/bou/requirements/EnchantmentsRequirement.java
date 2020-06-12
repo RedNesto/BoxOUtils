@@ -24,6 +24,7 @@
 package io.github.rednesto.bou.requirements;
 
 import com.google.common.base.MoreObjects;
+import io.github.rednesto.bou.api.customdrops.CustomLootProcessingContext;
 import io.github.rednesto.bou.api.requirement.AbstractRequirement;
 import io.github.rednesto.bou.api.requirement.Requirement;
 import io.github.rednesto.bou.api.requirement.RequirementConfigurationException;
@@ -33,25 +34,24 @@ import io.github.rednesto.bou.config.serializers.BouTypeTokens;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.item.enchantment.Enchantment;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 
 import java.util.List;
 
-public class EnchantmentsRequirement extends AbstractRequirement<Object> {
+public class EnchantmentsRequirement extends AbstractRequirement {
 
     private final EnchantmentsFilter enchantmentsFilter;
 
     public EnchantmentsRequirement(EnchantmentsFilter enchantmentsFilter) {
-        super("enchantments", Object.class);
+        super("enchantments");
         this.enchantmentsFilter = enchantmentsFilter;
     }
 
     @Override
-    public boolean fulfills(Object source, Cause cause) {
-        ItemStackSnapshot usedItem = cause.getContext().get(EventContextKeys.USED_ITEM).orElse(null);
+    public boolean fulfills(CustomLootProcessingContext context) {
+        ItemStackSnapshot usedItem = context.getCause().getContext().get(EventContextKeys.USED_ITEM).orElse(null);
         if (usedItem == null) {
             return true;
         }
@@ -95,7 +95,7 @@ public class EnchantmentsRequirement extends AbstractRequirement<Object> {
         }
 
         @Override
-        public Requirement<?> provide(ConfigurationNode node) throws RequirementConfigurationException {
+        public Requirement provide(ConfigurationNode node) throws RequirementConfigurationException {
             try {
                 EnchantmentsFilter filter = node.getValue(BouTypeTokens.ENCHANTMENTS_FILTER);
                 if (filter != null) {

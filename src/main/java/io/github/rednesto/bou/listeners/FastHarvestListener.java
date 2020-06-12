@@ -101,12 +101,13 @@ public class FastHarvestListener implements SpongeConfig.ReloadableListener {
         Map<String, List<CustomLoot>> drops = Config.getBlocksDrops().drops;
         List<CustomLoot> customLoots = blocksDropIdsMappingCache.get(drops, targetBlock.getState().getType().getId());
         List<CustomLoot> lootsToUse = Collections.emptyList();
+        CustomLootProcessingContext processingContext = new CustomLootProcessingContext(lootsToUse, event, targetBlock, event.getCause(), player, entitiesSpawnLocation);
         if (customLoots != null) {
-            lootsToUse = CustomDropsProcessor.getLootsToUse(customLoots, targetBlock, event.getCause());
+            lootsToUse = CustomDropsProcessor.getLootsToUse(customLoots, processingContext);
         }
 
-        CustomLootProcessingContext processingContext = new CustomLootProcessingContext(lootsToUse, event, targetBlock, event.getCause(), player, entitiesSpawnLocation);
         if (!lootsToUse.isEmpty()) {
+            processingContext = processingContext.withLoots(lootsToUse);
             CustomDropsProcessor.dropLoot(processingContext);
         }
 

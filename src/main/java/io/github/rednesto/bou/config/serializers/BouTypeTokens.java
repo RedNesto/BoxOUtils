@@ -48,8 +48,8 @@ public final class BouTypeTokens {
     public static final TypeToken<ItemLoot> ITEM_LOOT = TypeToken.of(ItemLoot.class);
     public static final TypeToken<LootReuse> LOOT_REUSE = TypeToken.of(LootReuse.class);
     public static final TypeToken<MoneyLoot> MONEY_LOOT = TypeToken.of(MoneyLoot.class);
-    public static final TypeToken<Requirement<?>> REQUIREMENT = new TypeToken<Requirement<?>>() {};
-    public static final TypeToken<Map<String, Requirement<?>>> REQUIREMENTS_MAP = new TypeToken<Map<String, Requirement<?>>>() {};
+    public static final TypeToken<Requirement> REQUIREMENT = new TypeToken<Requirement>() {};
+    public static final TypeToken<Map<String, Requirement>> REQUIREMENTS_MAP = new TypeToken<Map<String, Requirement>>() {};
     public static final TypeToken<SpawnedMob> SPAWNED_MOB = TypeToken.of(SpawnedMob.class);
     public static final TypeToken<EnchantmentsFilter> ENCHANTMENTS_FILTER = TypeToken.of(EnchantmentsFilter.class);
     public static final TypeToken<FastHarvestCrop> FAST_HARVEST_CROP = TypeToken.of(FastHarvestCrop.class);

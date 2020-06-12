@@ -23,9 +23,9 @@
  */
 package io.github.rednesto.bou.tests.requirements
 
+import io.github.rednesto.bou.api.customdrops.CustomLootProcessingContext
 import io.github.rednesto.bou.api.requirement.AbstractRequirement
-import org.spongepowered.api.event.cause.Cause
 
-class ConstantRequirement(private val value: Boolean, id: String = "constant") : AbstractRequirement<Any>(id, Any::class.java) {
-    override fun fulfills(source: Any, cause: Cause): Boolean = value
+class ConstantRequirement(private val value: Boolean, id: String = "constant") : AbstractRequirement(id) {
+    override fun fulfills(context: CustomLootProcessingContext): Boolean = value
 }

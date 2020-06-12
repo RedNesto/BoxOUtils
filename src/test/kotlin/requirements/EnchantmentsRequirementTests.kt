@@ -328,7 +328,7 @@ enchantments {
                 .registerType(BouTypeTokens.INT_RANGE, IntRangeSerializer())
     }
 
-    private fun loadRequirement(@Language("HOCON") configuration: String): Requirement<*> {
+    private fun loadRequirement(@Language("HOCON") configuration: String): Requirement {
         val config = configHelper.loadNode(configuration).getNode("enchantments")
         val provider = EnchantmentsRequirement.Provider()
         return provider.provide(config)

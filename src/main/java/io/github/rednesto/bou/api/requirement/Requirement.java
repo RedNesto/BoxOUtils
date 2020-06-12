@@ -23,33 +23,29 @@
  */
 package io.github.rednesto.bou.api.requirement;
 
-import org.spongepowered.api.event.cause.Cause;
+import io.github.rednesto.bou.api.customdrops.CustomLootProcessingContext;
 
-public interface Requirement<T> {
+public interface Requirement {
 
     String getId();
-
-    Class<T> getApplicableType();
 
     /**
      * Indicates whether this requirement can be used for the given source.
      *
-     * @param source the thing for which loot will be dropped
-     * @param cause the cause
+     * @param context the context in which the current loot is processed
      *
      * @return {@code true} if this requirement can be applied to the source, {@code false} otherwise
      */
-    default boolean appliesTo(T source, Cause cause) {
+    default boolean appliesTo(CustomLootProcessingContext context) {
         return true;
     }
 
     /**
      * Indicates if the given source fulfills this requirement.
      *
-     * @param source the source to check
-     * @param cause the cause
+     * @param context the context in which the current loot is processed
      *
      * @return {@code true} if the source fulfills this requirement, {@code false} otherwise
      */
-    boolean fulfills(T source, Cause cause);
+    boolean fulfills(CustomLootProcessingContext context);
 }

@@ -63,12 +63,16 @@ public class CustomFishingDropsListener {
             return;
         }
 
-        List<CustomLoot> loots = CustomDropsProcessor.getLootsToUse(fishingDrops.loots, event.getSource(), event.getCause());
+        Player player = event.getCause().first(Player.class).orElse(null);
+        Location<World> location = event.getFishHook().getLocation();
+        Location<World> experienceSpawnLocation = SpongeUtils.center(player != null ? player.getLocation() : location);
+        CustomLootProcessingContext context = new CustomLootProcessingContext(Collections.emptyList(), event, event.getFishHook(), event.getCause(), player, location, experienceSpawnLocation);
+        List<CustomLoot> loots = CustomDropsProcessor.getLootsToUse(fishingDrops.loots, context);
         if (loots.isEmpty()) {
             return;
         }
 
-        Player player = event.getCause().first(Player.class).orElse(null);
+        context = context.withLoots(loots);
         if (player != null) {
             requirementResultsTracker.put(player.getUniqueId(), loots);
         }
@@ -78,9 +82,6 @@ public class CustomFishingDropsListener {
             processReuse(transactions, loots);
         }
 
-        Location<World> location = event.getFishHook().getLocation();
-        Location<World> experienceSpawnLocation = SpongeUtils.center(player != null ? player.getLocation() : location);
-        CustomLootProcessingContext context = new CustomLootProcessingContext(loots, event, event.getFishHook(), event.getCause(), player, location, experienceSpawnLocation);
         CustomDropsProcessor.processLoots(context, (loot, itemStack) -> transactions.add(new Transaction<>(ItemStackSnapshot.NONE, itemStack.createSnapshot())));
     }
 

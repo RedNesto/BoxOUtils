@@ -27,6 +27,7 @@ import com.flowpowered.math.vector.Vector3d
 import io.github.rednesto.bou.requirements.WorldsRequirement
 import io.github.rednesto.bou.tests.framework.mock.MockPlayer
 import io.github.rednesto.bou.tests.framework.mock.MockWorld
+import io.github.rednesto.bou.tests.lootProcessingContext
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -84,6 +85,7 @@ class WorldsRequirementTests {
         val requirement = WorldsRequirement(requirementIds)
         val mockPlayer = MockPlayer(location = Location(MockWorld(worldId, worldName), Vector3d.ZERO))
         val cause = Cause.of(EventContext.empty(), mockPlayer)
-        return requirement.fulfills(Any(), cause)
+        val context = lootProcessingContext(emptyList(), Any(), cause);
+        return requirement.fulfills(context)
     }
 }

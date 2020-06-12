@@ -24,6 +24,7 @@
 package io.github.rednesto.bou.tests.requirements
 
 import io.github.rednesto.bou.CustomDropsProcessor
+import io.github.rednesto.bou.tests.lootProcessingContext
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -145,6 +146,7 @@ class RequirementsProcessorTests {
     }
 
     private fun testFulfill(requirements: List<List<ConstantRequirement>>): Boolean {
-        return CustomDropsProcessor.fulfillsRequirements(Any(), Cause.of(EventContext.empty(), Any()), requirements)
+        val context = lootProcessingContext(emptyList(), Any(), Cause.of(EventContext.empty(), Any()))
+        return CustomDropsProcessor.fulfillsRequirements(context, requirements)
     }
 }

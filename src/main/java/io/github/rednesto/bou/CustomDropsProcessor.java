@@ -34,7 +34,6 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.Item;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.entity.AffectEntityEvent;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
@@ -56,7 +55,7 @@ public class CustomDropsProcessor {
 
         CustomLoot.Reuse reuse = customLoot.getReuse();
         if (reuse != null) {
-            if (!fulfillsRequirements(context.getSource(), event.getCause(), reuse.getRequirements())) {
+            if (!fulfillsRequirements(context, reuse.getRequirements())) {
                 return;
             }
 
@@ -84,23 +83,18 @@ public class CustomDropsProcessor {
         }
     }
 
-    public static boolean fulfillsRequirements(Object source, Cause cause, List<List<Requirement<?>>> requirements) {
+    public static boolean fulfillsRequirements(CustomLootProcessingContext context, List<List<Requirement>> requirements) {
         if (requirements.isEmpty()) {
             return true;
         }
 
-        for (List<Requirement<?>> requirementsList : requirements) {
+        for (List<Requirement> requirementsList : requirements) {
             boolean failed = false;
-            //noinspection rawtypes
             for (Requirement value : requirementsList) {
                 try {
-                    //noinspection unchecked
-                    if (value.getApplicableType().isAssignableFrom(source.getClass()) && value.appliesTo(source, cause)) {
-                        //noinspection unchecked
-                        if (!value.fulfills(source, cause)) {
-                            failed = true;
-                            break;
-                        }
+                    if (value.appliesTo(context) && !value.fulfills(context)) {
+                        failed = true;
+                        break;
                     }
                 } catch (Throwable t) {
                     LOGGER.error("Failed to compute a requirement.", t);
@@ -226,10 +220,10 @@ public class CustomDropsProcessor {
         }
     }
 
-    public static List<CustomLoot> getLootsToUse(List<CustomLoot> candidates, Object source, Cause cause) {
+    public static List<CustomLoot> getLootsToUse(List<CustomLoot> candidates, CustomLootProcessingContext context) {
         List<CustomLoot> lootsToUse = new ArrayList<>();
         for (CustomLoot candidate : candidates) {
-            if (fulfillsRequirements(source, cause, candidate.getRequirements())) {
+            if (fulfillsRequirements(context, candidate.getRequirements())) {
                 lootsToUse.add(candidate);
             }
         }

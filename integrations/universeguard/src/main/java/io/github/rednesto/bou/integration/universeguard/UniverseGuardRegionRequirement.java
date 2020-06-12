@@ -26,6 +26,7 @@ package io.github.rednesto.bou.integration.universeguard;
 import com.google.common.base.MoreObjects;
 import com.universeguard.region.Region;
 import com.universeguard.utils.RegionUtils;
+import io.github.rednesto.bou.api.customdrops.CustomLootProcessingContext;
 import io.github.rednesto.bou.api.requirement.AbstractRequirement;
 import io.github.rednesto.bou.api.requirement.Requirement;
 import io.github.rednesto.bou.api.requirement.RequirementConfigurationException;
@@ -33,7 +34,6 @@ import io.github.rednesto.bou.api.requirement.RequirementProvider;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import org.spongepowered.api.data.LocatableSnapshot;
-import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.util.TypeTokens;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
@@ -43,13 +43,13 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-public class UniverseGuardRegionRequirement extends AbstractRequirement<LocatableSnapshot> {
+public class UniverseGuardRegionRequirement extends AbstractRequirement {
 
     private final List<Object> regions;
     private final boolean isWhitelist;
 
     public UniverseGuardRegionRequirement(List<String> regions, boolean isWhitelist) {
-        super("universeguard", LocatableSnapshot.class);
+        super("universeguard");
         this.regions = regions.stream().map(id -> {
             try {
                 return UUID.fromString(id);
@@ -61,12 +61,18 @@ public class UniverseGuardRegionRequirement extends AbstractRequirement<Locatabl
     }
 
     @Override
-    public boolean fulfills(LocatableSnapshot source, Cause cause) {
+    public boolean appliesTo(CustomLootProcessingContext context) {
+        return context.getSource() instanceof LocatableSnapshot;
+    }
+
+    @Override
+    public boolean fulfills(CustomLootProcessingContext context) {
+        LocatableSnapshot<?> source = (LocatableSnapshot<?>) context.getSource();
         if (!source.getLocation().isPresent()) {
             return false;
         }
 
-        Location<World> location = (Location<World>) source.getLocation().get();
+        Location<World> location = source.getLocation().get();
 
         Region hereRegion = RegionUtils.getRegion(location);
         for (Object regionId : this.regions) {
@@ -106,7 +112,6 @@ public class UniverseGuardRegionRequirement extends AbstractRequirement<Locatabl
     public String toString() {
         return MoreObjects.toStringHelper(this)
                 .add("id", getId())
-                .add("applicableType", getApplicableType())
                 .add("regions", regions)
                 .add("isWhitelist", isWhitelist)
                 .toString();
@@ -120,7 +125,7 @@ public class UniverseGuardRegionRequirement extends AbstractRequirement<Locatabl
         }
 
         @Override
-        public Requirement<?> provide(ConfigurationNode node) throws RequirementConfigurationException {
+        public Requirement provide(ConfigurationNode node) throws RequirementConfigurationException {
             try {
                 String listType = node.getNode("list-type").getString("whitelist");
                 boolean isWhitelist;

@@ -23,14 +23,16 @@
  */
 package io.github.rednesto.bou.tests
 
-import io.github.rednesto.bou.api.customdrops.CustomLoot
-import io.github.rednesto.bou.api.customdrops.CustomLootComponent
-import io.github.rednesto.bou.api.customdrops.CustomLootRecipient
-import io.github.rednesto.bou.api.customdrops.ItemLoot
+import io.github.rednesto.bou.api.customdrops.*
 import io.github.rednesto.bou.api.lootReuse.LootReuse
 import io.github.rednesto.bou.api.quantity.IntQuantity
 import io.github.rednesto.bou.api.requirement.Requirement
 import io.github.rednesto.bou.integration.customdrops.recipients.ContextLocationLootRecipient
+import org.spongepowered.api.entity.living.player.Player
+import org.spongepowered.api.event.Event
+import org.spongepowered.api.event.cause.Cause
+import org.spongepowered.api.world.Location
+import org.spongepowered.api.world.World
 
 fun customLoot(
         itemLoots: List<ItemLoot> = emptyList(),
@@ -38,7 +40,7 @@ fun customLoot(
         expOverwrite: Boolean = false,
         recipient: CustomLootRecipient = ContextLocationLootRecipient.INSTANCE,
         redirectBaseDropsToRecipient: Boolean = true,
-        requirements: List<List<Requirement<*>>> = emptyList(),
+        requirements: List<List<Requirement>> = emptyList(),
         reuse: CustomLoot.Reuse? = null,
         components: List<CustomLootComponent> = emptyList()
 ) = CustomLoot(itemLoots, overwrite, expOverwrite, recipient, redirectBaseDropsToRecipient, requirements, reuse, components)
@@ -46,7 +48,7 @@ fun customLoot(
 fun customReuse(
         multiplier: Float = 1f,
         items: Map<String, LootReuse> = emptyMap(),
-        requirements: List<List<Requirement<*>>> = emptyList()
+        requirements: List<List<Requirement>> = emptyList()
 ) = CustomLoot.Reuse(multiplier, items, requirements)
 
 fun itemLoot(
@@ -56,3 +58,13 @@ fun itemLoot(
         chance: Double = 0.0,
         quantity: IntQuantity? = null
 ) = ItemLoot(id, providerId, displayname, chance, quantity)
+
+fun lootProcessingContext(
+        loots: List<CustomLoot>,
+        source: Any,
+        cause: Cause,
+        event: Event? = null,
+        targetPlayer: Player? = null,
+        targetLocation: Location<World>? = null,
+        experienceSpawnLocation: Location<World>? = null
+) = CustomLootProcessingContext(loots, event, source, cause, targetPlayer, targetLocation, experienceSpawnLocation)

@@ -37,5 +37,5 @@ public interface RequirementProvider extends Integration {
      *
      * @throws RequirementConfigurationException if the configuration is invalid (like missing values)
      */
-    Requirement<?> provide(ConfigurationNode node) throws RequirementConfigurationException;
+    Requirement provide(ConfigurationNode node) throws RequirementConfigurationException;
 }

@@ -25,13 +25,13 @@ package io.github.rednesto.bou.requirements;
 
 import com.google.common.base.MoreObjects;
 import io.github.rednesto.bou.BoxOUtils;
+import io.github.rednesto.bou.api.customdrops.CustomLootProcessingContext;
 import io.github.rednesto.bou.api.requirement.AbstractRequirement;
 import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
@@ -39,17 +39,24 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-public class DataByKeyRequirement<C extends ValueContainer<C>> extends AbstractRequirement<C> {
+public class DataByKeyRequirement<C extends ValueContainer<C>> extends AbstractRequirement {
 
+    private final Class<C> applicableType;
     private final Map<String, List<Object>> requiredData;
 
     public DataByKeyRequirement(String id, Class<C> applicableType, Map<String, List<Object>> requiredData) {
-        super(id, applicableType);
+        super(id);
+        this.applicableType = applicableType;
         this.requiredData = requiredData;
     }
 
     @Override
-    public boolean fulfills(C source, Cause cause) {
+    public boolean appliesTo(CustomLootProcessingContext context) {
+        return requiredData.getClass().isAssignableFrom(context.getSource().getClass());
+    }
+
+    @Override
+    public boolean fulfills(CustomLootProcessingContext context) {
         for (Map.Entry<String, List<Object>> entry : this.requiredData.entrySet()) {
             String keyId = entry.getKey();
             List<Object> expectedValues = entry.getValue();
@@ -65,6 +72,8 @@ public class DataByKeyRequirement<C extends ValueContainer<C>> extends AbstractR
             //noinspection rawtypes
             Key dataKey = maybeDataKey.get();
             Object dataValue = null;
+            //noinspection unchecked
+            C source = (C) context.getSource();
             if (source.supports(dataKey)) {
                 //noinspection unchecked
                 dataValue = source.getOrNull(dataKey);
@@ -105,14 +114,15 @@ public class DataByKeyRequirement<C extends ValueContainer<C>> extends AbstractR
         }
 
         DataByKeyRequirement<?> that = (DataByKeyRequirement<?>) o;
-        return requiredData.equals(that.requiredData);
+        return applicableType.equals(that.applicableType)
+                && requiredData.equals(that.requiredData);
     }
 
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
                 .add("id", getId())
-                .add("applicableType", getApplicableType())
+                .add("applicableType", this.applicableType)
                 .add("requiredData", requiredData)
                 .toString();
     }

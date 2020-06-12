@@ -53,7 +53,7 @@ public class CustomLootSerializer implements TypeSerializer<CustomLoot> {
         CustomLoot.Reuse reuse = !reuseNode.isVirtual() ? reuseNode.getValue(BouTypeTokens.CUSTOM_LOOT_REUSE) : null;
 
         ConfigurationNode requirementsNode = value.getNode("requirements");
-        List<List<Requirement<?>>> requirements = RequirementSerializer.getRequirementGroups(requirementsNode);
+        List<List<Requirement>> requirements = RequirementSerializer.getRequirementGroups(requirementsNode);
 
         boolean overwrite = value.getNode("overwrite").getBoolean(false);
         boolean expOverwrite = value.getNode("exp-overwrite").getBoolean(false);

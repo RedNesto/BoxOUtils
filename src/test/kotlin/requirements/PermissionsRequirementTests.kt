@@ -23,8 +23,10 @@
  */
 package io.github.rednesto.bou.tests.requirements
 
+import io.github.rednesto.bou.api.customdrops.CustomLootProcessingContext
 import io.github.rednesto.bou.requirements.PermissionsRequirement
 import io.github.rednesto.bou.tests.framework.mock.MockPlayer
+import io.github.rednesto.bou.tests.lootProcessingContext
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -52,6 +54,7 @@ class PermissionsRequirementTests {
         val requirement = PermissionsRequirement(requirementPerms)
         val mockPlayer = MockPlayer(playerPerms)
         val cause = Cause.of(EventContext.empty(), mockPlayer)
-        return requirement.fulfills(Any(), cause)
+        val context = lootProcessingContext(emptyList(), Any(), cause);
+        return requirement.fulfills(context)
     }
 }
