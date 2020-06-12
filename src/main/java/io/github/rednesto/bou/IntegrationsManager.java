@@ -57,6 +57,7 @@ public final class IntegrationsManager {
         requirementProviderIntegrations.register(new DataByKeyRequirementProvider<>("box-o-utils:block_data", BlockSnapshot.class), true);
         requirementProviderIntegrations.register(new DataByKeyRequirementProvider<>("box-o-utils:entity_data", EntitySnapshot.class), true);
         requirementProviderIntegrations.register(new EnchantmentsRequirement.Provider(), true);
+        requirementProviderIntegrations.register(new CaughtFishRequirement.Provider(), true);
         requirementProviderIntegrations.register(new PermissionsRequirement.Provider(), true);
         requirementProviderIntegrations.register(new WorldsRequirement.Provider(), true);
 
