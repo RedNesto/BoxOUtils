@@ -1,0 +1,6 @@
+dependencies {
+    compileOnly "org.spongepowered:spongeapi:${spongeApiVersion}"
+    compileOnly rootProject
+
+    compileOnly 'com.github.bloodmc:GriefDefenderAPI:33bd795ad4'
+}

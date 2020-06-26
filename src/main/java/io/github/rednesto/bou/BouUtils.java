@@ -52,6 +52,11 @@ public final class BouUtils {
 
         RequirementProviderIntegrations requirementsProviders = integrationsManager.getRequirementsProviderIntegrations();
         Consumer<RequirementProvider> requirementsProviderRegistration = provider -> requirementsProviders.register(provider, true);
+        if (forceLoad || Sponge.getPluginManager().isLoaded("griefdefender")) {
+            reflectiveRegistration("io.github.rednesto.bou.integration.griefdefender.GriefDefenderRegionRequirement$Provider",
+                    requirementsProviderRegistration, "GriefDefenderRegionRequirement.Provider", "GriefDefender");
+        }
+
         if (forceLoad || Sponge.getPluginManager().isLoaded("griefprevention")) {
             reflectiveRegistration("io.github.rednesto.bou.integration.griefprevention.GriefPreventionRegionRequirement$Provider",
                     requirementsProviderRegistration, "GriefPreventionRegionRequirement.Provider", "GriefPrevention");

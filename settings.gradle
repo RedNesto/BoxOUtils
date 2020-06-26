@@ -2,7 +2,7 @@ rootProject.name = 'BoxOUtils'
 
 include 'example'
 
-def includedIntegration = gradle.ext.alwaysIncludedIntegrations = ['griefprevention', 'byte-items', 'file-inventories']
+def includedIntegration = gradle.ext.alwaysIncludedIntegrations = ['griefprevention', 'byte-items', 'file-inventories', 'griefdefender']
 for (integration in file('integrations').listFiles()) {
     if (!integration.isDirectory()) {
         continue
