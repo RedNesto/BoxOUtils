@@ -82,12 +82,18 @@ class BlocksDropsConfigurationTests : PluginConfigurationTestCase<Config.BlocksD
             customLoot(reuse = reuse)
         }
 
+        val stone = run {
+            val drops = listOf(vanillaDrop("minecraft:stone", unsafeDamage = 16))
+            customLoot(drops)
+        }
+
         val expected = mapOf(
                 "minecraft:leaves" to listOf(leaves),
                 "minecraft:leaves2" to listOf(leaves2),
                 "minecraft:iron_ore" to listOf(ironOre),
                 "minecraft:skull" to listOf(skull),
-                "minecraft:wheat" to listOf(wheat)
+                "minecraft:wheat" to listOf(wheat),
+                "minecraft:stone" to listOf(stone)
         )
 
         assertTrue(config.enabled)

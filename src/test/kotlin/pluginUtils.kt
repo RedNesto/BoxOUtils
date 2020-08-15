@@ -58,8 +58,9 @@ fun vanillaDrop(
         id: String,
         displayname: String? = null,
         chance: Double = 0.0,
-        quantity: IntQuantity? = null
-) = VanillaCustomDropsProvider(id, displayname, chance, quantity)
+        quantity: IntQuantity? = null,
+        unsafeDamage: Int? = null
+) = VanillaCustomDropsProvider(id, displayname, chance, quantity, unsafeDamage)
 
 fun byteItemsDrop(
         id: String,

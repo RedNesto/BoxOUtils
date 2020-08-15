@@ -24,15 +24,36 @@
 package io.github.rednesto.bou.integration.vanilla;
 
 import io.github.rednesto.bou.api.customdrops.BasicCustomDropsProvider;
+import io.github.rednesto.bou.api.customdrops.CustomLootProcessingContext;
 import io.github.rednesto.bou.api.quantity.IntQuantity;
 import ninja.leaping.configurate.ConfigurationNode;
+import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
+import org.spongepowered.api.item.inventory.ItemStack;
 
 import javax.annotation.Nullable;
 
 public class VanillaCustomDropsProvider extends BasicCustomDropsProvider {
 
-    public VanillaCustomDropsProvider(String itemId, @Nullable String displayname, double chance, @Nullable IntQuantity quantity) {
+    private static final DataQuery UNSAFE_DAMAGE_QUERY = DataQuery.of("UnsafeDamage");
+
+    private final Integer unsafeDamage;
+
+    public VanillaCustomDropsProvider(String itemId, @Nullable String displayname, double chance, @Nullable IntQuantity quantity,
+                                      @Nullable Integer unsafeDamage) {
         super(itemId, displayname, chance, quantity);
+        this.unsafeDamage = unsafeDamage;
+    }
+
+    @Override
+    protected ItemStack transform(CustomLootProcessingContext context, ItemStack stack) {
+        if (this.unsafeDamage == null) {
+            return stack;
+        }
+
+        DataContainer transformed = stack.toContainer();
+        transformed.set(UNSAFE_DAMAGE_QUERY, this.unsafeDamage);
+        return ItemStack.builder().fromContainer(transformed).build();
     }
 
     public static class Factory extends BasicFactory {
@@ -45,7 +66,14 @@ public class VanillaCustomDropsProvider extends BasicCustomDropsProvider {
                                                    @Nullable String displayname,
                                                    double chance,
                                                    @Nullable IntQuantity quantity) {
-            return new VanillaCustomDropsProvider(itemId, displayname, chance, quantity);
+            Integer unsafeDamage = null;
+            if (node != null) {
+                ConfigurationNode unsafeDamageNode = node.getNode("unsafe-damage");
+                if (!unsafeDamageNode.isVirtual()) {
+                    unsafeDamage = unsafeDamageNode.getInt();
+                }
+            }
+            return new VanillaCustomDropsProvider(itemId, displayname, chance, quantity, unsafeDamage);
         }
 
         @Override
