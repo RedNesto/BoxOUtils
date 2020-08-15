@@ -25,6 +25,7 @@ package io.github.rednesto.bou;
 
 import io.github.rednesto.bou.api.customdrops.CustomDropsProviderFactoryIntegrations;
 import io.github.rednesto.bou.api.customdrops.CustomLootComponentProviderIntegrations;
+import io.github.rednesto.bou.api.customdrops.CustomLootProcessingContext;
 import io.github.rednesto.bou.api.customdrops.CustomLootRecipientProviderIntegrations;
 import io.github.rednesto.bou.api.requirement.RequirementProviderIntegrations;
 import io.github.rednesto.bou.integration.customdrops.CommandLootComponent;
@@ -36,6 +37,10 @@ import io.github.rednesto.bou.integration.vanilla.VanillaCustomDropsProvider;
 import io.github.rednesto.bou.requirements.*;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.entity.EntitySnapshot;
+import org.spongepowered.api.event.cause.EventContextKeys;
+import org.spongepowered.api.item.inventory.ItemStackSnapshot;
+
+import java.util.function.Function;
 
 public final class IntegrationsManager {
 
@@ -58,6 +63,8 @@ public final class IntegrationsManager {
         requirementProviderIntegrations.register(new BiomesRequirement.Provider(), true);
         requirementProviderIntegrations.register(new DataByKeyRequirementProvider<>("box-o-utils:block_data", BlockSnapshot.class), true);
         requirementProviderIntegrations.register(new DataByKeyRequirementProvider<>("box-o-utils:entity_data", EntitySnapshot.class), true);
+        Function<CustomLootProcessingContext, Object> usedItemContainerSelector = context -> context.getCause().getContext().require(EventContextKeys.USED_ITEM);
+        requirementProviderIntegrations.register(new DataByKeyRequirementProvider<>("box-o-utils:used_item_data", ItemStackSnapshot.class, usedItemContainerSelector), true);
         requirementProviderIntegrations.register(new EnchantmentsRequirement.Provider(), true);
         requirementProviderIntegrations.register(new CaughtFishRequirement.Provider(), true);
         requirementProviderIntegrations.register(new PermissionsRequirement.Provider(), true);

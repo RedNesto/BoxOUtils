@@ -32,27 +32,35 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.value.ValueContainer;
+import org.spongepowered.api.text.Text;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 
 public class DataByKeyRequirement<C extends ValueContainer<C>> extends AbstractRequirement {
 
     private final Class<C> applicableType;
     private final Map<String, List<Object>> requiredData;
+    private final Function<CustomLootProcessingContext, Object> containerSelector;
 
     public DataByKeyRequirement(String id, Class<C> applicableType, Map<String, List<Object>> requiredData) {
+        this(id, applicableType, requiredData, CustomLootProcessingContext::getSource);
+    }
+
+    public DataByKeyRequirement(String id, Class<C> applicableType, Map<String, List<Object>> requiredData, Function<CustomLootProcessingContext, Object> containerSelector) {
         super(id);
         this.applicableType = applicableType;
         this.requiredData = requiredData;
+        this.containerSelector = containerSelector;
     }
 
     @Override
     public boolean appliesTo(CustomLootProcessingContext context) {
-        return requiredData.getClass().isAssignableFrom(context.getSource().getClass());
+        return this.applicableType.isAssignableFrom(this.containerSelector.apply(context).getClass());
     }
 
     @Override
@@ -73,7 +81,7 @@ public class DataByKeyRequirement<C extends ValueContainer<C>> extends AbstractR
             Key dataKey = maybeDataKey.get();
             Object dataValue = null;
             //noinspection unchecked
-            C source = (C) context.getSource();
+            C source = (C) this.containerSelector.apply(context);
             if (source.supports(dataKey)) {
                 //noinspection unchecked
                 dataValue = source.getOrNull(dataKey);
@@ -84,15 +92,15 @@ public class DataByKeyRequirement<C extends ValueContainer<C>> extends AbstractR
                     //noinspection unchecked
                     dataValue = location.getOrNull(dataKey);
                 }
-            }
-
-            if (dataValue == null) {
+            } else {
                 BoxOUtils.getInstance().getLogger().warn("Data container does not support '{}'", keyId);
                 continue;
             }
 
             if (dataValue instanceof CatalogType) {
                 return expectedValues.contains(((CatalogType) dataValue).getId());
+            } else if (dataValue instanceof Text) {
+                return expectedValues.contains(((Text) dataValue).toPlain());
             } else {
                 return expectedValues.contains(dataValue);
             }

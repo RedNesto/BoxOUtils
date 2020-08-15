@@ -24,6 +24,7 @@
 package io.github.rednesto.bou.requirements;
 
 import io.github.rednesto.bou.SpongeUtils;
+import io.github.rednesto.bou.api.customdrops.CustomLootProcessingContext;
 import io.github.rednesto.bou.api.requirement.Requirement;
 import io.github.rednesto.bou.api.requirement.RequirementConfigurationException;
 import io.github.rednesto.bou.api.requirement.RequirementProvider;
@@ -31,15 +32,22 @@ import ninja.leaping.configurate.ConfigurationNode;
 import org.spongepowered.api.data.value.ValueContainer;
 
 import java.util.*;
+import java.util.function.Function;
 
 public class DataByKeyRequirementProvider<C extends ValueContainer<C>> implements RequirementProvider {
 
     private final String id;
     private final Class<C> requirementType;
+    private final Function<CustomLootProcessingContext, Object> containerSelector;
 
     public DataByKeyRequirementProvider(String id, Class<C> valueContainerType) {
+        this(id, valueContainerType, CustomLootProcessingContext::getSource);
+    }
+
+    public DataByKeyRequirementProvider(String id, Class<C> valueContainerType, Function<CustomLootProcessingContext, Object> containerSelector) {
         this.id = id;
         this.requirementType = valueContainerType;
+        this.containerSelector = containerSelector;
     }
 
     @Override
@@ -68,6 +76,6 @@ public class DataByKeyRequirementProvider<C extends ValueContainer<C>> implement
             requiredData.put(expandedId, Collections.unmodifiableList(expectedValues));
         }
 
-        return new DataByKeyRequirement<>(getId(), this.requirementType, Collections.unmodifiableMap(requiredData));
+        return new DataByKeyRequirement<>(getId(), this.requirementType, Collections.unmodifiableMap(requiredData), this.containerSelector);
     }
 }
