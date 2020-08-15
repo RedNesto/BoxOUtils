@@ -24,6 +24,7 @@
 package io.github.rednesto.bou;
 
 import com.google.inject.Inject;
+import io.github.rednesto.bou.commands.BouInspectItemCommand;
 import io.github.rednesto.bou.commands.BouReloadCommand;
 import org.slf4j.Logger;
 import org.spongepowered.api.Sponge;
@@ -109,6 +110,9 @@ public class BoxOUtils {
     public void onGameInitialization(GameInitializationEvent event) {
         Sponge.getCommandManager().register(this, CommandSpec.builder()
                 .child(BouReloadCommand.create(), "reload")
+                .child(CommandSpec.builder()
+                        .child(BouInspectItemCommand.create(), "item")
+                        .build(), "inspect")
                 .build(), "boxoutils", "bou");
     }
 
