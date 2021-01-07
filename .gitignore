@@ -1,5 +1,7 @@
 /*
 
+!/.github/
+
 !/.gitignore
 
 !/gradle/
@@ -8,8 +10,6 @@
 !/integrations/
 
 !/src/
-
-!/.travis.yml
 
 !/build.gradle
 !/gradle.properties
