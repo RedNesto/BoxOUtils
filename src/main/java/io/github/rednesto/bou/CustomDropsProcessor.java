@@ -207,7 +207,7 @@ public class CustomDropsProcessor {
     public static List<CustomLoot> getLootsToUse(List<CustomLoot> candidates, CustomLootProcessingContext context) {
         List<CustomLoot> lootsToUse = new ArrayList<>();
         for (CustomLoot candidate : candidates) {
-            if (fulfillsRequirements(context, candidate.getRequirements())) {
+            if (candidate.shouldLoot() && fulfillsRequirements(context, candidate.getRequirements())) {
                 lootsToUse.add(candidate);
             }
         }

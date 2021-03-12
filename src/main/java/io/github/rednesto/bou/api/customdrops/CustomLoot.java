@@ -38,6 +38,7 @@ public class CustomLoot {
     private final List<CustomDropsProvider> dropsProviders;
     private final boolean overwrite;
     private final boolean expOverwrite;
+    private final double chance;
     private final CustomLootRecipient recipient;
     private final boolean redirectBaseDropsToRecipient;
     private final List<List<Requirement>> requirements;
@@ -48,6 +49,7 @@ public class CustomLoot {
     public CustomLoot(List<CustomDropsProvider> dropsProviders,
                       boolean overwrite,
                       boolean expOverwrite,
+                      double chance,
                       CustomLootRecipient recipient,
                       boolean redirectBaseDropsToRecipient,
                       List<List<Requirement>> requirements,
@@ -56,11 +58,16 @@ public class CustomLoot {
         this.dropsProviders = dropsProviders;
         this.overwrite = overwrite;
         this.expOverwrite = expOverwrite;
+        this.chance = chance / 100;
         this.recipient = recipient;
         this.redirectBaseDropsToRecipient = redirectBaseDropsToRecipient;
         this.requirements = requirements;
         this.reuse = reuse;
         this.components = components;
+    }
+
+    public final boolean shouldLoot() {
+        return chance <= 0 || Math.random() <= chance;
     }
 
     public List<CustomDropsProvider> getDropsProviders() {
@@ -73,6 +80,10 @@ public class CustomLoot {
 
     public boolean isExpOverwrite() {
         return expOverwrite;
+    }
+
+    public double getChance() {
+        return chance;
     }
 
     public CustomLootRecipient getRecipient() {
@@ -108,6 +119,7 @@ public class CustomLoot {
         CustomLoot that = (CustomLoot) o;
         return overwrite == that.overwrite &&
                 expOverwrite == that.expOverwrite &&
+                chance == that.chance &&
                 recipient == that.recipient &&
                 redirectBaseDropsToRecipient == that.redirectBaseDropsToRecipient &&
                 dropsProviders.equals(that.dropsProviders) &&
@@ -118,7 +130,7 @@ public class CustomLoot {
 
     @Override
     public int hashCode() {
-        return Objects.hash(dropsProviders, overwrite, expOverwrite, recipient, redirectBaseDropsToRecipient, requirements, reuse, components);
+        return Objects.hash(dropsProviders, overwrite, expOverwrite, chance, recipient, redirectBaseDropsToRecipient, requirements, reuse, components);
     }
 
     @Override
@@ -127,6 +139,7 @@ public class CustomLoot {
                 .add("itemLoots", dropsProviders)
                 .add("overwrite", overwrite)
                 .add("expOverwrite", expOverwrite)
+                .add("chance", chance)
                 .add("recipient", recipient)
                 .add("redirectBaseDropsToRecipient", redirectBaseDropsToRecipient)
                 .add("requirements", requirements)

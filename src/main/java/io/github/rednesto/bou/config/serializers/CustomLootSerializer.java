@@ -59,6 +59,16 @@ public class CustomLootSerializer implements TypeSerializer<CustomLoot> {
         boolean overwrite = value.getNode("overwrite").getBoolean(false);
         boolean expOverwrite = value.getNode("exp-overwrite").getBoolean(false);
 
+        double chance = 0;
+        ConfigurationNode chanceNode = value.getNode("chance");
+        if (!chanceNode.isVirtual()) {
+            chance = chanceNode.getDouble(Double.NaN);
+            if (Double.isNaN(chance)) {
+                String errorMessage = String.format("Chance value is not a valid number (%s).", chanceNode.getValue());
+                throw new ObjectMappingException(errorMessage);
+            }
+        }
+
         CustomLootRecipient recipient = value.getNode("recipient").getValue(BouTypeTokens.CUSTOM_LOOT_RECIPIENT, ContextLocationLootRecipient.INSTANCE);
         boolean redirectBaseDropsToRecipient = value.getNode("base-drops-to-recipient").getBoolean(true);
 
@@ -78,7 +88,7 @@ public class CustomLootSerializer implements TypeSerializer<CustomLoot> {
             }
         });
 
-        return new CustomLoot(itemLoots, overwrite, expOverwrite, recipient, redirectBaseDropsToRecipient, requirements, reuse, components);
+        return new CustomLoot(itemLoots, overwrite, expOverwrite, chance, recipient, redirectBaseDropsToRecipient, requirements, reuse, components);
     }
 
     @Override

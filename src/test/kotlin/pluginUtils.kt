@@ -41,12 +41,13 @@ fun customLoot(
         dropsProviders: List<CustomDropsProvider> = emptyList(),
         overwrite: Boolean = false,
         expOverwrite: Boolean = false,
+        chance: Double = 0.0,
         recipient: CustomLootRecipient = ContextLocationLootRecipient.INSTANCE,
         redirectBaseDropsToRecipient: Boolean = true,
         requirements: List<List<Requirement>> = emptyList(),
         reuse: CustomLoot.Reuse? = null,
         components: List<CustomLootComponent> = emptyList()
-) = CustomLoot(dropsProviders, overwrite, expOverwrite, recipient, redirectBaseDropsToRecipient, requirements, reuse, components)
+) = CustomLoot(dropsProviders, overwrite, expOverwrite, chance, recipient, redirectBaseDropsToRecipient, requirements, reuse, components)
 
 fun customReuse(
         multiplier: Float = 1f,
