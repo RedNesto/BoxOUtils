@@ -24,7 +24,6 @@
 package io.github.rednesto.bou.config.serializers;
 
 import com.google.common.reflect.TypeToken;
-import io.github.rednesto.bou.BoxOUtils;
 import io.github.rednesto.bou.api.customdrops.CustomDropsProvider;
 import io.github.rednesto.bou.api.customdrops.CustomDropsProviderFactory;
 import io.github.rednesto.bou.api.customdrops.CustomDropsProviderFactoryIntegrations;
@@ -32,7 +31,6 @@ import io.github.rednesto.bou.api.customdrops.ProviderConfigurationException;
 import io.github.rednesto.bou.integration.vanilla.VanillaCustomDropsProvider;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.ValueType;
-import ninja.leaping.configurate.objectmapping.serialize.TypeSerializer;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -41,7 +39,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-public class CustomDropsProviderListSerializer implements TypeSerializer<List<CustomDropsProvider>> {
+public class CustomDropsProviderListSerializer extends LintingTypeSerializer<List<CustomDropsProvider>> {
 
     @Nullable
     @Override
@@ -52,7 +50,7 @@ public class CustomDropsProviderListSerializer implements TypeSerializer<List<Cu
         } else if (value.hasListChildren()) {
             for (ConfigurationNode dropNode : value.getChildrenList()) {
                 if (dropNode.hasListChildren()) {
-                    BoxOUtils.getInstance().getLogger().error("Drop values cannot be lists, they will be ignored.");
+                    error(value, "Drop values cannot be lists");
                 } else if (dropNode.hasMapChildren()) {
                     String providerId = dropNode.getNode("provider").getString(VanillaCustomDropsProvider.Factory.ID);
                     configureProvider(providers, dropNode, providerId);
@@ -70,7 +68,7 @@ public class CustomDropsProviderListSerializer implements TypeSerializer<List<Cu
                 for (Map.Entry<Object, ? extends ConfigurationNode> entry : value.getChildrenMap().entrySet()) {
                     Object key = entry.getKey();
                     if (!(key instanceof String)) {
-                        BoxOUtils.getInstance().getLogger().error("Drops keys must be non-null strings (got {}).", key);
+                        error(entry.getValue(), "Drops keys must be non-null strings (got " + key + " of type " + key.getClass().getTypeName() + ").");
                     } else {
                         String providerId = ((String) key);
 
@@ -89,29 +87,24 @@ public class CustomDropsProviderListSerializer implements TypeSerializer<List<Cu
         return providers;
     }
 
-    @Override
-    public void serialize(@NonNull TypeToken<?> type, @Nullable List<CustomDropsProvider> obj, @NonNull ConfigurationNode value) {
-        throw new UnsupportedOperationException();
-    }
-
-    private static void configureProvider(Collection<@NonNull CustomDropsProvider> providers, ConfigurationNode dropNode, String providerId) {
+    private void configureProvider(Collection<@NonNull CustomDropsProvider> providers, ConfigurationNode dropNode, String providerId) {
         CustomDropsProviderFactory factory = CustomDropsProviderFactoryIntegrations.getInstance().getById(providerId, true);
         if (factory == null) {
-            BoxOUtils.getInstance().getLogger().error("Could not find CustomDropsProviderFactory for ID '{}', it will be ignored.", providerId);
+            error(dropNode, "Could not find CustomDropsProviderFactory for ID '" + providerId + "'");
             return;
         }
 
         try {
             CustomDropsProvider provider = factory.provide(dropNode);
             if (provider == null) {
-                BoxOUtils.getInstance().getLogger().error("Provider '{}' returned a null CustomDropsProvider, it will be ignored.", providerId);
+                error(dropNode, "Provider '" + providerId + "' returned a null CustomDropsProvider. This should never happen, please contact the extension developer.");
                 return;
             }
             providers.add(provider);
         } catch (ProviderConfigurationException e) {
-            BoxOUtils.getInstance().getLogger().error("Failed to configure a CustomDropsProvider, it will be ignored.", e);
+            error(dropNode, "CustomDropsProvider ('" + providerId + "') error: " + e.getMessage());
         } catch (Throwable t) {
-            BoxOUtils.getInstance().getLogger().error("Unhandled error when configuring a CustomDropsProvider, it will be ignored.", t);
+            error(dropNode, "Unhandled error when configuring CustomDropsProvider '" + providerId + "': " + t.getMessage());
         }
     }
 }

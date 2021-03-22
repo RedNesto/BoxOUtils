@@ -31,8 +31,7 @@ import io.github.rednesto.bou.config.serializers.IntQuantitySerializer
 import io.github.rednesto.bou.tests.framework.ConfigurationTestCase
 import ninja.leaping.configurate.objectmapping.ObjectMappingException
 import ninja.leaping.configurate.objectmapping.serialize.TypeSerializerCollection
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
@@ -46,14 +45,14 @@ class IntQuantityTests : ConfigurationTestCase<IntQuantity>("quantity", BouTypeT
 
     @Test
     fun `invalid quantity`() {
-        val thrown = assertThrows<ObjectMappingException> { loadConfig("quantity=invalid") }
-        assertTrue(thrown.cause is IllegalArgumentException)
+        val exception = assertThrows<ObjectMappingException> { assertNotNull(loadConfigOrNull("quantity=invalid")) }
+        assertEquals("Invalid amount.", exception.message)
     }
 
     @Test
     fun `invalid bounded quantity`() {
-        val thrown = assertThrows<ObjectMappingException> { loadConfig("quantity=2-a3") }
-        assertTrue(thrown.cause is NumberFormatException)
+        val exception = assertThrows<ObjectMappingException> { assertNotNull(loadConfigOrNull("quantity=2-a3")) }
+        assertEquals("Invalid amount.", exception.message)
     }
 
     override fun populateSerializers(serializers: TypeSerializerCollection) {

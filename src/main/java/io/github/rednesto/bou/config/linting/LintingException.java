@@ -21,23 +21,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.github.rednesto.bou.config.serializers;
+package io.github.rednesto.bou.config.linting;
 
-import com.google.common.reflect.TypeToken;
-import io.github.rednesto.bou.api.fastharvest.FastHarvestCrop;
-import ninja.leaping.configurate.ConfigurationNode;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 
-public class FastHarvestCropSerializer extends LintingTypeSerializer<FastHarvestCrop> {
+public class LintingException extends ObjectMappingException {
 
-    @Override
-    public @Nullable FastHarvestCrop deserialize(@NonNull TypeToken<?> type, @NonNull ConfigurationNode value) {
-        int chance = value.getNode("chance").getInt(-1);
-        int chanceOf = value.getNode("chance_of").getInt(-1);
-        int count = value.getNode("count").getInt();
-        int fortuneFactor = value.getNode("fortune_factor").getInt(1);
-        int minimum = value.getNode("minimum").getInt(1);
-        return new FastHarvestCrop(chance, chanceOf, count, fortuneFactor, minimum);
+    private final String key;
+
+    public LintingException(String key) {
+        this.key = key;
+    }
+
+    public LintingException(String key, String message) {
+        super(message);
+        this.key = key;
+    }
+
+    public LintingException(String key, String message, Throwable cause) {
+        super(message, cause);
+        this.key = key;
+    }
+
+    public LintingException(String key, Throwable cause) {
+        super(cause);
+        this.key = key;
+    }
+
+    public String getKey() {
+        return key;
     }
 }

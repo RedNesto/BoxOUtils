@@ -37,6 +37,14 @@ public final class BouUtils {
         return Boolean.getBoolean("bou.is_testing");
     }
 
+    public static boolean isNoSponge() {
+        return Boolean.getBoolean("bou.no_sponge");
+    }
+
+    public static boolean isOnlyLinting() {
+        return Boolean.getBoolean("bou.lint_only");
+    }
+
     public static void registerIntegrations(IntegrationsManager integrationsManager, boolean forceLoad) {
         CustomDropsProviderFactoryIntegrations customDropsProviders = integrationsManager.getCustomDropsProviderFactoryIntegrations();
         Consumer<CustomDropsProviderFactory> customDropsProviderRegistration = provider -> customDropsProviders.register(provider, true);

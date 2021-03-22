@@ -28,14 +28,13 @@ import io.github.rednesto.bou.api.customdrops.CustomLootCommand;
 import io.github.rednesto.bou.api.requirement.Requirement;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
-import ninja.leaping.configurate.objectmapping.serialize.TypeSerializer;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class CustomLootCommandSerializer implements TypeSerializer<CustomLootCommand> {
+public class CustomLootCommandSerializer extends LintingTypeSerializer<CustomLootCommand> {
 
     @Override
     public @Nullable CustomLootCommand deserialize(@NonNull TypeToken<?> type, @NonNull ConfigurationNode value) throws ObjectMappingException {
@@ -52,8 +51,7 @@ public class CustomLootCommandSerializer implements TypeSerializer<CustomLootCom
                 try {
                     senderMode = CustomLootCommand.SenderMode.valueOf(senderModeName);
                 } catch (IllegalArgumentException e) {
-                    String errorMessage = String.format("Sender mode '%s' is invalid. Possible values: SENDER, PLAYER.", senderModeName);
-                    throw new ObjectMappingException(errorMessage);
+                    fail(senderModeNode, "Sender mode '" + senderModeName + "' is invalid. Possible values: SENDER, PLAYER.");
                 }
             }
 
@@ -67,14 +65,9 @@ public class CustomLootCommandSerializer implements TypeSerializer<CustomLootCom
         }
 
         if (rawCommand == null) {
-            throw new ObjectMappingException("A command must be specified.");
+            fail(value, "A command must be specified.");
         }
 
         return new CustomLootCommand(rawCommand, senderMode, chance, requirements);
-    }
-
-    @Override
-    public void serialize(@NonNull TypeToken<?> type, @Nullable CustomLootCommand obj, @NonNull ConfigurationNode value) {
-        throw new UnsupportedOperationException();
     }
 }

@@ -29,20 +29,15 @@ import io.github.rednesto.bou.api.requirement.Requirement;
 import io.github.rednesto.bou.integration.customdrops.recipients.ContextLocationLootRecipient;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
-import ninja.leaping.configurate.objectmapping.serialize.TypeSerializer;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
-public class CustomLootSerializer implements TypeSerializer<CustomLoot> {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(CustomLootSerializer.class);
+public class CustomLootSerializer extends LintingTypeSerializer<CustomLoot> {
 
     @Nullable
     @Override
@@ -50,12 +45,8 @@ public class CustomLootSerializer implements TypeSerializer<CustomLoot> {
         List<CustomDropsProvider> itemLoots = new ArrayList<>(value.getNode("drops").getValue(BouTypeTokens.CUSTOM_DROPS_PROVIDER_LIST, Collections.emptyList()));
         itemLoots.removeIf(Objects::isNull);
 
-        ConfigurationNode reuseNode = value.getNode("reuse");
-        CustomLoot.Reuse reuse = !reuseNode.isVirtual() ? reuseNode.getValue(BouTypeTokens.CUSTOM_LOOT_REUSE) : null;
-
-        ConfigurationNode requirementsNode = value.getNode("requirements");
-        List<List<Requirement>> requirements = RequirementSerializer.getRequirementGroups(requirementsNode);
-
+        CustomLoot.Reuse reuse = value.getNode("reuse").getValue(BouTypeTokens.CUSTOM_LOOT_REUSE);
+        List<List<Requirement>> requirements = RequirementSerializer.getRequirementGroups(value.getNode("requirements"));
         boolean overwrite = value.getNode("overwrite").getBoolean(false);
         boolean expOverwrite = value.getNode("exp-overwrite").getBoolean(false);
 
@@ -64,8 +55,7 @@ public class CustomLootSerializer implements TypeSerializer<CustomLoot> {
         if (!chanceNode.isVirtual()) {
             chance = chanceNode.getDouble(Double.NaN);
             if (Double.isNaN(chance)) {
-                String errorMessage = String.format("Chance value is not a valid number (%s).", chanceNode.getValue());
-                throw new ObjectMappingException(errorMessage);
+                fail(chanceNode, "Chance value is not a valid number (" + chanceNode.getValue() + ").");
             }
         }
 
@@ -77,22 +67,17 @@ public class CustomLootSerializer implements TypeSerializer<CustomLoot> {
         value.getChildrenMap().forEach((key, node) -> {
             String componentId = (String) key;
             CustomLootComponentProvider componentProvider = componentProviderIntegrations.getById(componentId, true);
-            if (componentProvider == null) {
-                return;
-            }
-
-            try {
-                components.add(componentProvider.provide(node));
-            } catch (Throwable t) {
-                LOGGER.error("Unable to read CustomLoot component configuration {}", componentId, t);
+            if (componentProvider != null) {
+                try {
+                    components.add(componentProvider.provide(node));
+                } catch (CustomLootComponentConfigurationException e) {
+                    error(value, "Loot component '" + componentId + "' error: " + e.getMessage());
+                } catch (Throwable t) {
+                    error(value, "Loot component '" + componentId + "' unexpected error: " + t.getMessage());
+                }
             }
         });
 
         return new CustomLoot(itemLoots, overwrite, expOverwrite, chance, recipient, redirectBaseDropsToRecipient, requirements, reuse, components);
-    }
-
-    @Override
-    public void serialize(@NonNull TypeToken<?> type, @Nullable CustomLoot obj, @NonNull ConfigurationNode value) {
-        throw new UnsupportedOperationException();
     }
 }

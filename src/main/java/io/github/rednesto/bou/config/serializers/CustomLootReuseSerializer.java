@@ -30,7 +30,6 @@ import io.github.rednesto.bou.api.lootReuse.LootReuse;
 import io.github.rednesto.bou.api.requirement.Requirement;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
-import ninja.leaping.configurate.objectmapping.serialize.TypeSerializer;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -38,7 +37,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class CustomLootReuseSerializer implements TypeSerializer<CustomLoot.Reuse> {
+public class CustomLootReuseSerializer extends LintingTypeSerializer<CustomLoot.Reuse> {
 
     @Override
     public CustomLoot.@Nullable Reuse deserialize(@NonNull TypeToken<?> type, @NonNull ConfigurationNode value) throws ObjectMappingException {
@@ -47,20 +46,17 @@ public class CustomLootReuseSerializer implements TypeSerializer<CustomLoot.Reus
         Map<String, LootReuse> reuses = new HashMap<>();
         for (Map.Entry<Object, ? extends ConfigurationNode> entry : value.getNode("items").getChildrenMap().entrySet()) {
             String itemId = SpongeUtils.addMcNamespaceIfNeeded(entry.getKey().toString());
-            LootReuse reuse = entry.getValue().getValue(BouTypeTokens.LOOT_REUSE);
-            if (reuse != null) {
-                reuses.put(itemId, reuse);
+            try {
+                LootReuse reuse = entry.getValue().getValue(BouTypeTokens.LOOT_REUSE);
+                if (reuse != null) {
+                    reuses.put(itemId, reuse);
+                }
+            } catch (ObjectMappingException e) {
+                error(entry.getValue(), "Loot reuse deserialization error", e);
             }
         }
 
-        ConfigurationNode requirementsNode = value.getNode("requirements");
-        List<List<Requirement>> requirements = RequirementSerializer.getRequirementGroups(requirementsNode);
-
+        List<List<Requirement>> requirements = RequirementSerializer.getRequirementGroups(value.getNode("requirements"));
         return new CustomLoot.Reuse(multiplier, reuses, requirements);
-    }
-
-    @Override
-    public void serialize(@NonNull TypeToken<?> type, CustomLoot.@Nullable Reuse obj, @NonNull ConfigurationNode value) {
-        throw new UnsupportedOperationException();
     }
 }

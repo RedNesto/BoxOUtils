@@ -30,17 +30,16 @@ import io.github.rednesto.bou.api.range.IntRange;
 import io.github.rednesto.bou.api.range.SelectiveIntRange;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
-import ninja.leaping.configurate.objectmapping.serialize.TypeSerializer;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-public class IntRangeSerializer implements TypeSerializer<IntRange> {
+public class IntRangeSerializer extends LintingTypeSerializer<IntRange> {
 
     @Override
     public @Nullable IntRange deserialize(@NonNull TypeToken<?> type, @NonNull ConfigurationNode value) throws ObjectMappingException {
         String stringValue = value.getString();
         if (stringValue == null) {
-            throw new ObjectMappingException("Could not read value");
+            fail(value, "Could not read value.");
         }
 
         try {
@@ -58,11 +57,7 @@ public class IntRangeSerializer implements TypeSerializer<IntRange> {
         } catch (IllegalArgumentException ignored) {
         }
 
-        throw new ObjectMappingException("Invalid integer range '" + stringValue + "'.");
-    }
-
-    @Override
-    public void serialize(@NonNull TypeToken<?> type, @Nullable IntRange obj, @NonNull ConfigurationNode value) {
-        throw new UnsupportedOperationException();
+        fail(value, "Invalid integer range '" + stringValue + "'.");
+        return null;
     }
 }

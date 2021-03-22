@@ -30,7 +30,6 @@ import io.github.rednesto.bou.api.requirement.RequirementProvider;
 import io.github.rednesto.bou.api.requirement.RequirementProviderIntegrations;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
-import ninja.leaping.configurate.objectmapping.serialize.TypeSerializer;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -38,16 +37,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class RequirementSerializer implements TypeSerializer<Requirement> {
+public class RequirementSerializer extends LintingTypeSerializer<Requirement> {
 
     @Override
     public @Nullable Requirement deserialize(@NonNull TypeToken<?> type, @NonNull ConfigurationNode value) throws ObjectMappingException {
-        String key = (String) value.getKey();
-        if (key == null) {
-            return null;
+        Object rawKey = value.getKey();
+        if (!(rawKey instanceof String)) {
+            fail(value, "Key is expected to be a String.");
         }
 
-        RequirementProvider requirementProvider = RequirementProviderIntegrations.getInstance().getById(key, true);
+        RequirementProvider requirementProvider = RequirementProviderIntegrations.getInstance().getById((String) rawKey, true);
         if (requirementProvider == null) {
             return null;
         }
@@ -55,19 +54,16 @@ public class RequirementSerializer implements TypeSerializer<Requirement> {
         try {
             return requirementProvider.provide(value);
         } catch (RequirementConfigurationException e) {
-            throw new ObjectMappingException("Unable to read requirement configuration.", e);
+            fail(value, "Unable to read requirement configuration", e);
         } catch (Throwable t) {
-            throw new ObjectMappingException("Unexpected error during requirement creation.", t);
+            fail(value, "Unexpected error during requirement creation", t);
         }
+
+        return null;
     }
 
-    @Override
-    public void serialize(@NonNull TypeToken<?> type, @Nullable Requirement obj, @NonNull ConfigurationNode value) {
-        throw new UnsupportedOperationException();
-    }
-
-    public static List<List<Requirement>> getRequirementGroups(ConfigurationNode requirementsNode) throws ObjectMappingException {
-        List<Map<String, Requirement>> requirementsMaps = requirementsNode.getList(BouTypeTokens.REQUIREMENTS_MAP);
+    public static List<List<Requirement>> getRequirementGroups(ConfigurationNode requirementsNode) {
+        List<Map<String, Requirement>> requirementsMaps = SerializerUtils.getListSafe(requirementsNode, BouTypeTokens.REQUIREMENTS_MAP);
         ArrayList<List<Requirement>> lists = new ArrayList<>();
         for (Map<String, Requirement> requirementsMap : requirementsMaps) {
             ArrayList<Requirement> requirements = new ArrayList<>(requirementsMap.values());

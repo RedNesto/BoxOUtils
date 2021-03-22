@@ -30,18 +30,16 @@ import io.github.rednesto.bou.api.quantity.BoundedIntQuantity;
 import io.github.rednesto.bou.api.quantity.IntQuantity;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
-import ninja.leaping.configurate.objectmapping.serialize.TypeSerializer;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-public class SpawnedMobSerializer implements TypeSerializer<SpawnedMob> {
+public class SpawnedMobSerializer extends LintingTypeSerializer<SpawnedMob> {
 
     @Override
     public @Nullable SpawnedMob deserialize(@NonNull TypeToken<?> type, @NonNull ConfigurationNode value) throws ObjectMappingException {
         String mobType = value.getNode("type").getString();
         if (mobType == null) {
-            String message = String.format("A BlockSpawner spawn for '%s' has no 'type'", getBlockId(value));
-            throw new ObjectMappingException(message);
+            fail(value, String.format("A BlockSpawner spawn for '%s' has no 'type'", getBlockId(value)));
         }
 
         IntQuantity quantity = null;
@@ -53,15 +51,12 @@ public class SpawnedMobSerializer implements TypeSerializer<SpawnedMob> {
         if (quantity instanceof BoundedIntQuantity) {
             BoundedIntQuantity boundedQuantity = (BoundedIntQuantity) quantity;
             if (boundedQuantity.getFrom() < 0) {
-                String message = String.format("The quantity lower bound (%s) of BlockSpawner '%s' for mob '%s' is negative. This spawn will not be loaded.",
-                        boundedQuantity.getFrom(), mobType, getBlockId(value));
-                throw new ObjectMappingException(message);
+                fail(quantityNode, String.format("Quantity lower bound cannot be negative, is currently '%s'.", boundedQuantity.getFrom()));
             }
 
             if (boundedQuantity.getTo() < boundedQuantity.getFrom()) {
-                String message = String.format("The quantity upper bound (%s) of BlockSpawner '%s' for mob '%s' is less than its lower bound (%s). This spawn will not be loaded.",
-                        boundedQuantity.getTo(), mobType, getBlockId(value), boundedQuantity.getFrom());
-                throw new ObjectMappingException(message);
+                fail(quantityNode, String.format("Quantity upper bound (%s) should be higher than the lower bound (%s).",
+                        boundedQuantity.getTo(), boundedQuantity.getFrom()));
             }
         }
 
@@ -70,18 +65,11 @@ public class SpawnedMobSerializer implements TypeSerializer<SpawnedMob> {
         if (!chanceNode.isVirtual()) {
             chance = chanceNode.getDouble(Double.NaN);
             if (Double.isNaN(chance)) {
-                String message = String.format("Chance of BlockSpawner mob '%s' for block '%s' is not a valid number ('%s'). This spawn will not be loaded.",
-                        mobType, getBlockId(value), chanceNode.getValue());
-                throw new ObjectMappingException(message);
+                fail(chanceNode, "Chance is not a valid number ('" + chanceNode.getValue() + "').");
             }
         }
 
         return new SpawnedMob(mobType, chance, quantity);
-    }
-
-    @Override
-    public void serialize(@NonNull TypeToken<?> type, @Nullable SpawnedMob obj, @NonNull ConfigurationNode value) {
-        throw new UnsupportedOperationException();
     }
 
     @Nullable

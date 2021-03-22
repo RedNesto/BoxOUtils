@@ -34,5 +34,7 @@ abstract class ConfigurationTestCase<T>(val rootNodeKey: String, val typeToken: 
 
     protected open fun loadConfig(configuration: String): T = configHelper.loadConfig(configuration, rootNodeKey, typeToken)
 
+    protected open fun loadConfigOrNull(configuration: String): T? = configHelper.loadConfigOrNull(configuration, rootNodeKey, typeToken)
+
     protected open fun loadConfigList(configuration: String): List<T> = configHelper.loadConfigList(configuration, rootNodeKey, typeToken)
 }

@@ -25,6 +25,7 @@ package io.github.rednesto.bou;
 
 import com.google.inject.Inject;
 import io.github.rednesto.bou.commands.BouInspectItemCommand;
+import io.github.rednesto.bou.commands.BouLintCommand;
 import io.github.rednesto.bou.commands.BouReloadCommand;
 import org.slf4j.Logger;
 import org.spongepowered.api.Sponge;
@@ -41,6 +42,7 @@ import org.spongepowered.api.event.game.state.GamePreInitializationEvent;
 import org.spongepowered.api.plugin.Dependency;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.channel.MessageReceiver;
 import org.spongepowered.api.text.format.TextColors;
 
 import java.io.IOException;
@@ -68,6 +70,7 @@ public class BoxOUtils {
     private final Path configDir;
     private final IntegrationsManager integrationsManager;
 
+    private Config.General generalConfig = new Config.General();
     private Config.BlocksDrops blocksDrops = new Config.BlocksDrops(false, new HashMap<>());
     private Config.MobsDrops mobsDrops = new Config.MobsDrops(false, new HashMap<>());
     private Config.FishingDrops fishingDrops = new Config.FishingDrops(false, new ArrayList<>());
@@ -110,6 +113,7 @@ public class BoxOUtils {
     public void onGameInitialization(GameInitializationEvent event) {
         Sponge.getCommandManager().register(this, CommandSpec.builder()
                 .child(BouReloadCommand.create(), "reload")
+                .child(BouLintCommand.create(), "lint")
                 .child(CommandSpec.builder()
                         .child(BouInspectItemCommand.create(), "item")
                         .build(), "inspect")
@@ -123,15 +127,26 @@ public class BoxOUtils {
 
     @Listener
     public void onConfigReload(GameReloadEvent event) {
+        MessageReceiver messageReceiver = event.getCause().first(MessageReceiver.class)
+                .orElseGet(() -> Sponge.getServer().getConsole());
         try {
-            SpongeConfig.loadConf(this);
-            integrationsManager.reloadIntegrations(this);
+            reloadConfiguration(messageReceiver);
         } catch (IOException e) {
             this.logger.error("An exception occurred when reloading configuration", e);
             event.getCause().first(CommandSource.class)
                     .filter(source -> !(source instanceof ConsoleSource))
                     .ifPresent(source -> source.sendMessage(Text.of(TextColors.RED, "[Box O' Utils] Unable to reload configuration: " + e.getMessage())));
         }
+    }
+
+    public void reloadConfiguration(MessageReceiver receiver) throws IOException {
+        if (generalConfig.lintOnReload) {
+            SpongeConfig.loadAndLint(this, receiver);
+        } else {
+            SpongeConfig.loadConf(this);
+        }
+
+        integrationsManager.reloadIntegrations(this);
     }
 
     public Logger getLogger() {
@@ -144,6 +159,14 @@ public class BoxOUtils {
 
     public IntegrationsManager getIntegrationsManager() {
         return integrationsManager;
+    }
+
+    public Config.General getGeneralConfig() {
+        return generalConfig;
+    }
+
+    public void setGeneralConfig(Config.General generalConfig) {
+        this.generalConfig = generalConfig;
     }
 
     public Config.BlocksDrops getBlocksDrops() {

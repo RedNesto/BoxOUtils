@@ -27,45 +27,39 @@ import com.google.common.reflect.TypeToken;
 import io.github.rednesto.bou.api.customdrops.CustomLootRecipient;
 import io.github.rednesto.bou.api.customdrops.CustomLootRecipientProvider;
 import io.github.rednesto.bou.api.customdrops.CustomLootRecipientProviderIntegrations;
+import io.github.rednesto.bou.api.customdrops.ProviderConfigurationException;
 import ninja.leaping.configurate.ConfigurationNode;
-import ninja.leaping.configurate.objectmapping.serialize.TypeSerializer;
+import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-public class CustomLootRecipientSerializer implements TypeSerializer<CustomLootRecipient> {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(CustomLootRecipientSerializer.class);
+public class CustomLootRecipientSerializer extends LintingTypeSerializer<CustomLootRecipient> {
 
     @Override
-    public @Nullable CustomLootRecipient deserialize(@NonNull TypeToken<?> type, @NonNull ConfigurationNode value) {
+    public @Nullable CustomLootRecipient deserialize(@NonNull TypeToken<?> type, @NonNull ConfigurationNode value) throws ObjectMappingException {
         String providerId = value.getString();
         ConfigurationNode recipientConfigNode = null;
         if (providerId == null) {
             providerId = value.getNode("id").getString();
             recipientConfigNode = value;
             if (providerId == null) {
-                return null;
+                fail(value, "Missing required provider ID as 'id'");
             }
         }
 
         CustomLootRecipientProviderIntegrations recipientProviderIntegrations = CustomLootRecipientProviderIntegrations.getInstance();
         CustomLootRecipientProvider provider = recipientProviderIntegrations.getById(providerId, true);
-        if (provider == null){
-            return null;
+        if (provider == null) {
+            fail(value, "Provider '" + providerId + "' does not exists");
         }
 
         try {
             return provider.provide(recipientConfigNode);
+        } catch (ProviderConfigurationException e) {
+            fail(value, "CustomLootRecipientProvider ('" + providerId + "') error: " + e.getMessage());
         } catch (Throwable t) {
-            LOGGER.error("Unable to read CustomLootRecipient configuration of provider {}", providerId, t);
+            fail(value, "Unhandled error when configuring CustomLootRecipientProvider '" + providerId + "': " + t.getMessage());
         }
         return null;
-    }
-
-    @Override
-    public void serialize(@NonNull TypeToken<?> type, @Nullable CustomLootRecipient obj, @NonNull ConfigurationNode value) {
-        throw new UnsupportedOperationException();
     }
 }

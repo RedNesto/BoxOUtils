@@ -30,11 +30,10 @@ import io.github.rednesto.bou.api.lootReuse.SimpleLootReuse;
 import io.github.rednesto.bou.api.quantity.IntQuantity;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
-import ninja.leaping.configurate.objectmapping.serialize.TypeSerializer;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-public class LootReuseSerializer implements TypeSerializer<LootReuse> {
+public class LootReuseSerializer extends LintingTypeSerializer<LootReuse> {
 
     @Override
     public @Nullable LootReuse deserialize(@NonNull TypeToken<?> type, @NonNull ConfigurationNode value) throws ObjectMappingException {
@@ -54,10 +53,5 @@ public class LootReuseSerializer implements TypeSerializer<LootReuse> {
         }
 
         return null;
-    }
-
-    @Override
-    public void serialize(@NonNull TypeToken<?> type, @Nullable LootReuse obj, @NonNull ConfigurationNode value) {
-        throw new UnsupportedOperationException();
     }
 }

@@ -54,6 +54,11 @@ abstract class ConfigHelper {
         return rootNode.getNode(rootNodeKey).getValue(token) ?: fail("Configuration value is null")
     }
 
+    open fun <N> loadConfigOrNull(configuration: String, rootNodeKey: String, token: TypeToken<N>): N? {
+        val rootNode = loadNode(configuration)
+        return rootNode.getNode(rootNodeKey).getValue(token)
+    }
+
     open fun <N> loadConfigList(configuration: String, rootNodeKey: String, token: TypeToken<N>): List<N> {
         val rootNode = loadNode(configuration)
         return rootNode.getNode(rootNodeKey).getList(token)

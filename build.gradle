@@ -50,6 +50,8 @@ dependencies {
     compileOnly "org.spongepowered:spongeapi:${spongeApiVersion}"
     annotationProcessor "org.spongepowered:spongeapi:${spongeApiVersion}"
 
+    compile 'org.jetbrains:annotations:17.0.0'
+
     testCompile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
     testCompile 'org.junit.jupiter:junit-jupiter-api:5.5.1'
     testRuntime 'org.junit.jupiter:junit-jupiter-engine:5.5.1'

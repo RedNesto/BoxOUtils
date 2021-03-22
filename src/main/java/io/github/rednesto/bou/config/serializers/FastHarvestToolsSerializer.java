@@ -27,7 +27,6 @@ import com.google.common.reflect.TypeToken;
 import io.github.rednesto.bou.api.fastharvest.FastHarvestTools;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
-import ninja.leaping.configurate.objectmapping.serialize.TypeSerializer;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.util.TypeTokens;
@@ -35,7 +34,7 @@ import org.spongepowered.api.util.TypeTokens;
 import java.util.ArrayList;
 import java.util.List;
 
-public class FastHarvestToolsSerializer implements TypeSerializer<FastHarvestTools> {
+public class FastHarvestToolsSerializer extends LintingTypeSerializer<FastHarvestTools> {
 
     @Override
     public @Nullable FastHarvestTools deserialize(@NonNull TypeToken<?> type, @NonNull ConfigurationNode value) throws ObjectMappingException {
@@ -45,10 +44,5 @@ public class FastHarvestToolsSerializer implements TypeSerializer<FastHarvestToo
         List<String> tools = new ArrayList<>(value.getNode("tools").getList(TypeTokens.STRING_TOKEN));
 
         return new FastHarvestTools(enabled, damageOnUse, isWhitelist, tools);
-    }
-
-    @Override
-    public void serialize(@NonNull TypeToken<?> type, @Nullable FastHarvestTools obj, @NonNull ConfigurationNode value) {
-        throw new UnsupportedOperationException();
     }
 }

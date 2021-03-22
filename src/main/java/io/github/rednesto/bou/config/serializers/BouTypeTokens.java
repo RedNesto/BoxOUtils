@@ -56,6 +56,7 @@ public final class BouTypeTokens {
     public static final TypeToken<FastHarvestCrop> FAST_HARVEST_CROP = TypeToken.of(FastHarvestCrop.class);
     public static final TypeToken<FastHarvestTools> FAST_HARVEST_TOOLS = TypeToken.of(FastHarvestTools.class);
 
+    public static final TypeToken<Config.General> CONFIG_GENERAL = TypeToken.of(Config.General.class);
     public static final TypeToken<Config.BlocksDrops> CONFIG_BLOCKS_DROPS = TypeToken.of(Config.BlocksDrops.class);
     public static final TypeToken<Config.MobsDrops> CONFIG_MOBS_DROPS = TypeToken.of(Config.MobsDrops.class);
     public static final TypeToken<Config.FishingDrops> CONFIG_FISHING_DROPS = TypeToken.of(Config.FishingDrops.class);

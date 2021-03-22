@@ -24,33 +24,26 @@
 package io.github.rednesto.bou.commands;
 
 import io.github.rednesto.bou.BoxOUtils;
+import io.github.rednesto.bou.SpongeConfig;
 import org.spongepowered.api.command.CommandCallable;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.CommandContext;
-import org.spongepowered.api.command.source.ConsoleSource;
 import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
 
-import java.io.IOException;
+import java.util.List;
 
-public class BouReloadCommand implements CommandExecutor {
+public class BouLintCommand implements CommandExecutor {
 
     @Override
     public CommandResult execute(CommandSource src, CommandContext args) {
-        BoxOUtils plugin = BoxOUtils.getInstance();
-        try {
-            plugin.reloadConfiguration(src);
-            src.sendMessage(Text.of("Box O' Utils configuration has been reloaded successfully"));
-        } catch (IOException e) {
-            plugin.getLogger().error("An exception occurred when reloading configuration", e);
-            if (!(src instanceof ConsoleSource)) {
-                src.sendMessage(Text.of(TextColors.RED, "[Box O' Utils] Unable to reload configuration: " + e.getMessage()));
-            }
-
-            return CommandResult.empty();
+        List<Text> report = SpongeConfig.lint(BoxOUtils.getInstance());
+        if (!report.isEmpty()) {
+            src.sendMessages(report);
+        } else {
+            src.sendMessage(Text.of("The linter found nothing to report."));
         }
 
         return CommandResult.success();
@@ -58,8 +51,7 @@ public class BouReloadCommand implements CommandExecutor {
 
     public static CommandCallable create() {
         return CommandSpec.builder()
-                .permission("boxoutils.reload")
-                .executor(new BouReloadCommand())
+                .executor(new BouLintCommand())
                 .build();
     }
 }

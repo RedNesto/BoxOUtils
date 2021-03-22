@@ -29,20 +29,16 @@ import io.github.rednesto.bou.api.range.IntRange;
 import io.github.rednesto.bou.api.utils.EnchantmentsFilter;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
-import ninja.leaping.configurate.objectmapping.serialize.TypeSerializer;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class EnchantmentsFilterSerializer implements TypeSerializer<EnchantmentsFilter> {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(EnchantmentsFilterSerializer.class);
+public class EnchantmentsFilterSerializer extends LintingTypeSerializer<EnchantmentsFilter> {
 
     private static final List<String> ANY_VALUES = Arrays.asList("any", "all");
     private static final List<String> NONE_VALUES = Arrays.asList("none", "disallow");
@@ -59,7 +55,7 @@ public class EnchantmentsFilterSerializer implements TypeSerializer<Enchantments
         for (ConfigurationNode filterNode : value.getChildrenMap().values()) {
             String key = (String) filterNode.getKey();
             if (key == null) {
-                LOGGER.warn("An enchantements filter item configuration is missing its key!");
+                error(filterNode, "This enchantments filter does not have a key! It will be ignored.");
                 continue;
             }
 
@@ -73,7 +69,7 @@ public class EnchantmentsFilterSerializer implements TypeSerializer<Enchantments
                         disallowedRanges.put(key, range);
                     }
                 } catch (ObjectMappingException e) {
-                    LOGGER.error("Error reading enchantment requirement filter.", e);
+                    error(disallowNode, "Cannot read enchantment requirement filter range: " + ExceptionUtils.getStackTrace(e));
                 }
 
                 continue;
@@ -87,6 +83,8 @@ public class EnchantmentsFilterSerializer implements TypeSerializer<Enchantments
                 } else if (ANY_VALUES.contains(stringValue)) {
                     wildcards.put(key, true);
                     continue;
+                } else {
+                    error(filterNode, "Unknown wildcard value '" + stringValue + "'");
                 }
             }
 
@@ -96,15 +94,10 @@ public class EnchantmentsFilterSerializer implements TypeSerializer<Enchantments
                     neededRanges.put(key, range);
                 }
             } catch (ObjectMappingException e) {
-                LOGGER.error("Error reading enchantment requirement filter.", e);
+                error(filterNode, "Error reading enchantment requirement filter.", e);
             }
         }
 
         return new EnchantmentsFilter(neededRanges, disallowedRanges, wildcards);
-    }
-
-    @Override
-    public void serialize(@NonNull TypeToken<?> type, @Nullable EnchantmentsFilter obj, @NonNull ConfigurationNode value) {
-        throw new UnsupportedOperationException();
     }
 }

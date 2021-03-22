@@ -48,6 +48,10 @@ public final class Config {
                 || !tools.isWhitelist() && !tools.getToolsIds().contains(item);
     }
 
+    public static General getGeneral() {
+        return BoxOUtils.getInstance().getGeneralConfig();
+    }
+
     public static BlocksDrops getBlocksDrops() {
         return BoxOUtils.getInstance().getBlocksDrops();
     }
@@ -74,6 +78,19 @@ public final class Config {
 
     public interface ToggleableConfig {
         boolean isEnabled();
+    }
+
+    @ConfigSerializable
+    public static class General {
+
+        @Setting("lint_on_reload")
+        public boolean lintOnReload;
+
+        public General() {}
+
+        public General(boolean lintOnReload) {
+            this.lintOnReload = lintOnReload;
+        }
     }
 
     @ConfigSerializable

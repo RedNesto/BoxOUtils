@@ -29,17 +29,16 @@ import io.github.rednesto.bou.api.quantity.FixedIntQuantity;
 import io.github.rednesto.bou.api.quantity.IntQuantity;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
-import ninja.leaping.configurate.objectmapping.serialize.TypeSerializer;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-public class IntQuantitySerializer implements TypeSerializer<IntQuantity> {
+public class IntQuantitySerializer extends LintingTypeSerializer<IntQuantity> {
 
     @Override
     public @Nullable IntQuantity deserialize(@NonNull TypeToken<?> type, @NonNull ConfigurationNode value) throws ObjectMappingException {
         String stringValue = value.getString();
         if (stringValue == null) {
-            throw new ObjectMappingException("Could not read value");
+            fail(value, "Could not read value");
         }
 
         try {
@@ -51,12 +50,8 @@ public class IntQuantitySerializer implements TypeSerializer<IntQuantity> {
         try {
             return BoundedIntQuantity.parse(stringValue);
         } catch (IllegalArgumentException e) {
-            throw new ObjectMappingException("Invalid amount.", e);
+            fail(value, "Invalid amount.", e);
         }
-    }
-
-    @Override
-    public void serialize(@NonNull TypeToken<?> type, @Nullable IntQuantity obj, @NonNull ConfigurationNode value) {
-        throw new UnsupportedOperationException();
+        return null;
     }
 }

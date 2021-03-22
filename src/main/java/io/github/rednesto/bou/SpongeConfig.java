@@ -26,8 +26,12 @@ package io.github.rednesto.bou;
 import com.google.common.reflect.TypeToken;
 import com.typesafe.config.ConfigParseOptions;
 import io.github.rednesto.bou.config.SimpleConfigIncluderFile;
+import io.github.rednesto.bou.config.linting.BuiltinLinter;
+import io.github.rednesto.bou.config.linting.LinterContext;
+import io.github.rednesto.bou.config.linting.LinterReportExporter;
 import io.github.rednesto.bou.config.serializers.*;
 import io.github.rednesto.bou.listeners.*;
+import io.github.rednesto.bou.utils.ThrowingConsumer;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.ConfigurationOptions;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
@@ -36,10 +40,18 @@ import ninja.leaping.configurate.objectmapping.serialize.TypeSerializerCollectio
 import ninja.leaping.configurate.objectmapping.serialize.TypeSerializers;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.asset.Asset;
+import org.spongepowered.api.service.pagination.PaginationList;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.action.HoverAction;
+import org.spongepowered.api.text.action.TextActions;
+import org.spongepowered.api.text.channel.MessageReceiver;
+import org.spongepowered.api.text.format.TextColors;
+import org.spongepowered.api.text.format.TextStyles;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -53,6 +65,7 @@ public class SpongeConfig {
     private static final boolean IS_TESTING = BouUtils.isTesting();
 
     private static final List<Feature<?, ?>> FEATURES = Arrays.asList(
+            new Feature<>("general.conf", "General", BouTypeTokens.CONFIG_GENERAL, BoxOUtils::setGeneralConfig),
             new Feature<>("fastharvest.conf", "FastHarvest", BouTypeTokens.CONFIG_FAST_HARVEST, BoxOUtils::setFastHarvest, FastHarvestListener::new),
             new Feature<>("cropscontrol.conf", "CropsControl", BouTypeTokens.CONFIG_CROPS_CONTROL, BoxOUtils::setCropsControl),
             new Feature<>("blocksdrops.conf", "BlocksDrops", BouTypeTokens.CONFIG_BLOCKS_DROPS, BoxOUtils::setBlocksDrops, CustomBlockDropsListener::new),
@@ -60,6 +73,41 @@ public class SpongeConfig {
             new Feature<>("mobsdrops.conf", "MobsDrops", BouTypeTokens.CONFIG_MOBS_DROPS, BoxOUtils::setMobsDrops, CustomMobDropsListener::new),
             new Feature<>("blockspawners.conf", "BlockSpawners", BouTypeTokens.CONFIG_BLOCK_SPAWNERS, BoxOUtils::setBlockSpawners, BlockSpawnersListener::new)
     );
+
+    public static void loadAndLint(BoxOUtils plugin, MessageReceiver messageReceiver) {
+        List<Text> reportText = collectLinterReport(plugin, descriptor -> loadFeature(plugin, descriptor));
+        if (reportText.isEmpty()) {
+            messageReceiver.sendMessage(Text.of("Box O' Utils linter found no issues with the configurations."));
+        } else {
+            PaginationList.builder()
+                    .contents(reportText)
+                    .sendTo(messageReceiver);
+        }
+    }
+
+    public static List<Text> lint(BoxOUtils plugin) {
+        return collectLinterReport(plugin, feature -> loadFeature(plugin, feature));
+    }
+
+    private static List<Text> collectLinterReport(BoxOUtils plugin, ThrowingConsumer<Feature<?, ?>, Exception> configLoader) {
+        List<Text> reportText = new ArrayList<>();
+        for (Feature<?, ?> feature : FEATURES) {
+            try {
+                LinterContext linterContext = BuiltinLinter.lint(() -> configLoader.accept(feature));
+                List<Text> configIssues = LinterReportExporter.export(linterContext);
+                if (!configIssues.isEmpty()) {
+                    reportText.add(Text.of(TextStyles.BOLD, feature.presentableConfigName, " issues:"));
+                    reportText.addAll(configIssues);
+                }
+            } catch (Exception e) {
+                HoverAction.ShowText showExceptionMessage = TextActions.showText(Text.of(e.getMessage()));
+                reportText.add(Text.of(showExceptionMessage, TextColors.RED, "Error when reading ", feature.presentableConfigName, " configuration."));
+                plugin.getLogger().error("Error when reading {} configuration.", feature.presentableConfigName, e);
+            }
+        }
+
+        return reportText;
+    }
 
     public static void loadConf(BoxOUtils plugin) throws IOException {
         Files.createDirectories(plugin.getConfigDir());
@@ -126,8 +174,11 @@ public class SpongeConfig {
     }
 
     public static HoconConfigurationLoader loader(Path path) {
+        return loaderBuilder(path.getParent()).setPath(path).build();
+    }
+
+    public static HoconConfigurationLoader.Builder loaderBuilder(Path includerBaseDir) {
         HoconConfigurationLoader.Builder builder = HoconConfigurationLoader.builder()
-                .setPath(path)
                 .setDefaultOptions(ConfigurationOptions.defaults().setSerializers(createSerializersCollection()));
         try {
             // SpongeForge relocates the HOCON library to avoid conflicts with Forge, which uses an older version of it.
@@ -135,10 +186,10 @@ public class SpongeConfig {
             // It would be very hard, if not impossible, to work around this issue, so I just disable the includer on SpongeForge
             Class.forName("configurate.typesafe.config.ConfigParseOptions");
         } catch (ClassNotFoundException e) {
-            builder.setParseOptions(ConfigParseOptions.defaults().appendIncluder(new SimpleConfigIncluderFile(path.getParent())));
+            builder.setParseOptions(ConfigParseOptions.defaults().appendIncluder(new SimpleConfigIncluderFile(includerBaseDir)));
         }
 
-        return builder.build();
+        return builder;
     }
 
     public static TypeSerializerCollection createSerializersCollection() {
