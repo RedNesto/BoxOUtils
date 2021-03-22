@@ -25,10 +25,11 @@ package io.github.rednesto.bou.api.customdrops;
 
 import io.github.rednesto.bou.api.integration.Integration;
 import ninja.leaping.configurate.ConfigurationNode;
+import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 
 import javax.annotation.Nullable;
 
 public interface CustomLootRecipientProvider extends Integration {
 
-    CustomLootRecipient provide(@Nullable ConfigurationNode node) throws ProviderConfigurationException;
+    CustomLootRecipient provide(@Nullable ConfigurationNode node) throws ObjectMappingException;
 }

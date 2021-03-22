@@ -26,6 +26,7 @@ package io.github.rednesto.bou.integration.customdrops;
 import com.google.common.base.MoreObjects;
 import io.github.rednesto.bou.BoxOUtils;
 import io.github.rednesto.bou.api.customdrops.*;
+import io.github.rednesto.bou.config.linting.LinterContext;
 import io.github.rednesto.bou.config.serializers.BouTypeTokens;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
@@ -122,17 +123,13 @@ public class MoneyLootComponent implements CustomLootComponent {
     public static class Provider implements CustomLootComponentProvider {
 
         @Override
-        public CustomLootComponent provide(ConfigurationNode node) throws CustomLootComponentConfigurationException {
-            try {
-                MoneyLoot moneyLoot = node.getValue(BouTypeTokens.MONEY_LOOT);
-                if (moneyLoot == null) {
-                    throw new CustomLootComponentConfigurationException("Could not deserialize a MoneyLoot.");
-                }
-
-                return new MoneyLootComponent(moneyLoot);
-            } catch (ObjectMappingException e) {
-                throw new CustomLootComponentConfigurationException(e);
+        public CustomLootComponent provide(ConfigurationNode node) throws ObjectMappingException {
+            MoneyLoot moneyLoot = node.getValue(BouTypeTokens.MONEY_LOOT);
+            if (moneyLoot == null) {
+                LinterContext.fail("Could not deserialize a MoneyLoot.", node);
             }
+
+            return new MoneyLootComponent(moneyLoot);
         }
 
         @Override

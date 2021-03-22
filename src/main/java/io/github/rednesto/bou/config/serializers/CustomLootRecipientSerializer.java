@@ -27,7 +27,6 @@ import com.google.common.reflect.TypeToken;
 import io.github.rednesto.bou.api.customdrops.CustomLootRecipient;
 import io.github.rednesto.bou.api.customdrops.CustomLootRecipientProvider;
 import io.github.rednesto.bou.api.customdrops.CustomLootRecipientProviderIntegrations;
-import io.github.rednesto.bou.api.customdrops.ProviderConfigurationException;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -55,8 +54,6 @@ public class CustomLootRecipientSerializer extends LintingTypeSerializer<CustomL
 
         try {
             return provider.provide(recipientConfigNode);
-        } catch (ProviderConfigurationException e) {
-            fail(value, "CustomLootRecipientProvider ('" + providerId + "') error: " + e.getMessage());
         } catch (Throwable t) {
             fail(value, "Unhandled error when configuring CustomLootRecipientProvider '" + providerId + "': " + t.getMessage());
         }

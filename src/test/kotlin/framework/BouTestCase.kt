@@ -24,12 +24,13 @@
 package io.github.rednesto.bou.tests.framework
 
 import io.github.rednesto.bou.BoxOUtils
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import java.nio.file.Path
 
-abstract class BouTestCase(loadBuiltinIntegrations: Boolean = true) {
+abstract class BouTestCase(loadBuiltinIntegrations: Boolean = true, noSponge: Boolean = false) {
 
-    val pluginFixture: BouFixture = BouFixture({ createConfigDir() }, loadBuiltinIntegrations)
+    val pluginFixture: BouFixture = BouFixture({ createConfigDir() }, loadBuiltinIntegrations, noSponge)
 
     val plugin: BoxOUtils
         get() = pluginFixture.plugin
@@ -39,5 +40,10 @@ abstract class BouTestCase(loadBuiltinIntegrations: Boolean = true) {
     @BeforeEach
     protected open fun setUp() {
         pluginFixture.setUp()
+    }
+
+    @AfterEach
+    protected open fun tearDown() {
+        pluginFixture.tearDown()
     }
 }

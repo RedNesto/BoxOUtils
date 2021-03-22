@@ -27,6 +27,7 @@ import com.google.common.base.MoreObjects;
 import com.google.common.base.Preconditions;
 import io.github.rednesto.bou.api.quantity.BoundedIntQuantity;
 import io.github.rednesto.bou.api.quantity.IntQuantity;
+import io.github.rednesto.bou.config.linting.LinterContext;
 import io.github.rednesto.bou.config.serializers.BouTypeTokens;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.ValueType;
@@ -130,39 +131,37 @@ public abstract class BasicCustomDropsProvider implements CustomDropsProvider {
     public static abstract class BasicFactory implements CustomDropsProviderFactory {
 
         @Override
-        public final CustomDropsProvider provide(ConfigurationNode node) throws ProviderConfigurationException {
-            String itemId;
+        public final CustomDropsProvider provide(ConfigurationNode node) throws ObjectMappingException {
+            String itemId = null;
             if (node.getValueType() == ValueType.SCALAR) {
                 itemId = node.getString();
             } else if (node.hasMapChildren()) {
                 itemId = node.getNode("type").getString();
             } else {
-                throw new ProviderConfigurationException("Provided value should be scalar or an object.");
+                LinterContext.fail("Provided value should be scalar or an object.", node);
             }
 
             if (itemId == null) {
-                throw new ProviderConfigurationException("Type is missing.");
+                LinterContext.fail("Type is missing.", node);
             }
 
-            IntQuantity quantity;
-            try {
-                quantity = node.getNode("quantity").getValue(BouTypeTokens.INT_QUANTITY, (IntQuantity) null);
-            } catch (ObjectMappingException e) {
-                throw new ProviderConfigurationException("Invalid IntQuantity", e);
+            if (!isItemIdValid(itemId)) {
+                LinterContext.registerWarning("Item with ID '" + itemId + "' (provided by " + getId() + ") doesn't exist.", node);
             }
 
+            ConfigurationNode quantityNode = node.getNode("quantity");
+            IntQuantity quantity = quantityNode.getValue(BouTypeTokens.INT_QUANTITY, (IntQuantity) null);
             if (quantity instanceof BoundedIntQuantity) {
                 BoundedIntQuantity boundedQuantity = (BoundedIntQuantity) quantity;
                 if (boundedQuantity.getFrom() < 0) {
-                    String errorMessage = String.format("The quantity lower bound (%s) is negative.",
-                            boundedQuantity.getFrom());
-                    throw new ProviderConfigurationException(errorMessage);
+                    String errorMessage = String.format("The quantity lower bound (%s) is negative.", boundedQuantity.getFrom());
+                    LinterContext.fail(errorMessage, quantityNode);
                 }
 
                 if (boundedQuantity.getTo() < boundedQuantity.getFrom()) {
                     String errorMessage = String.format("The quantity upper bound (%s) is less than its lower bound (%s).",
                             boundedQuantity.getTo(), boundedQuantity.getFrom());
-                    throw new ProviderConfigurationException(errorMessage);
+                    LinterContext.fail(errorMessage, quantityNode);
                 }
             }
 
@@ -172,7 +171,7 @@ public abstract class BasicCustomDropsProvider implements CustomDropsProvider {
                 chance = chanceNode.getDouble(Double.NaN);
                 if (Double.isNaN(chance)) {
                     String errorMessage = String.format("Chance value is not a valid number (%s).", chanceNode.getValue());
-                    throw new ProviderConfigurationException(errorMessage);
+                    LinterContext.fail(errorMessage, chanceNode);
                 }
             }
 
@@ -183,6 +182,10 @@ public abstract class BasicCustomDropsProvider implements CustomDropsProvider {
                                                             String itemId,
                                                             @Nullable String displayname,
                                                             double chance,
-                                                            @Nullable IntQuantity quantity);
+                                                            @Nullable IntQuantity quantity) throws ObjectMappingException;
+
+        protected boolean isItemIdValid(String itemId) {
+            return true;
+        }
     }
 }

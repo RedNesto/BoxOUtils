@@ -27,9 +27,9 @@ import com.google.common.base.MoreObjects;
 import io.github.rednesto.bou.api.customdrops.CustomLootProcessingContext;
 import io.github.rednesto.bou.api.requirement.AbstractRequirement;
 import io.github.rednesto.bou.api.requirement.Requirement;
-import io.github.rednesto.bou.api.requirement.RequirementConfigurationException;
 import io.github.rednesto.bou.api.requirement.RequirementProvider;
 import io.github.rednesto.bou.api.utils.EnchantmentsFilter;
+import io.github.rednesto.bou.config.linting.LinterContext;
 import io.github.rednesto.bou.config.serializers.BouTypeTokens;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
@@ -95,17 +95,13 @@ public class EnchantmentsRequirement extends AbstractRequirement {
         }
 
         @Override
-        public Requirement provide(ConfigurationNode node) throws RequirementConfigurationException {
-            try {
-                EnchantmentsFilter filter = node.getValue(BouTypeTokens.ENCHANTMENTS_FILTER);
-                if (filter != null) {
-                    return new EnchantmentsRequirement(filter);
-                }
-
-                throw new RequirementConfigurationException("Enchantment requirement is empty.");
-            } catch (ObjectMappingException e) {
-                throw new RequirementConfigurationException(e);
+        public Requirement provide(ConfigurationNode node) throws ObjectMappingException {
+            EnchantmentsFilter filter = node.getValue(BouTypeTokens.ENCHANTMENTS_FILTER);
+            if (filter == null) {
+                LinterContext.fail("Enchantment requirement is empty.", node);
             }
+
+            return new EnchantmentsRequirement(filter);
         }
     }
 }

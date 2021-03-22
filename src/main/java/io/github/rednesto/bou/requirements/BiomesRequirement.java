@@ -27,7 +27,6 @@ import io.github.rednesto.bou.BoxOUtils;
 import io.github.rednesto.bou.api.customdrops.CustomLootProcessingContext;
 import io.github.rednesto.bou.api.requirement.AbstractRequirement;
 import io.github.rednesto.bou.api.requirement.Requirement;
-import io.github.rednesto.bou.api.requirement.RequirementConfigurationException;
 import io.github.rednesto.bou.api.requirement.RequirementProvider;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
@@ -80,12 +79,8 @@ public class BiomesRequirement extends AbstractRequirement {
     public static class Provider implements RequirementProvider {
 
         @Override
-        public Requirement provide(ConfigurationNode node) throws RequirementConfigurationException {
-            try {
-                return new BiomesRequirement(node.getList(TypeTokens.STRING_TOKEN));
-            } catch (ObjectMappingException e) {
-                throw new RequirementConfigurationException("Could not read list of biomes IDs", e);
-            }
+        public Requirement provide(ConfigurationNode node) throws ObjectMappingException {
+            return new BiomesRequirement(node.getList(TypeTokens.STRING_TOKEN));
         }
 
         @Override

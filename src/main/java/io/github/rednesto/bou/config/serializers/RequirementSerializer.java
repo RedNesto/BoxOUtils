@@ -25,7 +25,6 @@ package io.github.rednesto.bou.config.serializers;
 
 import com.google.common.reflect.TypeToken;
 import io.github.rednesto.bou.api.requirement.Requirement;
-import io.github.rednesto.bou.api.requirement.RequirementConfigurationException;
 import io.github.rednesto.bou.api.requirement.RequirementProvider;
 import io.github.rednesto.bou.api.requirement.RequirementProviderIntegrations;
 import ninja.leaping.configurate.ConfigurationNode;
@@ -53,8 +52,6 @@ public class RequirementSerializer extends LintingTypeSerializer<Requirement> {
 
         try {
             return requirementProvider.provide(value);
-        } catch (RequirementConfigurationException e) {
-            fail(value, "Unable to read requirement configuration", e);
         } catch (Throwable t) {
             fail(value, "Unexpected error during requirement creation", t);
         }

@@ -29,7 +29,7 @@ import org.junit.jupiter.api.fail
 import java.nio.file.Path
 import java.nio.file.Paths
 
-open class PluginConfigurationTestCase<T>(val configDir: String, val typeToken: TypeToken<T>) : BouTestCase() {
+open class PluginConfigurationTestCase<T>(val configDir: String, val typeToken: TypeToken<T>) : BouTestCase(noSponge = true) {
 
     protected fun loadConfig(testName: String): T {
         val configFile = plugin.configDir.resolve("$testName.conf")

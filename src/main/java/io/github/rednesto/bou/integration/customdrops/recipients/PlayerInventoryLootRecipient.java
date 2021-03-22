@@ -27,6 +27,7 @@ import io.github.rednesto.bou.api.customdrops.CustomLootProcessingContext;
 import io.github.rednesto.bou.api.customdrops.CustomLootRecipient;
 import io.github.rednesto.bou.api.customdrops.CustomLootRecipientProvider;
 import ninja.leaping.configurate.ConfigurationNode;
+import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.inventory.ItemStack;
 
@@ -51,7 +52,7 @@ public class PlayerInventoryLootRecipient implements CustomLootRecipient {
     public static class Provider implements CustomLootRecipientProvider {
 
         @Override
-        public CustomLootRecipient provide(@Nullable ConfigurationNode node) {
+        public CustomLootRecipient provide(@Nullable ConfigurationNode node) throws ObjectMappingException {
             return INSTANCE;
         }
 

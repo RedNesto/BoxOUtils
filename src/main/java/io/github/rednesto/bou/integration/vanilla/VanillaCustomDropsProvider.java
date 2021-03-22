@@ -23,12 +23,15 @@
  */
 package io.github.rednesto.bou.integration.vanilla;
 
+import io.github.rednesto.bou.BouUtils;
 import io.github.rednesto.bou.api.customdrops.BasicCustomDropsProvider;
 import io.github.rednesto.bou.api.customdrops.CustomLootProcessingContext;
 import io.github.rednesto.bou.api.quantity.IntQuantity;
 import ninja.leaping.configurate.ConfigurationNode;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataQuery;
+import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
 
 import javax.annotation.Nullable;
@@ -74,6 +77,11 @@ public class VanillaCustomDropsProvider extends BasicCustomDropsProvider {
                 }
             }
             return new VanillaCustomDropsProvider(itemId, displayname, chance, quantity, unsafeDamage);
+        }
+
+        @Override
+        protected boolean isItemIdValid(String itemId) {
+            return BouUtils.isNoSponge() || Sponge.getRegistry().getType(ItemType.class, itemId).isPresent();
         }
 
         @Override

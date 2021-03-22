@@ -25,6 +25,7 @@ package io.github.rednesto.bou.api.customdrops;
 
 import io.github.rednesto.bou.api.integration.Integration;
 import ninja.leaping.configurate.ConfigurationNode;
+import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 
 public interface CustomLootComponentProvider extends Integration {
 
@@ -35,7 +36,7 @@ public interface CustomLootComponentProvider extends Integration {
      *
      * @return the component configured
      *
-     * @throws CustomLootComponentConfigurationException if the configuration is invalid (like missing values)
+     * @throws ObjectMappingException if the configuration is invalid (like missing values)
      */
-    CustomLootComponent provide(ConfigurationNode node) throws CustomLootComponentConfigurationException;
+    CustomLootComponent provide(ConfigurationNode node) throws ObjectMappingException;
 }

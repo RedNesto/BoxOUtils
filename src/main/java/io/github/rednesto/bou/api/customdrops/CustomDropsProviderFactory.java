@@ -25,8 +25,9 @@ package io.github.rednesto.bou.api.customdrops;
 
 import io.github.rednesto.bou.api.integration.Integration;
 import ninja.leaping.configurate.ConfigurationNode;
+import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 
 public interface CustomDropsProviderFactory extends Integration {
 
-    CustomDropsProvider provide(ConfigurationNode node) throws ProviderConfigurationException;
+    CustomDropsProvider provide(ConfigurationNode node) throws ObjectMappingException;
 }

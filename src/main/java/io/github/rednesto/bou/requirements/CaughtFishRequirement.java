@@ -27,9 +27,10 @@ import com.google.common.base.MoreObjects;
 import io.github.rednesto.bou.api.customdrops.CustomLootProcessingContext;
 import io.github.rednesto.bou.api.requirement.AbstractRequirement;
 import io.github.rednesto.bou.api.requirement.Requirement;
-import io.github.rednesto.bou.api.requirement.RequirementConfigurationException;
 import io.github.rednesto.bou.api.requirement.RequirementProvider;
+import io.github.rednesto.bou.config.linting.LinterContext;
 import ninja.leaping.configurate.ConfigurationNode;
+import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.type.Fish;
@@ -115,17 +116,18 @@ public class CaughtFishRequirement extends AbstractRequirement {
         }
 
         @Override
-        public Requirement provide(ConfigurationNode node) throws RequirementConfigurationException {
+        public Requirement provide(ConfigurationNode node) throws ObjectMappingException {
             String id = node.getString();
             if (id == null) {
-                throw new RequirementConfigurationException("Value is not a String");
+                LinterContext.fail("Value is not a String", node);
             }
 
             try {
                 FishType fishType = FishType.valueOf(id.toUpperCase(Locale.ROOT));
                 return new CaughtFishRequirement(fishType);
             } catch (IllegalArgumentException e) {
-                throw new RequirementConfigurationException("FishType " + id + " is not valid");
+                LinterContext.fail("FishType " + id + " is not valid", node);
+                return null;
             }
         }
     }

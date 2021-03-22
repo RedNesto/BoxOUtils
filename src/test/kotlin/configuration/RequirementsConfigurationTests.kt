@@ -36,6 +36,7 @@ import io.github.rednesto.bou.tests.framework.BouFixture
 import io.github.rednesto.bou.tests.framework.ConfigurationTestCase
 import ninja.leaping.configurate.ConfigurationNode
 import ninja.leaping.configurate.objectmapping.serialize.TypeSerializerCollection
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -124,6 +125,11 @@ requirements=[
             RequirementDataStruct(it.getNode("str").string!!, it.getNode("int").int)
         }, true)
     }
+
+    @AfterEach
+    private fun tearDown() {
+        pluginFixture.tearDown()
+    }
 }
 
 private class TestRequirement(id: String, val configurationValue: Any) : AbstractRequirement(id) {
@@ -156,7 +162,7 @@ private class TestRequirement(id: String, val configurationValue: Any) : Abstrac
 
         override fun getId(): String = id
 
-        override fun provide(node: ConfigurationNode): Requirement? {
+        override fun provide(node: ConfigurationNode): Requirement {
             return TestRequirement(id, configLoader(node))
         }
     }

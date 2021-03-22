@@ -26,10 +26,10 @@ package io.github.rednesto.bou.integration.customdrops;
 import com.google.common.base.MoreObjects;
 import io.github.rednesto.bou.SpongeUtils;
 import io.github.rednesto.bou.api.customdrops.CustomLootComponent;
-import io.github.rednesto.bou.api.customdrops.CustomLootComponentConfigurationException;
 import io.github.rednesto.bou.api.customdrops.CustomLootComponentProvider;
 import io.github.rednesto.bou.api.customdrops.CustomLootProcessingContext;
 import io.github.rednesto.bou.api.quantity.IntQuantity;
+import io.github.rednesto.bou.config.linting.LinterContext;
 import io.github.rednesto.bou.config.serializers.BouTypeTokens;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
@@ -86,17 +86,13 @@ public class ExperienceLootComponent implements CustomLootComponent {
     public static class Provider implements CustomLootComponentProvider {
 
         @Override
-        public CustomLootComponent provide(ConfigurationNode node) throws CustomLootComponentConfigurationException {
-            try {
-                IntQuantity experience = node.getValue(BouTypeTokens.INT_QUANTITY);
-                if (experience == null) {
-                    throw new CustomLootComponentConfigurationException("Could not deserialize a MoneyLoot.");
-                }
-
-                return new ExperienceLootComponent(experience);
-            } catch (ObjectMappingException e) {
-                throw new CustomLootComponentConfigurationException(e);
+        public CustomLootComponent provide(ConfigurationNode node) throws ObjectMappingException {
+            IntQuantity experience = node.getValue(BouTypeTokens.INT_QUANTITY);
+            if (experience == null) {
+                LinterContext.fail("Could not deserialize a MoneyLoot.", node);
             }
+
+            return new ExperienceLootComponent(experience);
         }
 
         @Override

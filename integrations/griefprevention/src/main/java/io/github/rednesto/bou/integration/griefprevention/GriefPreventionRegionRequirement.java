@@ -27,8 +27,8 @@ import com.google.common.base.MoreObjects;
 import io.github.rednesto.bou.api.customdrops.CustomLootProcessingContext;
 import io.github.rednesto.bou.api.requirement.AbstractRequirement;
 import io.github.rednesto.bou.api.requirement.Requirement;
-import io.github.rednesto.bou.api.requirement.RequirementConfigurationException;
 import io.github.rednesto.bou.api.requirement.RequirementProvider;
+import io.github.rednesto.bou.config.linting.LinterContext;
 import me.ryanhamshire.griefprevention.GriefPrevention;
 import me.ryanhamshire.griefprevention.api.claim.Claim;
 import me.ryanhamshire.griefprevention.api.claim.ClaimManager;
@@ -128,32 +128,29 @@ public class GriefPreventionRegionRequirement extends AbstractRequirement {
         }
 
         @Override
-        public Requirement provide(ConfigurationNode node) throws RequirementConfigurationException {
-            try {
-                String listType = node.getNode("list-type").getString("whitelist");
-                boolean isWhitelist;
-                if (listType.equalsIgnoreCase("whitelist")) {
-                    isWhitelist = true;
-                } else if (listType.equalsIgnoreCase("blacklist")) {
-                    isWhitelist = false;
-                } else {
-                    throw new RequirementConfigurationException("Invalid list-type: " + listType);
-                }
-
-                ConfigurationNode regionsNode = node.getNode("regions");
-                if (regionsNode.isVirtual()) {
-                    throw new RequirementConfigurationException("Regions list regions is missing");
-                }
-
-                List<String> regions = new ArrayList<>(regionsNode.getList(TypeTokens.STRING_TOKEN));
-                if (regions.isEmpty()) {
-                    throw new RequirementConfigurationException("Regions list is empty");
-                }
-
-                return new GriefPreventionRegionRequirement(regions, isWhitelist);
-            } catch (ObjectMappingException e) {
-                throw new RequirementConfigurationException(e);
+        public Requirement provide(ConfigurationNode node) throws ObjectMappingException {
+            String listType = node.getNode("list-type").getString("whitelist");
+            boolean isWhitelist;
+            if (listType.equalsIgnoreCase("whitelist")) {
+                isWhitelist = true;
+            } else if (listType.equalsIgnoreCase("blacklist")) {
+                isWhitelist = false;
+            } else {
+                LinterContext.fail("Invalid list-type: " + listType, node);
+                return null;
             }
+
+            ConfigurationNode regionsNode = node.getNode("regions");
+            if (regionsNode.isVirtual()) {
+                LinterContext.fail("Regions list regions is missing", node);
+            }
+
+            List<String> regions = new ArrayList<>(regionsNode.getList(TypeTokens.STRING_TOKEN));
+            if (regions.isEmpty()) {
+                LinterContext.fail("Regions list is empty", node);
+            }
+
+            return new GriefPreventionRegionRequirement(regions, isWhitelist);
         }
     }
 }

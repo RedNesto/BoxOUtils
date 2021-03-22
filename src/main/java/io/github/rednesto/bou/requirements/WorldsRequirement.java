@@ -27,7 +27,6 @@ import com.google.common.base.MoreObjects;
 import io.github.rednesto.bou.api.customdrops.CustomLootProcessingContext;
 import io.github.rednesto.bou.api.requirement.AbstractRequirement;
 import io.github.rednesto.bou.api.requirement.Requirement;
-import io.github.rednesto.bou.api.requirement.RequirementConfigurationException;
 import io.github.rednesto.bou.api.requirement.RequirementProvider;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
@@ -109,13 +108,9 @@ public class WorldsRequirement extends AbstractRequirement {
         }
 
         @Override
-        public Requirement provide(ConfigurationNode node) throws RequirementConfigurationException {
-            try {
-                List<String> permissions = node.getList(TypeTokens.STRING_TOKEN);
-                return new WorldsRequirement(permissions);
-            } catch (ObjectMappingException e) {
-                throw new RequirementConfigurationException(e);
-            }
+        public Requirement provide(ConfigurationNode node) throws ObjectMappingException {
+            List<String> permissions = node.getList(TypeTokens.STRING_TOKEN);
+            return new WorldsRequirement(permissions);
         }
     }
 }

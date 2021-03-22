@@ -24,6 +24,7 @@
 package io.github.rednesto.bou.integration.byteitems;
 
 import de.randombyte.byteitems.api.ByteItemsService;
+import io.github.rednesto.bou.BouUtils;
 import io.github.rednesto.bou.api.customdrops.BasicCustomDropsProvider;
 import io.github.rednesto.bou.api.customdrops.CustomLootProcessingContext;
 import io.github.rednesto.bou.api.quantity.IntQuantity;
@@ -61,6 +62,13 @@ public class ByteItemsCustomDropsProvider extends BasicCustomDropsProvider {
                                                    double chance,
                                                    @Nullable IntQuantity quantity) {
             return new ByteItemsCustomDropsProvider(itemId, displayname, chance, quantity);
+        }
+
+        @Override
+        protected boolean isItemIdValid(String itemId) {
+            return BouUtils.isNoSponge() || Sponge.getServiceManager().provide(ByteItemsService.class)
+                    .map(service -> service.get(itemId).isPresent())
+                    .orElse(true);
         }
 
         @Override

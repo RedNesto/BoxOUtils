@@ -25,6 +25,7 @@ package io.github.rednesto.bou.api.requirement;
 
 import io.github.rednesto.bou.api.integration.Integration;
 import ninja.leaping.configurate.ConfigurationNode;
+import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 
 public interface RequirementProvider extends Integration {
 
@@ -35,7 +36,7 @@ public interface RequirementProvider extends Integration {
      *
      * @return the created requirement
      *
-     * @throws RequirementConfigurationException if the configuration is invalid (like missing values)
+     * @throws ObjectMappingException if the configuration is invalid (like missing values)
      */
-    Requirement provide(ConfigurationNode node) throws RequirementConfigurationException;
+    Requirement provide(ConfigurationNode node) throws ObjectMappingException;
 }

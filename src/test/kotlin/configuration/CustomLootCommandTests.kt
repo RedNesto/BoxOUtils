@@ -32,6 +32,7 @@ import io.github.rednesto.bou.integration.griefprevention.GriefPreventionRegionR
 import io.github.rednesto.bou.tests.framework.BouFixture
 import io.github.rednesto.bou.tests.framework.ConfigurationTestCase
 import ninja.leaping.configurate.objectmapping.serialize.TypeSerializerCollection
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -123,6 +124,11 @@ commands=[
     @BeforeEach
     fun setUp() {
         pluginFixture.setUp()
+    }
+
+    @AfterEach
+    fun tearDown() {
+        pluginFixture.tearDown()
     }
 
     override fun populateSerializers(serializers: TypeSerializerCollection) {

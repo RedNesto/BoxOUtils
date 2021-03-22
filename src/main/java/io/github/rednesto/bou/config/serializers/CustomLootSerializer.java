@@ -70,8 +70,6 @@ public class CustomLootSerializer extends LintingTypeSerializer<CustomLoot> {
             if (componentProvider != null) {
                 try {
                     components.add(componentProvider.provide(node));
-                } catch (CustomLootComponentConfigurationException e) {
-                    error(value, "Loot component '" + componentId + "' error: " + e.getMessage());
                 } catch (Throwable t) {
                     error(value, "Loot component '" + componentId + "' unexpected error: " + t.getMessage());
                 }

@@ -25,17 +25,19 @@ package io.github.rednesto.bou.integration.customdrops;
 
 import com.google.common.base.MoreObjects;
 import io.github.rednesto.bou.CustomDropsProcessor;
-import io.github.rednesto.bou.api.customdrops.*;
+import io.github.rednesto.bou.api.customdrops.CustomLootCommand;
+import io.github.rednesto.bou.api.customdrops.CustomLootComponent;
+import io.github.rednesto.bou.api.customdrops.CustomLootComponentProvider;
+import io.github.rednesto.bou.api.customdrops.CustomLootProcessingContext;
 import io.github.rednesto.bou.config.serializers.BouTypeTokens;
+import io.github.rednesto.bou.config.serializers.SerializerUtils;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.entity.living.player.Player;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 public class CommandLootComponent implements CustomLootComponent {
 
@@ -97,14 +99,8 @@ public class CommandLootComponent implements CustomLootComponent {
     public static class Provider implements CustomLootComponentProvider {
 
         @Override
-        public CustomLootComponent provide(ConfigurationNode node) throws CustomLootComponentConfigurationException {
-            try {
-                List<CustomLootCommand> commands = new ArrayList<>(node.getList(BouTypeTokens.CUSTOM_LOOT_COMMAND));
-                commands.removeIf(Objects::isNull);
-                return new CommandLootComponent(commands);
-            } catch (ObjectMappingException e) {
-                throw new CustomLootComponentConfigurationException(e);
-            }
+        public CustomLootComponent provide(ConfigurationNode node) throws ObjectMappingException {
+            return new CommandLootComponent(SerializerUtils.getListSafe(node, BouTypeTokens.CUSTOM_LOOT_COMMAND));
         }
 
         @Override

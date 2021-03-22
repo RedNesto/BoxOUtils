@@ -29,7 +29,9 @@ import io.github.rednesto.bou.IntegrationsManager
 import org.slf4j.LoggerFactory
 import java.nio.file.Path
 
-class BouFixture(private val configDirProvider: () -> Path, val loadBuiltinIntegrations: Boolean = true) {
+class BouFixture(private val configDirProvider: () -> Path,
+                 val loadBuiltinIntegrations: Boolean = true,
+                 val noSponge: Boolean = false) {
 
     lateinit var plugin: BoxOUtils
         private set
@@ -41,6 +43,16 @@ class BouFixture(private val configDirProvider: () -> Path, val loadBuiltinInteg
             val integrationsManager = plugin.integrationsManager
             integrationsManager.loadVanillaBuiltins()
             BouUtils.registerIntegrations(integrationsManager, true)
+        }
+
+        if (noSponge) {
+            System.setProperty("bou.no_sponge", "true")
+        }
+    }
+
+    fun tearDown() {
+        if (noSponge) {
+            System.clearProperty("bou.no_sponge")
         }
     }
 }

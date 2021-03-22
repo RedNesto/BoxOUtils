@@ -27,7 +27,6 @@ import com.google.common.reflect.TypeToken;
 import io.github.rednesto.bou.api.customdrops.CustomDropsProvider;
 import io.github.rednesto.bou.api.customdrops.CustomDropsProviderFactory;
 import io.github.rednesto.bou.api.customdrops.CustomDropsProviderFactoryIntegrations;
-import io.github.rednesto.bou.api.customdrops.ProviderConfigurationException;
 import io.github.rednesto.bou.integration.vanilla.VanillaCustomDropsProvider;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.ValueType;
@@ -101,8 +100,6 @@ public class CustomDropsProviderListSerializer extends LintingTypeSerializer<Lis
                 return;
             }
             providers.add(provider);
-        } catch (ProviderConfigurationException e) {
-            error(dropNode, "CustomDropsProvider ('" + providerId + "') error: " + e.getMessage());
         } catch (Throwable t) {
             error(dropNode, "Unhandled error when configuring CustomDropsProvider '" + providerId + "': " + t.getMessage());
         }
