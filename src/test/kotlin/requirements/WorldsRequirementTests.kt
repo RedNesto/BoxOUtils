@@ -85,7 +85,7 @@ class WorldsRequirementTests {
         val requirement = WorldsRequirement(requirementIds)
         val mockPlayer = MockPlayer(location = Location(MockWorld(worldId, worldName), Vector3d.ZERO))
         val cause = Cause.of(EventContext.empty(), mockPlayer)
-        val context = lootProcessingContext(emptyList(), Any(), cause);
+        val context = lootProcessingContext(emptyList(), Any(), cause)
         return requirement.fulfills(context)
     }
 }

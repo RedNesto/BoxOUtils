@@ -156,7 +156,7 @@ private class TestRequirement(id: String, val configurationValue: Any) : Abstrac
 
         override fun getId(): String = id
 
-        override fun provide(node: ConfigurationNode): Requirement? {
+        override fun provide(node: ConfigurationNode): Requirement {
             return TestRequirement(id, configLoader(node))
         }
     }

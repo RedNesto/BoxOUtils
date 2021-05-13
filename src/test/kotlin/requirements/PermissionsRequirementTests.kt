@@ -23,7 +23,6 @@
  */
 package io.github.rednesto.bou.tests.requirements
 
-import io.github.rednesto.bou.api.customdrops.CustomLootProcessingContext
 import io.github.rednesto.bou.requirements.PermissionsRequirement
 import io.github.rednesto.bou.tests.framework.mock.MockPlayer
 import io.github.rednesto.bou.tests.lootProcessingContext
@@ -54,7 +53,7 @@ class PermissionsRequirementTests {
         val requirement = PermissionsRequirement(requirementPerms)
         val mockPlayer = MockPlayer(playerPerms)
         val cause = Cause.of(EventContext.empty(), mockPlayer)
-        val context = lootProcessingContext(emptyList(), Any(), cause);
+        val context = lootProcessingContext(emptyList(), Any(), cause)
         return requirement.fulfills(context)
     }
 }
