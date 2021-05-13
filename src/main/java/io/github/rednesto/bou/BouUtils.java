@@ -29,6 +29,7 @@ import io.github.rednesto.bou.api.requirement.RequirementProvider;
 import io.github.rednesto.bou.api.requirement.RequirementProviderIntegrations;
 import org.spongepowered.api.Sponge;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.function.Consumer;
 
 public final class BouUtils {
@@ -78,8 +79,8 @@ public final class BouUtils {
         try {
             //noinspection unchecked
             Class<T> clazz = (Class<T>) Class.forName(className);
-            registration.accept(clazz.newInstance());
-        } catch (InstantiationException | IllegalAccessException e) {
+            registration.accept(clazz.getConstructor().newInstance());
+        } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
             BoxOUtils.getInstance().getLogger().error("Could not instantiate {}", friendlyClassName, e);
         } catch (ClassNotFoundException e) {
             if (!ignoreCNF) {

@@ -1,6 +1,6 @@
 repositories {
     maven {
-        url 'http://files.minecraftforge.net/maven'
+        url 'https://maven.minecraftforge.net/'
     }
 }
 

@@ -1,0 +1,16 @@
+[
+  {
+    "modid": "bou-integration-example",
+    "name": "example",
+    "version": "${version}",
+    "description": "An example plugin showing how to register Box O' Utils integrations",
+    "dependencies": [
+      "box-o-utils",
+      "spongeapi@${spongeApiVersion}"
+    ],
+    "requiredMods": [
+      "box-o-utils",
+      "spongeapi@${spongeApiVersion}"
+    ]
+  }
+]

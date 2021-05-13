@@ -38,7 +38,6 @@ import org.spongepowered.api.event.game.state.GameAboutToStartServerEvent;
 import org.spongepowered.api.event.game.state.GameConstructionEvent;
 import org.spongepowered.api.event.game.state.GameInitializationEvent;
 import org.spongepowered.api.event.game.state.GamePreInitializationEvent;
-import org.spongepowered.api.plugin.Dependency;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
@@ -48,19 +47,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-@Plugin(
-        id = "box-o-utils",
-        name = "Box O' Utils",
-        url = "https://ore.spongepowered.org/RedNesto/Box-O%27-Utils",
-        description = "Control blocks and mobs loots, right-click to harvest and more",
-        authors = {"RedNesto"},
-        dependencies = {
-                @Dependency(id = "file-inventories", version = "[0.3.0,)", optional = true),
-                @Dependency(id = "byte-items", version = "[2.3,)", optional = true),
-                @Dependency(id = "griefprevention", optional = true),
-                @Dependency(id = "universeguard", optional = true)
-        }
-)
+@Plugin(id = "box-o-utils")
 public class BoxOUtils {
 
     private final Logger logger;

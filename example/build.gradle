@@ -1,15 +1,18 @@
-plugins {
-    id 'org.spongepowered.plugin'
-}
-
 version = '0.0'
 archivesBaseName = 'BoxOUtils-Integration-Example'
 
 dependencies {
     compileOnly "org.spongepowered:spongeapi:${spongeApiVersion}"
-    annotationProcessor "org.spongepowered:spongeapi:${spongeApiVersion}"
 
     compileOnly rootProject
 }
 
-sponge.plugin.id = 'bou-integration-example'
+compileJava.dependsOn rootProject.shadowJar
+
+processResources {
+    def props = [version: project.version, spongeApiVersion: spongeApiVersion]
+    inputs.properties(props)
+    filesMatching('mcmod.info') {
+        expand(props)
+    }
+}

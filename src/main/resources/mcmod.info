@@ -1,0 +1,22 @@
+[
+  {
+    "modid": "box-o-utils",
+    "name": "Box O' Utils",
+    "version": "${version}",
+    "description": "Control blocks and mobs loots, right-click to harvest and more",
+    "url": "https://ore.spongepowered.org/RedNesto/Box-O%27-Utils",
+    "authorList": [
+      "RedNesto"
+    ],
+    "dependencies": [
+      "byte-items@[2.3,)",
+      "file-inventories@[0.3.0,)",
+      "griefprevention",
+      "spongeapi@${spongeApiVersion}",
+      "universeguard"
+    ],
+    "requiredMods": [
+      "spongeapi@${spongeApiVersion}"
+    ]
+  }
+]

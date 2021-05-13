@@ -28,12 +28,9 @@ import io.github.rednesto.bou.api.customdrops.CustomDropsProviderFactoryIntegrat
 import org.slf4j.Logger;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.game.state.GamePostInitializationEvent;
-import org.spongepowered.api.plugin.Dependency;
 import org.spongepowered.api.plugin.Plugin;
 
-@Plugin(id = "bou-integration-example",
-        description = "An example plugin showing how to register Box O' Utils integrations",
-        dependencies = @Dependency(id = "box-o-utils"))
+@Plugin(id = "bou-integration-example")
 public class BouIntegrationExample {
 
     @Inject
