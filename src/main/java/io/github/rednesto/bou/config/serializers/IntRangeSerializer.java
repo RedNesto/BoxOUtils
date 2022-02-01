@@ -23,24 +23,24 @@
  */
 package io.github.rednesto.bou.config.serializers;
 
-import com.google.common.reflect.TypeToken;
 import io.github.rednesto.bou.api.range.BoundedIntRange;
 import io.github.rednesto.bou.api.range.FixedIntRange;
 import io.github.rednesto.bou.api.range.IntRange;
 import io.github.rednesto.bou.api.range.SelectiveIntRange;
-import ninja.leaping.configurate.ConfigurationNode;
-import ninja.leaping.configurate.objectmapping.ObjectMappingException;
-import ninja.leaping.configurate.objectmapping.serialize.TypeSerializer;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.configurate.ConfigurationNode;
+import org.spongepowered.configurate.serialize.SerializationException;
+import org.spongepowered.configurate.serialize.TypeSerializer;
+
+import java.lang.reflect.Type;
 
 public class IntRangeSerializer implements TypeSerializer<IntRange> {
 
     @Override
-    public @Nullable IntRange deserialize(@NonNull TypeToken<?> type, @NonNull ConfigurationNode value) throws ObjectMappingException {
-        String stringValue = value.getString();
+    public @Nullable IntRange deserialize(Type type, ConfigurationNode value) throws SerializationException {
+        @Nullable String stringValue = value.getString();
         if (stringValue == null) {
-            throw new ObjectMappingException("Could not read value");
+            throw new SerializationException(value, String.class, "Could not read value");
         }
 
         try {
@@ -58,11 +58,11 @@ public class IntRangeSerializer implements TypeSerializer<IntRange> {
         } catch (IllegalArgumentException ignored) {
         }
 
-        throw new ObjectMappingException("Invalid integer range '" + stringValue + "'.");
+        throw new SerializationException(value, String.class, "Invalid integer range '" + stringValue + "'.");
     }
 
     @Override
-    public void serialize(@NonNull TypeToken<?> type, @Nullable IntRange obj, @NonNull ConfigurationNode value) {
-        throw new UnsupportedOperationException();
+    public void serialize(Type type, @Nullable IntRange obj, ConfigurationNode value) throws SerializationException {
+        throw new SerializationException("IntRange cannot be serialized");
     }
 }

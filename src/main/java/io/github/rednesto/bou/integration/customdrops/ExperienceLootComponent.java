@@ -31,11 +31,11 @@ import io.github.rednesto.bou.api.customdrops.CustomLootComponentProvider;
 import io.github.rednesto.bou.api.customdrops.CustomLootProcessingContext;
 import io.github.rednesto.bou.api.quantity.IntQuantity;
 import io.github.rednesto.bou.config.serializers.BouTypeTokens;
-import ninja.leaping.configurate.ConfigurationNode;
-import ninja.leaping.configurate.objectmapping.ObjectMappingException;
-import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.World;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
+import org.spongepowered.api.world.server.ServerLocation;
+import org.spongepowered.configurate.ConfigurationNode;
+import org.spongepowered.configurate.serialize.SerializationException;
 
 public class ExperienceLootComponent implements CustomLootComponent {
 
@@ -47,14 +47,14 @@ public class ExperienceLootComponent implements CustomLootComponent {
 
     @Override
     public void processLoot(CustomLootProcessingContext processingContext) {
-        Location<World> targetLocation = processingContext.getExperienceSpawnLocation();
+        @Nullable ServerLocation targetLocation = processingContext.getExperienceSpawnLocation();
         if (targetLocation == null) {
             targetLocation = processingContext.getTargetLocation();
         }
         if (targetLocation == null) {
-            Player targetPlayer = processingContext.getTargetPlayer();
+            @Nullable ServerPlayer targetPlayer = processingContext.getTargetPlayer();
             if (targetPlayer != null) {
-                targetLocation = targetPlayer.getLocation();
+                targetLocation = targetPlayer.serverLocation();
             }
         }
 
@@ -88,13 +88,13 @@ public class ExperienceLootComponent implements CustomLootComponent {
         @Override
         public CustomLootComponent provide(ConfigurationNode node) throws CustomLootComponentConfigurationException {
             try {
-                IntQuantity experience = node.getValue(BouTypeTokens.INT_QUANTITY);
+                @Nullable IntQuantity experience = node.get(BouTypeTokens.INT_QUANTITY);
                 if (experience == null) {
                     throw new CustomLootComponentConfigurationException("Could not deserialize a MoneyLoot.");
                 }
 
                 return new ExperienceLootComponent(experience);
-            } catch (ObjectMappingException e) {
+            } catch (SerializationException e) {
                 throw new CustomLootComponentConfigurationException(e);
             }
         }

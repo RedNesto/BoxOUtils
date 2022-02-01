@@ -23,12 +23,6 @@
  */
 package io.github.rednesto.bou;
 
-import io.github.rednesto.bou.api.customdrops.CustomDropsProviderFactory;
-import io.github.rednesto.bou.api.customdrops.CustomDropsProviderFactoryIntegrations;
-import io.github.rednesto.bou.api.requirement.RequirementProvider;
-import io.github.rednesto.bou.api.requirement.RequirementProviderIntegrations;
-import org.spongepowered.api.Sponge;
-
 import java.lang.reflect.InvocationTargetException;
 import java.util.function.Consumer;
 
@@ -39,34 +33,34 @@ public final class BouUtils {
     }
 
     public static void registerIntegrations(IntegrationsManager integrationsManager, boolean forceLoad) {
-        CustomDropsProviderFactoryIntegrations customDropsProviders = integrationsManager.getCustomDropsProviderFactoryIntegrations();
-        Consumer<CustomDropsProviderFactory> customDropsProviderRegistration = provider -> customDropsProviders.register(provider, true);
-        if (forceLoad || Sponge.getPluginManager().isLoaded("file-inventories")) {
-            reflectiveRegistration("io.github.rednesto.bou.integration.fileinventories.FileInventoriesCustomDropsProvider$Factory",
-                    customDropsProviderRegistration, "FileInventoriesCustomDropsProvider.Factory", "FileInventories");
-        }
-
-        if (forceLoad || Sponge.getPluginManager().isLoaded("byte-items")) {
-            reflectiveRegistration("io.github.rednesto.bou.integration.byteitems.ByteItemsCustomDropsProvider$Factory",
-                    customDropsProviderRegistration, "ByteItemsCustomDropsProvider.Factory", "ByteItems");
-        }
-
-        RequirementProviderIntegrations requirementsProviders = integrationsManager.getRequirementsProviderIntegrations();
-        Consumer<RequirementProvider> requirementsProviderRegistration = provider -> requirementsProviders.register(provider, true);
-        if (forceLoad || Sponge.getPluginManager().isLoaded("griefdefender")) {
-            reflectiveRegistration("io.github.rednesto.bou.integration.griefdefender.GriefDefenderRegionRequirement$Provider",
-                    requirementsProviderRegistration, "GriefDefenderRegionRequirement.Provider", "GriefDefender");
-        }
-
-        if (forceLoad || Sponge.getPluginManager().isLoaded("griefprevention")) {
-            reflectiveRegistration("io.github.rednesto.bou.integration.griefprevention.GriefPreventionRegionRequirement$Provider",
-                    requirementsProviderRegistration, "GriefPreventionRegionRequirement.Provider", "GriefPrevention");
-        }
-
-        if (forceLoad || Sponge.getPluginManager().isLoaded("universeguard")) {
-            reflectiveRegistration("io.github.rednesto.bou.integration.universeguard.UniverseGuardRegionRequirement$Provider",
-                    requirementsProviderRegistration, "UniverseGuardRegionRequirement.Provider", "UniverseGuard", true);
-        }
+        //CustomDropsProviderFactoryIntegrations customDropsProviders = integrationsManager.getCustomDropsProviderFactoryIntegrations();
+        //Consumer<CustomDropsProviderFactory> customDropsProviderRegistration = provider -> customDropsProviders.register(provider, true);
+        //if (forceLoad || Sponge.getPluginManager().isLoaded("file-inventories")) {
+        //    reflectiveRegistration("io.github.rednesto.bou.integration.fileinventories.FileInventoriesCustomDropsProvider$Factory",
+        //            customDropsProviderRegistration, "FileInventoriesCustomDropsProvider.Factory", "FileInventories");
+        //}
+        //
+        //if (forceLoad || Sponge.getPluginManager().isLoaded("byte-items")) {
+        //    reflectiveRegistration("io.github.rednesto.bou.integration.byteitems.ByteItemsCustomDropsProvider$Factory",
+        //            customDropsProviderRegistration, "ByteItemsCustomDropsProvider.Factory", "ByteItems");
+        //}
+        //
+        //RequirementProviderIntegrations requirementsProviders = integrationsManager.getRequirementsProviderIntegrations();
+        //Consumer<RequirementProvider> requirementsProviderRegistration = provider -> requirementsProviders.register(provider, true);
+        //if (forceLoad || Sponge.getPluginManager().isLoaded("griefdefender")) {
+        //    reflectiveRegistration("io.github.rednesto.bou.integration.griefdefender.GriefDefenderRegionRequirement$Provider",
+        //            requirementsProviderRegistration, "GriefDefenderRegionRequirement.Provider", "GriefDefender");
+        //}
+        //
+        //if (forceLoad || Sponge.getPluginManager().isLoaded("griefprevention")) {
+        //    reflectiveRegistration("io.github.rednesto.bou.integration.griefprevention.GriefPreventionRegionRequirement$Provider",
+        //            requirementsProviderRegistration, "GriefPreventionRegionRequirement.Provider", "GriefPrevention");
+        //}
+        //
+        //if (forceLoad || Sponge.getPluginManager().isLoaded("universeguard")) {
+        //    reflectiveRegistration("io.github.rednesto.bou.integration.universeguard.UniverseGuardRegionRequirement$Provider",
+        //            requirementsProviderRegistration, "UniverseGuardRegionRequirement.Provider", "UniverseGuard", true);
+        //}
     }
 
     // Integrations are not on the plugin's classpath, so we use reflection to get them
@@ -75,9 +69,9 @@ public final class BouUtils {
     }
 
     // Integrations are not on the plugin's classpath, so we use reflection to get them
+    @SuppressWarnings("unchecked")
     private static <T> void reflectiveRegistration(String className, Consumer<T> registration, String friendlyClassName, String integrationName, boolean ignoreCNF) {
         try {
-            //noinspection unchecked
             Class<T> clazz = (Class<T>) Class.forName(className);
             registration.accept(clazz.getConstructor().newInstance());
         } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {

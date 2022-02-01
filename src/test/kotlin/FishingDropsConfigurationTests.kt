@@ -27,6 +27,7 @@ import io.github.rednesto.bou.Config
 import io.github.rednesto.bou.api.quantity.BoundedIntQuantity
 import io.github.rednesto.bou.config.serializers.BouTypeTokens
 import io.github.rednesto.bou.tests.framework.PluginConfigurationTestCase
+import io.github.rednesto.bou.tests.framework.mock.id
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -37,7 +38,7 @@ class FishingDropsConfigurationTests : PluginConfigurationTestCase<Config.Fishin
     fun `simple 1`() {
         val config = loadConfig("simple1")
 
-        val drops = listOf(vanillaDrop("minecraft:iron_ingot", quantity = BoundedIntQuantity(0, 3)))
+        val drops = listOf(vanillaDrop(id("minecraft:iron_ingot"), quantity = BoundedIntQuantity(0, 3)))
         val expected = listOf(customLoot(drops))
 
         assertTrue(config.enabled)

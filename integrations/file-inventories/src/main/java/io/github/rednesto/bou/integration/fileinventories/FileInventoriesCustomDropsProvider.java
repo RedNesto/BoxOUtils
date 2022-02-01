@@ -28,17 +28,17 @@ import io.github.rednesto.bou.api.customdrops.BasicCustomDropsProvider;
 import io.github.rednesto.bou.api.customdrops.CustomLootProcessingContext;
 import io.github.rednesto.bou.api.quantity.IntQuantity;
 import io.github.rednesto.fileinventories.api.FileInventoriesService;
-import ninja.leaping.configurate.ConfigurationNode;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.configurate.ConfigurationNode;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
 import java.util.stream.Stream;
-
-import javax.annotation.Nullable;
 
 public class FileInventoriesCustomDropsProvider extends BasicCustomDropsProvider {
 
@@ -51,7 +51,7 @@ public class FileInventoriesCustomDropsProvider extends BasicCustomDropsProvider
 
     @Nullable
     @Override
-    protected ItemStack createStack(CustomLootProcessingContext context, String itemId) {
+    protected ItemStack createStack(CustomLootProcessingContext context, ResourceKey itemId) {
         Optional<FileInventoriesService> maybeService = Sponge.getServiceManager().provide(FileInventoriesService.class);
         if (!maybeService.isPresent()) {
             BoxOUtils.getInstance().getLogger().error("The FileInventoriesService cannot be found. Has FileInventories been installed on this server?");

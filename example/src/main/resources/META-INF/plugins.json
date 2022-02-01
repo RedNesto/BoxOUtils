@@ -1,0 +1,26 @@
+{
+  "plugins": [
+    {
+      "loader": "java_plain",
+      "id": "bou-integration-example",
+      "name": "Box O' Utils Integration Example",
+      "version": "${version}",
+      "description": "An example plugin showing how to register Box O' Utils integrations",
+      "main-class": "io.github.rednesto.bou.example.BouIntegrationExample",
+      "links": {
+        "homepage": "https://ore.spongepowered.org/RedNesto/Box-O%27-Utils",
+        "source": "https://github.com/RedNesto/BoxOUtils",
+        "issues": "https://github.com/RedNesto/BoxOUtils/issues"
+      },
+      "dependencies": [
+        {
+          "id": "spongeapi",
+          "version": "${spongeApiVersion}"
+        },
+        {
+          "id": "box-o-utils"
+        }
+      ]
+    }
+  ]
+}

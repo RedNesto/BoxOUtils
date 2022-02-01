@@ -25,21 +25,21 @@ package io.github.rednesto.bou.api.customdrops;
 
 import com.google.common.base.MoreObjects;
 import io.github.rednesto.bou.api.quantity.IntQuantity;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.ResourceKey;
 
 import java.util.Objects;
-
-import javax.annotation.Nullable;
 
 public class MoneyLoot {
 
     private final IntQuantity amount;
     @Nullable
-    private final String currencyId;
+    private final ResourceKey currencyId;
     private final double chance;
     @Nullable
     private final String message;
 
-    public MoneyLoot(IntQuantity amount, @Nullable String currencyId, double chance, @Nullable String message) {
+    public MoneyLoot(IntQuantity amount, @Nullable ResourceKey currencyId, double chance, @Nullable String message) {
         this.amount = amount;
         this.currencyId = currencyId;
         this.chance = chance / 100;
@@ -55,7 +55,7 @@ public class MoneyLoot {
     }
 
     @Nullable
-    public String getCurrencyId() {
+    public ResourceKey getCurrencyId() {
         return currencyId;
     }
 

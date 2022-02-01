@@ -23,26 +23,25 @@
  */
 package io.github.rednesto.bou.config.serializers;
 
-import com.google.common.reflect.TypeToken;
 import io.github.rednesto.bou.api.requirement.Requirement;
-import ninja.leaping.configurate.ConfigurationNode;
-import ninja.leaping.configurate.objectmapping.ObjectMappingException;
-import ninja.leaping.configurate.objectmapping.serialize.TypeSerializer;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.configurate.ConfigurationNode;
+import org.spongepowered.configurate.serialize.SerializationException;
+import org.spongepowered.configurate.serialize.TypeSerializer;
 
+import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
 
 public class RequirementsMapSerializer implements TypeSerializer<Map<String, Requirement>> {
 
     @Override
-    public @Nullable Map<String, Requirement> deserialize(@NonNull TypeToken<?> type, @NonNull ConfigurationNode value) throws ObjectMappingException {
+    public @Nullable Map<String, Requirement> deserialize(Type type, ConfigurationNode value) throws SerializationException {
         Map<String, Requirement> requirements = new HashMap<>();
-        for (ConfigurationNode requirementNode : value.getChildrenMap().values()) {
-            Requirement requirement = requirementNode.getValue(BouTypeTokens.REQUIREMENT);
+        for (ConfigurationNode requirementNode : value.childrenMap().values()) {
+            @Nullable Requirement requirement = requirementNode.get(BouTypeTokens.REQUIREMENT);
             if (requirement != null) {
-                requirements.put(((String) requirementNode.getKey()), requirement);
+                requirements.put(((String) requirementNode.key()), requirement);
             }
         }
 
@@ -50,7 +49,7 @@ public class RequirementsMapSerializer implements TypeSerializer<Map<String, Req
     }
 
     @Override
-    public void serialize(@NonNull TypeToken<?> type, @Nullable Map<String, Requirement> obj, @NonNull ConfigurationNode value) {
-        throw new UnsupportedOperationException();
+    public void serialize(Type type, @Nullable Map<String, Requirement> obj, ConfigurationNode value) throws SerializationException {
+        throw new SerializationException("RequirementsMap cannot be serialized");
     }
 }

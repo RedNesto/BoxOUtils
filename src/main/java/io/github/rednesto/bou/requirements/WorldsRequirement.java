@@ -29,12 +29,14 @@ import io.github.rednesto.bou.api.requirement.AbstractRequirement;
 import io.github.rednesto.bou.api.requirement.Requirement;
 import io.github.rednesto.bou.api.requirement.RequirementConfigurationException;
 import io.github.rednesto.bou.api.requirement.RequirementProvider;
-import ninja.leaping.configurate.ConfigurationNode;
-import ninja.leaping.configurate.objectmapping.ObjectMappingException;
-import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.util.TypeTokens;
-import org.spongepowered.api.world.World;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
+import org.spongepowered.api.world.server.ServerWorld;
+import org.spongepowered.configurate.ConfigurationNode;
+import org.spongepowered.configurate.serialize.SerializationException;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -56,19 +58,21 @@ public class WorldsRequirement extends AbstractRequirement {
 
     @Override
     public boolean fulfills(CustomLootProcessingContext context) {
-        Player player = context.getCause().first(Player.class).orElse(null);
+        @Nullable ServerPlayer player = context.getCause().first(ServerPlayer.class).orElse(null);
         if (player == null) {
             return true;
         }
 
-        World sourceWorld = player.getWorld();
+        ServerWorld sourceWorld = player.world();
         for (Object worldId : worlds) {
             if (worldId instanceof UUID) {
-                if (sourceWorld.getUniqueId().equals(worldId)) {
+                if (sourceWorld.uniqueId().equals(worldId)) {
                     return true;
                 }
             } else {
-                if (sourceWorld.getName().equals(worldId)) {
+                @Nullable String worldName = sourceWorld.properties().displayName()
+                        .map(PlainTextComponentSerializer.plainText()::serialize).orElse(null);
+                if (worldName != null && worldName.equals(worldId)) {
                     return true;
                 }
             }
@@ -111,9 +115,9 @@ public class WorldsRequirement extends AbstractRequirement {
         @Override
         public Requirement provide(ConfigurationNode node) throws RequirementConfigurationException {
             try {
-                List<String> permissions = node.getList(TypeTokens.STRING_TOKEN);
+                List<String> permissions = node.getList(String.class, Collections.emptyList());
                 return new WorldsRequirement(permissions);
-            } catch (ObjectMappingException e) {
+            } catch (SerializationException e) {
                 throw new RequirementConfigurationException(e);
             }
         }

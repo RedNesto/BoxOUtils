@@ -21,10 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-@NonnullByDefault
-@ParametersAreNonnullByDefault
+@DefaultQualifier(NonNull.class)
 package io.github.rednesto.bou.commands;
 
-import org.spongepowered.api.util.annotation.NonnullByDefault;
-
-import javax.annotation.ParametersAreNonnullByDefault;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.framework.qual.DefaultQualifier;

@@ -23,18 +23,17 @@
  */
 package io.github.rednesto.bou.config.serializers;
 
-import com.google.common.reflect.TypeToken;
-import io.github.rednesto.bou.SpongeUtils;
 import io.github.rednesto.bou.api.range.IntRange;
 import io.github.rednesto.bou.api.utils.EnchantmentsFilter;
-import ninja.leaping.configurate.ConfigurationNode;
-import ninja.leaping.configurate.objectmapping.ObjectMappingException;
-import ninja.leaping.configurate.objectmapping.serialize.TypeSerializer;
-import org.checkerframework.checker.nullness.qual.NonNull;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.spongepowered.api.ResourceKey;
+import org.spongepowered.configurate.ConfigurationNode;
+import org.spongepowered.configurate.serialize.SerializationException;
+import org.spongepowered.configurate.serialize.TypeSerializer;
 
+import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -42,60 +41,58 @@ import java.util.Map;
 
 public class EnchantmentsFilterSerializer implements TypeSerializer<EnchantmentsFilter> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(EnchantmentsFilterSerializer.class);
+    private static final Logger LOGGER = LogManager.getLogger(EnchantmentsFilterSerializer.class);
 
     private static final List<String> ANY_VALUES = Arrays.asList("any", "all");
     private static final List<String> NONE_VALUES = Arrays.asList("none", "disallow");
 
     @Override
-    public @Nullable EnchantmentsFilter deserialize(@NonNull TypeToken<?> type, @NonNull ConfigurationNode value) {
-        if (!value.hasMapChildren()) {
+    public @Nullable EnchantmentsFilter deserialize(Type type, ConfigurationNode value) {
+        if (!value.isMap()) {
             return null;
         }
 
-        Map<String, IntRange> neededRanges = new HashMap<>();
-        Map<String, IntRange> disallowedRanges = new HashMap<>();
-        Map<String, Boolean> wildcards = new HashMap<>();
-        for (ConfigurationNode filterNode : value.getChildrenMap().values()) {
-            String key = (String) filterNode.getKey();
+        Map<ResourceKey, IntRange> neededRanges = new HashMap<>();
+        Map<ResourceKey, IntRange> disallowedRanges = new HashMap<>();
+        Map<ResourceKey, Boolean> wildcards = new HashMap<>();
+        for (ConfigurationNode filterNode : value.childrenMap().values()) {
+            @Nullable String key = (String) filterNode.key();
             if (key == null) {
                 LOGGER.warn("An enchantements filter item configuration is missing its key!");
                 continue;
             }
 
-            key = SpongeUtils.addMcNamespaceIfNeeded(key);
-
-            ConfigurationNode disallowNode = filterNode.getNode("disallow");
-            if (!disallowNode.isVirtual()) {
+            ConfigurationNode disallowNode = filterNode.node("disallow");
+            if (!disallowNode.virtual()) {
                 try {
-                    IntRange range = disallowNode.getValue(BouTypeTokens.INT_RANGE);
+                    @Nullable IntRange range = disallowNode.get(BouTypeTokens.INT_RANGE);
                     if (range != null) {
-                        disallowedRanges.put(key, range);
+                        disallowedRanges.put(ResourceKey.resolve(key), range);
                     }
-                } catch (ObjectMappingException e) {
+                } catch (SerializationException e) {
                     LOGGER.error("Error reading enchantment requirement filter.", e);
                 }
 
                 continue;
             }
 
-            String stringValue = filterNode.getString();
+            @Nullable String stringValue = filterNode.getString();
             if (stringValue != null) {
                 if (NONE_VALUES.contains(stringValue)) {
-                    wildcards.put(key, false);
+                    wildcards.put(ResourceKey.resolve(key), false);
                     continue;
                 } else if (ANY_VALUES.contains(stringValue)) {
-                    wildcards.put(key, true);
+                    wildcards.put(ResourceKey.resolve(key), true);
                     continue;
                 }
             }
 
             try {
-                IntRange range = filterNode.getValue(BouTypeTokens.INT_RANGE);
+                @Nullable IntRange range = filterNode.get(BouTypeTokens.INT_RANGE);
                 if (range != null) {
-                    neededRanges.put(key, range);
+                    neededRanges.put(ResourceKey.resolve(key), range);
                 }
-            } catch (ObjectMappingException e) {
+            } catch (SerializationException e) {
                 LOGGER.error("Error reading enchantment requirement filter.", e);
             }
         }
@@ -104,7 +101,7 @@ public class EnchantmentsFilterSerializer implements TypeSerializer<Enchantments
     }
 
     @Override
-    public void serialize(@NonNull TypeToken<?> type, @Nullable EnchantmentsFilter obj, @NonNull ConfigurationNode value) {
-        throw new UnsupportedOperationException();
+    public void serialize(Type type, @Nullable EnchantmentsFilter obj, ConfigurationNode value) throws SerializationException {
+        throw new SerializationException("EnchantmentFilter cannot be serialized");
     }
 }

@@ -32,9 +32,9 @@ import io.github.rednesto.bou.api.quantity.FixedIntQuantity
 import io.github.rednesto.bou.config.serializers.BouTypeTokens
 import io.github.rednesto.bou.integration.customdrops.MoneyLootComponent
 import io.github.rednesto.bou.integration.customdrops.recipients.PlayerInventoryLootRecipient
-import io.github.rednesto.bou.integration.griefprevention.GriefPreventionRegionRequirement
 import io.github.rednesto.bou.requirements.DataByKeyRequirement
 import io.github.rednesto.bou.tests.framework.PluginConfigurationTestCase
+import io.github.rednesto.bou.tests.framework.mock.id
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -47,43 +47,43 @@ class BlocksDropsConfigurationTests : PluginConfigurationTestCase<Config.BlocksD
         val config = loadConfig("complex1")
 
         val leaves = run {
-            val drops = listOf(vanillaDrop("minecraft:coal", chance = 25.0, quantity = FixedIntQuantity(1)))
-            val money = MoneyLootComponent(MoneyLoot(BoundedIntQuantity(10, 30), "economylite:coin", 25.0, "&aYou earned {money_amount}"))
+            val drops = listOf(vanillaDrop(id("minecraft:coal"), chance = 25.0, quantity = FixedIntQuantity(1)))
+            val money = MoneyLootComponent(MoneyLoot(BoundedIntQuantity(10, 30), id("economylite:coin"), 25.0, "&aYou earned {money_amount}"))
             customLoot(drops, overwrite = true, components = listOf(money))
         }
 
         val leaves2 = run {
             val drops = listOf(
-                    vanillaDrop("minecraft:coal", chance = 25.0, quantity = FixedIntQuantity(1)),
-                    vanillaDrop("minecraft:dirt", chance = 25.0, quantity = FixedIntQuantity(1)))
-            val money  = MoneyLootComponent(MoneyLoot(BoundedIntQuantity(10, 30), "economylite:coin", 25.0, "&aYou earned {money_amount}"))
+                    vanillaDrop(id("minecraft:coal"), chance = 25.0, quantity = FixedIntQuantity(1)),
+                    vanillaDrop(id("minecraft:dirt"), chance = 25.0, quantity = FixedIntQuantity(1)))
+            val money  = MoneyLootComponent(MoneyLoot(BoundedIntQuantity(10, 30), id("economylite:coin"), 25.0, "&aYou earned {money_amount}"))
             customLoot(drops, overwrite = true, components = listOf(money))
         }
 
         val ironOre = run {
-            val reuse = customReuse(multiplier = 2f, items = mapOf("minecraft:iron_ore" to SimpleLootReuse(BoundedIntQuantity(1, 3))))
+            val reuse = customReuse(multiplier = 2f, items = mapOf(id("minecraft:iron_ore") to SimpleLootReuse(BoundedIntQuantity(1, 3))))
             val money = MoneyLootComponent(MoneyLoot(BoundedIntQuantity(1, 15), null, 25.0, "&aYou earned {money_amount}"))
-            val drops = listOf(vanillaDrop("minecraft:cobblestone", chance = 25.0))
+            val drops = listOf(vanillaDrop(id("minecraft:cobblestone"), chance = 25.0))
             customLoot(drops, reuse = reuse, components = listOf(money))
         }
 
-        val skull = run {
-            val requirements = listOf(listOf(GriefPreventionRegionRequirement(listOf("test region"), true)))
-            val reuse = customReuse(multiplier = 2f, requirements = listOf(listOf(DataByKeyRequirement("box-o-utils:block_data", BlockSnapshot::class.java, mapOf("sponge_impl:skull_type" to listOf("minecraft:ender_dragon"))))))
-            customLoot(requirements = requirements, reuse = reuse)
-        }
+        //val skull = run {
+        //    val requirements = listOf(listOf(GriefPreventionRegionRequirement(listOf("test region"), true)))
+        //    val reuse = customReuse(multiplier = 2f, requirements = listOf(listOf(DataByKeyRequirement("box-o-utils:block_data", BlockSnapshot::class.java, mapOf("sponge_impl:skull_type" to listOf("minecraft:ender_dragon"))))))
+        //    customLoot(requirements = requirements, reuse = reuse)
+        //}
 
         val wheat = run {
             val reuseItems = mapOf(
-                    "minecraft:seed" to MultiplyLootReuse(3f),
-                    "minecraft:wheat" to SimpleLootReuse(BoundedIntQuantity(1, 5))
+                    id("minecraft:seed") to MultiplyLootReuse(3f),
+                    id("minecraft:wheat") to SimpleLootReuse(BoundedIntQuantity(1, 5))
             )
             val reuse = customReuse(items = reuseItems)
             customLoot(reuse = reuse)
         }
 
         val stone = run {
-            val drops = listOf(vanillaDrop("minecraft:stone", unsafeDamage = 16))
+            val drops = listOf(vanillaDrop(id("minecraft:stone"), unsafeDamage = 16))
             customLoot(drops)
         }
 
@@ -91,7 +91,7 @@ class BlocksDropsConfigurationTests : PluginConfigurationTestCase<Config.BlocksD
                 "minecraft:leaves" to listOf(leaves),
                 "minecraft:leaves2" to listOf(leaves2),
                 "minecraft:iron_ore" to listOf(ironOre),
-                "minecraft:skull" to listOf(skull),
+                //"minecraft:skull" to listOf(skull),
                 "minecraft:wheat" to listOf(wheat),
                 "minecraft:stone" to listOf(stone)
         )
@@ -105,8 +105,8 @@ class BlocksDropsConfigurationTests : PluginConfigurationTestCase<Config.BlocksD
         val config = loadConfig("dropsByProvider1")
 
         val drops = listOf(
-                byteItemsDrop("the_item"),
-                vanillaDrop("minecraft:cobblestone")
+                //byteItemsDrop("the_item"),
+                vanillaDrop(id("minecraft:cobblestone"))
         )
         val customLoot = customLoot(drops)
         val expected = mapOf("minecraft:iron_ore" to listOf(customLoot))
@@ -120,8 +120,8 @@ class BlocksDropsConfigurationTests : PluginConfigurationTestCase<Config.BlocksD
         val config = loadConfig("dropsByProvider2")
 
         val drops = listOf(
-                vanillaDrop("minecraft:cobblestone"),
-                byteItemsDrop("the_item", quantity = FixedIntQuantity(2))
+                vanillaDrop(id("minecraft:cobblestone"))//,
+                //byteItemsDrop("the_item", quantity = FixedIntQuantity(2))
         )
         val customLoot = customLoot(drops)
         val expected = mapOf("minecraft:iron_ore" to listOf(customLoot))
@@ -135,10 +135,10 @@ class BlocksDropsConfigurationTests : PluginConfigurationTestCase<Config.BlocksD
         val config = loadConfig("dropsByProvider3")
 
         val drops = listOf(
-                byteItemsDrop("the_item", chance = 10.0),
-                byteItemsDrop("the_item"),
-                vanillaDrop("minecraft:cobblestone"),
-                vanillaDrop("minecraft:stone", chance = 25.0)
+                //byteItemsDrop("the_item", chance = 10.0),
+                //byteItemsDrop("the_item"),
+                vanillaDrop(id("minecraft:cobblestone")),
+                vanillaDrop(id("minecraft:stone"), chance = 25.0)
         )
         val customLoot = customLoot(drops)
         val expected = mapOf("minecraft:iron_ore" to listOf(customLoot))
@@ -152,9 +152,9 @@ class BlocksDropsConfigurationTests : PluginConfigurationTestCase<Config.BlocksD
         val config = loadConfig("mixedDrops1")
 
         val drops = listOf(
-                vanillaDrop("minecraft:stone"),
-                vanillaDrop("minecraft:cobblestone", chance = 25.0),
-                byteItemsDrop("the_item", quantity = FixedIntQuantity(2))
+                vanillaDrop(id("minecraft:stone")),
+                vanillaDrop(id("minecraft:cobblestone"), chance = 25.0)//,
+                //byteItemsDrop("the_item", quantity = FixedIntQuantity(2))
         )
         val customLoot = customLoot(drops)
         val expected = mapOf("minecraft:iron_ore" to listOf(customLoot))
@@ -179,7 +179,7 @@ class BlocksDropsConfigurationTests : PluginConfigurationTestCase<Config.BlocksD
     fun `simple 1`() {
         val config = loadConfig("simple1")
 
-        val itemLoots = listOf(vanillaDrop("minecraft:cobblestone", chance = 25.0))
+        val itemLoots = listOf(vanillaDrop(id("minecraft:cobblestone"), chance = 25.0))
         val customLoot = customLoot(itemLoots, recipient = PlayerInventoryLootRecipient.INSTANCE)
         val expected = mapOf("minecraft:iron_ore" to listOf(customLoot))
 
@@ -191,8 +191,8 @@ class BlocksDropsConfigurationTests : PluginConfigurationTestCase<Config.BlocksD
     fun `simple 2`() {
         val config = loadConfig("simple2")
 
-        val moneyLoot = MoneyLootComponent(MoneyLoot(BoundedIntQuantity(10, 30), "economylite:coin", 25.0, "&aYou earned {money_amount}"))
-        val itemLoots = listOf(vanillaDrop("minecraft:coal", chance = 25.0, quantity = FixedIntQuantity(1)))
+        val moneyLoot = MoneyLootComponent(MoneyLoot(BoundedIntQuantity(10, 30), id("economylite:coin"), 25.0, "&aYou earned {money_amount}"))
+        val itemLoots = listOf(vanillaDrop(id("minecraft:coal"), chance = 25.0, quantity = FixedIntQuantity(1)))
         val customLoot = customLoot(itemLoots, overwrite = true, components = listOf(moneyLoot))
         val expected = mapOf("minecraft:leaves" to listOf(customLoot))
 
@@ -204,7 +204,7 @@ class BlocksDropsConfigurationTests : PluginConfigurationTestCase<Config.BlocksD
     fun `simple drop 1`() {
         val config = loadConfig("simpleDrop1")
 
-        val drops = listOf(vanillaDrop("minecraft:cobblestone"))
+        val drops = listOf(vanillaDrop(id("minecraft:cobblestone")))
         val customLoot = customLoot(drops)
         val expected = mapOf("minecraft:iron_ore" to listOf(customLoot))
 
@@ -216,7 +216,7 @@ class BlocksDropsConfigurationTests : PluginConfigurationTestCase<Config.BlocksD
     fun `simple drop 2`() {
         val config = loadConfig("simpleDrop2")
 
-        val drops = listOf(vanillaDrop("minecraft:cobblestone", quantity = BoundedIntQuantity(0, 2)))
+        val drops = listOf(vanillaDrop(id("minecraft:cobblestone"), quantity = BoundedIntQuantity(0, 2)))
         val customLoot = customLoot(drops)
         val expected = mapOf("minecraft:iron_ore" to listOf(customLoot))
 
@@ -228,7 +228,7 @@ class BlocksDropsConfigurationTests : PluginConfigurationTestCase<Config.BlocksD
     fun `simplest drop`() {
         val config = loadConfig("simplestDrop")
 
-        val drops = listOf(vanillaDrop("minecraft:cobblestone"))
+        val drops = listOf(vanillaDrop(id("minecraft:cobblestone")))
         val customLoot = customLoot(drops)
         val expected = mapOf("minecraft:iron_ore" to listOf(customLoot))
 

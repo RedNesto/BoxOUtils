@@ -25,41 +25,36 @@ package io.github.rednesto.bou.commands;
 
 import io.github.rednesto.bou.BoxOUtils;
 import io.github.rednesto.bou.SpongeConfig;
-import org.spongepowered.api.command.CommandCallable;
+import net.kyori.adventure.identity.Identity;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import org.spongepowered.api.command.Command;
+import org.spongepowered.api.command.CommandExecutor;
 import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.command.args.CommandContext;
-import org.spongepowered.api.command.source.ConsoleSource;
-import org.spongepowered.api.command.spec.CommandExecutor;
-import org.spongepowered.api.command.spec.CommandSpec;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
+import org.spongepowered.api.command.exception.CommandException;
+import org.spongepowered.api.command.parameter.CommandContext;
 
 import java.io.IOException;
 
 public class BouReloadCommand implements CommandExecutor {
 
     @Override
-    public CommandResult execute(CommandSource src, CommandContext args) {
+    public CommandResult execute(CommandContext context) throws CommandException {
         BoxOUtils plugin = BoxOUtils.getInstance();
         try {
             SpongeConfig.loadConf(plugin);
             plugin.getIntegrationsManager().reloadIntegrations(plugin);
-            src.sendMessage(Text.of("Box O' Utils configuration has been reloaded successfully"));
+            context.sendMessage(Identity.nil(), Component.text("Box O' Utils configuration has been reloaded successfully"));
         } catch (IOException e) {
             plugin.getLogger().error("An exception occurred when reloading configuration", e);
-            if (!(src instanceof ConsoleSource)) {
-                src.sendMessage(Text.of(TextColors.RED, "[Box O' Utils] Unable to reload configuration: " + e.getMessage()));
-            }
-
-            return CommandResult.empty();
+            return CommandResult.error(Component.text("[Box O' Utils] Unable to reload configuration: " + e.getMessage(), NamedTextColor.RED));
         }
 
         return CommandResult.success();
     }
 
-    public static CommandCallable create() {
-        return CommandSpec.builder()
+    public static Command.Parameterized create() {
+        return Command.builder()
                 .permission("boxoutils.reload")
                 .executor(new BouReloadCommand())
                 .build();

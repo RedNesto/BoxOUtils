@@ -26,12 +26,12 @@ package io.github.rednesto.bou.api.customdrops;
 import com.google.common.base.MoreObjects;
 import io.github.rednesto.bou.api.lootReuse.LootReuse;
 import io.github.rednesto.bou.api.requirement.Requirement;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.ResourceKey;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-
-import javax.annotation.Nullable;
 
 public class CustomLoot {
 
@@ -152,9 +152,9 @@ public class CustomLoot {
 
         private final float multiplier;
         private final List<List<Requirement>> requirements;
-        private final Map<String, LootReuse> items;
+        private final Map<ResourceKey, LootReuse> items;
 
-        public Reuse(float multiplier, Map<String, LootReuse> items, List<List<Requirement>> requirements) {
+        public Reuse(float multiplier, Map<ResourceKey, LootReuse> items, List<List<Requirement>> requirements) {
             this.multiplier = multiplier;
             this.items = items;
             this.requirements = requirements;
@@ -164,7 +164,7 @@ public class CustomLoot {
             return multiplier;
         }
 
-        public Map<String, LootReuse> getItems() {
+        public Map<ResourceKey, LootReuse> getItems() {
             return items;
         }
 

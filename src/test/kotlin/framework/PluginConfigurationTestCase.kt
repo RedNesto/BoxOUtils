@@ -23,9 +23,11 @@
  */
 package io.github.rednesto.bou.tests.framework
 
-import com.google.common.reflect.TypeToken
 import io.github.rednesto.bou.SpongeConfig
+import io.leangen.geantyref.TypeToken
 import org.junit.jupiter.api.fail
+import org.spongepowered.configurate.hocon.HoconConfigurationLoader
+import org.spongepowered.configurate.serialize.TypeSerializerCollection
 import java.nio.file.Path
 import java.nio.file.Paths
 
@@ -33,8 +35,15 @@ open class PluginConfigurationTestCase<T>(val configDir: String, val typeToken: 
 
     protected fun loadConfig(testName: String): T {
         val configFile = plugin.configDir.resolve("$testName.conf")
-        val node = SpongeConfig.loader(configFile).load()
-        return node.getValue(typeToken) ?: fail("Configuration value is null")
+        val serializers = TypeSerializerCollection.defaults().childBuilder()
+                .let(SpongeConfig::populatePluginSerializers)
+                .build()
+        val node = HoconConfigurationLoader.builder()
+                .path(configFile)
+                .defaultOptions { it.serializers(serializers) }
+                .build()
+                .load()
+        return node.get(typeToken) ?: fail("Configuration value is null")
     }
 
     override fun createConfigDir(): Path {

@@ -28,17 +28,20 @@ import com.google.common.cache.CacheBuilder;
 import io.github.rednesto.bou.*;
 import io.github.rednesto.bou.api.customdrops.CustomLoot;
 import io.github.rednesto.bou.api.customdrops.CustomLootProcessingContext;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
-import org.spongepowered.api.data.Transaction;
+import org.spongepowered.api.block.transaction.Operations;
 import org.spongepowered.api.entity.ExperienceOrb;
-import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
+import org.spongepowered.api.event.filter.cause.ContextValue;
 import org.spongepowered.api.event.filter.cause.First;
-import org.spongepowered.api.event.item.inventory.DropItemEvent;
-import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.World;
+import org.spongepowered.api.registry.RegistryTypes;
+import org.spongepowered.api.world.server.ServerLocation;
 
 import java.util.Collections;
 import java.util.List;
@@ -49,7 +52,7 @@ public class CustomBlockDropsListener implements SpongeConfig.ReloadableListener
 
     // I'd like to find a better thing to use as block identifier, something that does not rely on location,
     // entities unique id are great for that, but I don't know anything similar for blocks
-    private final Cache<Location<World>, List<CustomLoot>> requirementResultsTracker = CacheBuilder.newBuilder()
+    private final Cache<ServerLocation, List<CustomLoot>> requirementResultsTracker = CacheBuilder.newBuilder()
             // 15 seconds should be enough even if the server is skipping some ticks
             // but this should not be too high because the requirements test results may change quickly
             .expireAfterWrite(15, TimeUnit.SECONDS)
@@ -57,41 +60,42 @@ public class CustomBlockDropsListener implements SpongeConfig.ReloadableListener
     private final IdSelector.Cache idsMappingCache = new IdSelector.Cache();
 
     @Listener
-    public void onBlockBreak(ChangeBlockEvent.Break event, @First Player player) {
+    public void onBlockBreak(ChangeBlockEvent.All event, @First ServerPlayer player) {
         final Config.BlocksDrops blocksDrops = Config.getBlocksDrops();
         if (!blocksDrops.enabled) {
             return;
         }
 
         Map<String, List<CustomLoot>> drops = blocksDrops.drops;
-        for (Transaction<BlockSnapshot> transaction : event.getTransactions()) {
-            BlockSnapshot originalBlock = transaction.getOriginal();
-            List<CustomLoot> loots = idsMappingCache.get(drops, originalBlock.getState().getType().getId());
+        event.transactions(Operations.BREAK.get()).forEach(transaction -> {
+            BlockSnapshot original = transaction.original();
+            ResourceKey originalKey = RegistryTypes.BLOCK_TYPE.keyFor(Sponge.game(), original.state().type());
+            @Nullable List<CustomLoot> loots = idsMappingCache.get(drops, originalKey.formatted());
             if (loots == null) {
-                continue;
+                return;
             }
 
-            Location<World> targetLocation = SpongeUtils.getCenteredLocation(originalBlock, player.getWorld());
-            CustomLootProcessingContext context = new CustomLootProcessingContext(Collections.emptyList(), event, originalBlock, event.getCause(), player, targetLocation);
+            ServerLocation targetLocation = SpongeUtils.getCenteredLocation(original, player.world());
+            CustomLootProcessingContext context = new CustomLootProcessingContext(Collections.emptyList(), event, original, event.cause(), player, targetLocation);
             List<CustomLoot> lootsToUse = CustomDropsProcessor.getLootsToUse(loots, context);
             if (!lootsToUse.isEmpty()) {
                 requirementResultsTracker.put(targetLocation, lootsToUse);
                 CustomDropsProcessor.dropLoot(context.withLoots(lootsToUse));
             }
-        }
+        });
     }
 
     @Listener
-    public void onItemDrop(DropItemEvent.Destruct event, @First Player player, @First BlockSnapshot block) {
+    public void onItemDrop(SpawnEntityEvent.Pre event, @First ServerPlayer player, @ContextValue("BLOCK_HIT") BlockSnapshot block) {
         if (!Config.getBlocksDrops().enabled) {
             return;
         }
 
-        Location<World> targetLocation = SpongeUtils.getCenteredLocation(block, player.getWorld());
-        List<CustomLoot> result = requirementResultsTracker.getIfPresent(targetLocation);
+        ServerLocation targetLocation = SpongeUtils.getCenteredLocation(block, player.world());
+        @Nullable List<CustomLoot> result = requirementResultsTracker.getIfPresent(targetLocation);
         if (result != null) {
             result.forEach(loot -> {
-                CustomLootProcessingContext context = new CustomLootProcessingContext(Collections.singletonList(loot), event, block, event.getCause(), player, targetLocation);
+                CustomLootProcessingContext context = new CustomLootProcessingContext(Collections.singletonList(loot), event, block, event.cause(), player, targetLocation);
                 CustomDropsProcessor.handleDropItemEvent(event, loot, context);
             });
         }
@@ -103,7 +107,7 @@ public class CustomBlockDropsListener implements SpongeConfig.ReloadableListener
             return;
         }
 
-        List<CustomLoot> customLoot = brokenBlock.getLocation()
+        @Nullable List<CustomLoot> customLoot = brokenBlock.location()
                 .map(SpongeUtils::center)
                 .map(requirementResultsTracker::getIfPresent)
                 .orElse(null);

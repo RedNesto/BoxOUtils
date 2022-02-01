@@ -25,19 +25,19 @@ package io.github.rednesto.bou.api.blockspawners;
 
 import com.google.common.base.MoreObjects;
 import io.github.rednesto.bou.api.quantity.IntQuantity;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.ResourceKey;
 
 import java.util.Objects;
 
-import javax.annotation.Nullable;
-
 public class SpawnedMob {
 
-    private final String id;
+    private final ResourceKey id;
     private final double chance;
     @Nullable
     private final IntQuantity quantity;
 
-    public SpawnedMob(String id, double chance, @Nullable IntQuantity quantity) {
+    public SpawnedMob(ResourceKey id, double chance, @Nullable IntQuantity quantity) {
         this.id = id;
         this.chance = chance / 100;
         this.quantity = quantity;
@@ -47,7 +47,7 @@ public class SpawnedMob {
         return chance <= 0 || Math.random() <= chance;
     }
 
-    public String getId() {
+    public ResourceKey getId() {
         return id;
     }
 

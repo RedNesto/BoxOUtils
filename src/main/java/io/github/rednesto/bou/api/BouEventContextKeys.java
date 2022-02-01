@@ -24,17 +24,23 @@
 package io.github.rednesto.bou.api;
 
 import io.github.rednesto.bou.api.customdrops.CustomLootProcessingContext;
-import org.spongepowered.api.event.cause.EventContextKey;
+import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.event.EventContextKey;
 
 public class BouEventContextKeys {
 
-    public static final EventContextKey<CustomLootProcessingContext> CUSTOM_LOOT_PROCESSING_CONTEXT = EventContextKey.builder(CustomLootProcessingContext.class)
-            .id("box-o-utils:custom_loot_processing_context")
-            .name("CustomDrops Loot Context")
+    public static final EventContextKey<CustomLootProcessingContext> CUSTOM_LOOT_PROCESSING_CONTEXT = EventContextKey.builder()
+            .type(CustomLootProcessingContext.class)
+            .key(ResourceKey.of("box-o-utils", "custom_loot_processing_context"))
             .build();
 
-    public static final EventContextKey<Boolean> IS_FAST_HARVESTING = EventContextKey.builder(Boolean.class)
-            .id("box-o-utils:is_fast_harvesting")
-            .name("Is FastHarvesting")
+    public static final EventContextKey<Boolean> IS_FAST_HARVESTING = EventContextKey.builder()
+            .type(Boolean.class)
+            .key(ResourceKey.of("box-o-utils", "is_fast_harvesting"))
+            .build();
+
+    public static final EventContextKey<Boolean> IS_REUSE_DROPS = EventContextKey.builder()
+            .type(Boolean.class)
+            .key(ResourceKey.of("box-o-utils", "is_reuse_drops"))
             .build();
 }

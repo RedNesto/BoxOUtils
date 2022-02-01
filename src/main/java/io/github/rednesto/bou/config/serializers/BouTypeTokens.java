@@ -23,7 +23,7 @@
  */
 package io.github.rednesto.bou.config.serializers;
 
-import com.google.common.reflect.TypeToken;
+import io.leangen.geantyref.TypeToken;
 import io.github.rednesto.bou.Config;
 import io.github.rednesto.bou.api.blockspawners.SpawnedMob;
 import io.github.rednesto.bou.api.customdrops.*;
@@ -40,28 +40,28 @@ import java.util.Map;
 
 public final class BouTypeTokens {
 
-    public static final TypeToken<CustomLoot> CUSTOM_LOOT = TypeToken.of(CustomLoot.class);
+    public static final TypeToken<CustomLoot> CUSTOM_LOOT = TypeToken.get(CustomLoot.class);
     public static final TypeToken<List<CustomDropsProvider>> CUSTOM_DROPS_PROVIDER_LIST = new TypeToken<List<CustomDropsProvider>>() {};
-    public static final TypeToken<CustomLootRecipient> CUSTOM_LOOT_RECIPIENT = TypeToken.of(CustomLootRecipient.class);
-    public static final TypeToken<CustomLoot.Reuse> CUSTOM_LOOT_REUSE = TypeToken.of(CustomLoot.Reuse.class);
-    public static final TypeToken<CustomLootCommand> CUSTOM_LOOT_COMMAND = TypeToken.of(CustomLootCommand.class);
-    public static final TypeToken<IntQuantity> INT_QUANTITY = TypeToken.of(IntQuantity.class);
-    public static final TypeToken<IntRange> INT_RANGE = TypeToken.of(IntRange.class);
-    public static final TypeToken<LootReuse> LOOT_REUSE = TypeToken.of(LootReuse.class);
-    public static final TypeToken<MoneyLoot> MONEY_LOOT = TypeToken.of(MoneyLoot.class);
+    public static final TypeToken<CustomLootRecipient> CUSTOM_LOOT_RECIPIENT = TypeToken.get(CustomLootRecipient.class);
+    public static final TypeToken<CustomLoot.Reuse> CUSTOM_LOOT_REUSE = TypeToken.get(CustomLoot.Reuse.class);
+    public static final TypeToken<CustomLootCommand> CUSTOM_LOOT_COMMAND = TypeToken.get(CustomLootCommand.class);
+    public static final TypeToken<IntQuantity> INT_QUANTITY = TypeToken.get(IntQuantity.class);
+    public static final TypeToken<IntRange> INT_RANGE = TypeToken.get(IntRange.class);
+    public static final TypeToken<LootReuse> LOOT_REUSE = TypeToken.get(LootReuse.class);
+    public static final TypeToken<MoneyLoot> MONEY_LOOT = TypeToken.get(MoneyLoot.class);
     public static final TypeToken<Requirement> REQUIREMENT = new TypeToken<Requirement>() {};
     public static final TypeToken<Map<String, Requirement>> REQUIREMENTS_MAP = new TypeToken<Map<String, Requirement>>() {};
-    public static final TypeToken<SpawnedMob> SPAWNED_MOB = TypeToken.of(SpawnedMob.class);
-    public static final TypeToken<EnchantmentsFilter> ENCHANTMENTS_FILTER = TypeToken.of(EnchantmentsFilter.class);
-    public static final TypeToken<FastHarvestCrop> FAST_HARVEST_CROP = TypeToken.of(FastHarvestCrop.class);
-    public static final TypeToken<FastHarvestTools> FAST_HARVEST_TOOLS = TypeToken.of(FastHarvestTools.class);
+    public static final TypeToken<SpawnedMob> SPAWNED_MOB = TypeToken.get(SpawnedMob.class);
+    public static final TypeToken<EnchantmentsFilter> ENCHANTMENTS_FILTER = TypeToken.get(EnchantmentsFilter.class);
+    public static final TypeToken<FastHarvestCrop> FAST_HARVEST_CROP = TypeToken.get(FastHarvestCrop.class);
+    public static final TypeToken<FastHarvestTools> FAST_HARVEST_TOOLS = TypeToken.get(FastHarvestTools.class);
 
-    public static final TypeToken<Config.BlocksDrops> CONFIG_BLOCKS_DROPS = TypeToken.of(Config.BlocksDrops.class);
-    public static final TypeToken<Config.MobsDrops> CONFIG_MOBS_DROPS = TypeToken.of(Config.MobsDrops.class);
-    public static final TypeToken<Config.FishingDrops> CONFIG_FISHING_DROPS = TypeToken.of(Config.FishingDrops.class);
-    public static final TypeToken<Config.BlockSpawners> CONFIG_BLOCK_SPAWNERS = TypeToken.of(Config.BlockSpawners.class);
-    public static final TypeToken<Config.FastHarvest> CONFIG_FAST_HARVEST = TypeToken.of(Config.FastHarvest.class);
-    public static final TypeToken<Config.CropsControl> CONFIG_CROPS_CONTROL = TypeToken.of(Config.CropsControl.class);
+    public static final TypeToken<Config.BlocksDrops> CONFIG_BLOCKS_DROPS = TypeToken.get(Config.BlocksDrops.class);
+    public static final TypeToken<Config.MobsDrops> CONFIG_MOBS_DROPS = TypeToken.get(Config.MobsDrops.class);
+    public static final TypeToken<Config.FishingDrops> CONFIG_FISHING_DROPS = TypeToken.get(Config.FishingDrops.class);
+    public static final TypeToken<Config.BlockSpawners> CONFIG_BLOCK_SPAWNERS = TypeToken.get(Config.BlockSpawners.class);
+    public static final TypeToken<Config.FastHarvest> CONFIG_FAST_HARVEST = TypeToken.get(Config.FastHarvest.class);
+    public static final TypeToken<Config.CropsControl> CONFIG_CROPS_CONTROL = TypeToken.get(Config.CropsControl.class);
 
     private BouTypeTokens() {}
 }

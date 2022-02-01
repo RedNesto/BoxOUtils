@@ -26,30 +26,31 @@ package io.github.rednesto.bou;
 import com.google.inject.Inject;
 import io.github.rednesto.bou.commands.BouInspectItemCommand;
 import io.github.rednesto.bou.commands.BouReloadCommand;
-import org.slf4j.Logger;
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.command.source.ConsoleSource;
-import org.spongepowered.api.command.spec.CommandSpec;
+import net.kyori.adventure.audience.Audience;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import org.apache.logging.log4j.Logger;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
+import org.spongepowered.api.Server;
+import org.spongepowered.api.command.Command;
 import org.spongepowered.api.config.ConfigDir;
 import org.spongepowered.api.event.Listener;
-import org.spongepowered.api.event.game.GameReloadEvent;
-import org.spongepowered.api.event.game.state.GameAboutToStartServerEvent;
-import org.spongepowered.api.event.game.state.GameConstructionEvent;
-import org.spongepowered.api.event.game.state.GameInitializationEvent;
-import org.spongepowered.api.event.game.state.GamePreInitializationEvent;
-import org.spongepowered.api.plugin.Plugin;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
+import org.spongepowered.api.event.lifecycle.ConstructPluginEvent;
+import org.spongepowered.api.event.lifecycle.RefreshGameEvent;
+import org.spongepowered.api.event.lifecycle.RegisterCommandEvent;
+import org.spongepowered.api.event.lifecycle.StartingEngineEvent;
+import org.spongepowered.plugin.PluginContainer;
+import org.spongepowered.plugin.builtin.jvm.Plugin;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-@Plugin(id = "box-o-utils")
+@Plugin("box-o-utils")
 public class BoxOUtils {
 
+    private final PluginContainer container;
     private final Logger logger;
 
     private final Path configDir;
@@ -62,26 +63,27 @@ public class BoxOUtils {
     private Config.FastHarvest fastHarvest = Config.FastHarvest.createDefault();
     private Config.CropsControl cropsControl = Config.CropsControl.createDefault();
 
-    private static BoxOUtils instance;
+    private static @MonotonicNonNull BoxOUtils instance;
 
     @Inject
-    public BoxOUtils(Logger logger, @ConfigDir(sharedRoot = false) Path configDir) {
-        this(logger, configDir, new IntegrationsManager());
+    public BoxOUtils(PluginContainer container, @ConfigDir(sharedRoot = false) Path configDir) {
+        this(container, configDir, new IntegrationsManager());
     }
 
-    public BoxOUtils(Logger logger, Path configDir, IntegrationsManager integrationsManager) {
-        this.logger = logger;
+    public BoxOUtils(PluginContainer container, Path configDir, IntegrationsManager integrationsManager) {
+        this.container = container;
+        this.logger = container.logger();
         this.configDir = configDir;
         this.integrationsManager = integrationsManager;
     }
 
     @Listener
-    public void onConstruct(GameConstructionEvent event) {
+    public void onConstruct(ConstructPluginEvent event) {
         instance = this;
     }
 
     @Listener
-    public void onPreInit(GamePreInitializationEvent event) {
+    public void onPreInit(StartingEngineEvent<Server> event) {
         this.logger.info("Loading built-in integrations");
         integrationsManager.loadVanillaBuiltins();
         BouUtils.registerIntegrations(integrationsManager, false);
@@ -91,34 +93,33 @@ public class BoxOUtils {
         } catch (IOException e) {
             this.logger.error("An exception occurred when loading configuration", e);
         }
-    }
-
-    @Listener
-    public void onGameInitialization(GameInitializationEvent event) {
-        Sponge.getCommandManager().register(this, CommandSpec.builder()
-                .child(BouReloadCommand.create(), "reload")
-                .child(CommandSpec.builder()
-                        .child(BouInspectItemCommand.create(), "item")
-                        .build(), "inspect")
-                .build(), "boxoutils", "bou");
-    }
-
-    @Listener
-    public void onGamePostInitialization(GameAboutToStartServerEvent event) {
         integrationsManager.initIntegrations(this);
     }
 
     @Listener
-    public void onConfigReload(GameReloadEvent event) {
+    public void onGameInitialization(RegisterCommandEvent<Command.Parameterized> event) {
+        Command.Parameterized bou = Command.builder()
+                .addChild(BouReloadCommand.create(), "reload")
+                .addChild(Command.builder().addChild(BouInspectItemCommand.create(), "item").build(), "inspect")
+                .build();
+        event.register(this.container, bou, "boxoutils", "bou");
+    }
+
+    @Listener
+    public void onConfigReload(RefreshGameEvent event) {
         try {
             SpongeConfig.loadConf(this);
             integrationsManager.reloadIntegrations(this);
         } catch (IOException e) {
             this.logger.error("An exception occurred when reloading configuration", e);
-            event.getCause().first(CommandSource.class)
-                    .filter(source -> !(source instanceof ConsoleSource))
-                    .ifPresent(source -> source.sendMessage(Text.of(TextColors.RED, "[Box O' Utils] Unable to reload configuration: " + e.getMessage())));
+            event.cause().first(Audience.class)
+                    .filter(source -> !(source instanceof Server))
+                    .ifPresent(source -> source.sendMessage(Component.text("[Box O' Utils] Unable to reload configuration: " + e.getMessage(), NamedTextColor.RED)));
         }
+    }
+
+    public PluginContainer getContainer() {
+        return container;
     }
 
     public Logger getLogger() {

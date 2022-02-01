@@ -23,31 +23,33 @@
  */
 package io.github.rednesto.bou.config.serializers;
 
-import com.google.common.reflect.TypeToken;
 import io.github.rednesto.bou.SpongeUtils;
 import io.github.rednesto.bou.api.blockspawners.SpawnedMob;
 import io.github.rednesto.bou.api.quantity.BoundedIntQuantity;
 import io.github.rednesto.bou.api.quantity.IntQuantity;
-import ninja.leaping.configurate.ConfigurationNode;
-import ninja.leaping.configurate.objectmapping.ObjectMappingException;
-import ninja.leaping.configurate.objectmapping.serialize.TypeSerializer;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.ResourceKey;
+import org.spongepowered.configurate.ConfigurationNode;
+import org.spongepowered.configurate.serialize.SerializationException;
+import org.spongepowered.configurate.serialize.TypeSerializer;
+
+import java.lang.reflect.Type;
 
 public class SpawnedMobSerializer implements TypeSerializer<SpawnedMob> {
 
     @Override
-    public @Nullable SpawnedMob deserialize(@NonNull TypeToken<?> type, @NonNull ConfigurationNode value) throws ObjectMappingException {
-        String mobType = value.getNode("type").getString();
+    public @Nullable SpawnedMob deserialize(Type type, ConfigurationNode value) throws SerializationException {
+        @Nullable ResourceKey mobType = value.node("type").get(ResourceKey.class);
         if (mobType == null) {
             String message = String.format("A BlockSpawner spawn for '%s' has no 'type'", getBlockId(value));
-            throw new ObjectMappingException(message);
+            throw new SerializationException(value.node("type"), String.class, message);
         }
 
-        IntQuantity quantity = null;
-        ConfigurationNode quantityNode = value.getNode("quantity");
-        if (!quantityNode.isVirtual()) {
-            quantity = quantityNode.getValue(BouTypeTokens.INT_QUANTITY);
+        @Nullable IntQuantity quantity = null;
+        ConfigurationNode quantityNode = value.node("quantity");
+        if (!quantityNode.virtual()) {
+            quantity = quantityNode.get(BouTypeTokens.INT_QUANTITY);
         }
 
         if (quantity instanceof BoundedIntQuantity) {
@@ -55,24 +57,24 @@ public class SpawnedMobSerializer implements TypeSerializer<SpawnedMob> {
             if (boundedQuantity.getFrom() < 0) {
                 String message = String.format("The quantity lower bound (%s) of BlockSpawner '%s' for mob '%s' is negative. This spawn will not be loaded.",
                         boundedQuantity.getFrom(), mobType, getBlockId(value));
-                throw new ObjectMappingException(message);
+                throw new SerializationException(quantityNode, BoundedIntQuantity.class, message);
             }
 
             if (boundedQuantity.getTo() < boundedQuantity.getFrom()) {
                 String message = String.format("The quantity upper bound (%s) of BlockSpawner '%s' for mob '%s' is less than its lower bound (%s). This spawn will not be loaded.",
                         boundedQuantity.getTo(), mobType, getBlockId(value), boundedQuantity.getFrom());
-                throw new ObjectMappingException(message);
+                throw new SerializationException(quantityNode, BoundedIntQuantity.class, message);
             }
         }
 
         double chance = 0;
-        ConfigurationNode chanceNode = value.getNode("chance");
-        if (!chanceNode.isVirtual()) {
+        ConfigurationNode chanceNode = value.node("chance");
+        if (!chanceNode.virtual()) {
             chance = chanceNode.getDouble(Double.NaN);
             if (Double.isNaN(chance)) {
                 String message = String.format("Chance of BlockSpawner mob '%s' for block '%s' is not a valid number ('%s'). This spawn will not be loaded.",
-                        mobType, getBlockId(value), chanceNode.getValue());
-                throw new ObjectMappingException(message);
+                        mobType, getBlockId(value), chanceNode.raw());
+                throw new SerializationException(chanceNode, double.class, message);
             }
         }
 
@@ -80,17 +82,17 @@ public class SpawnedMobSerializer implements TypeSerializer<SpawnedMob> {
     }
 
     @Override
-    public void serialize(@NonNull TypeToken<?> type, @Nullable SpawnedMob obj, @NonNull ConfigurationNode value) {
-        throw new UnsupportedOperationException();
+    public void serialize(Type type, @Nullable SpawnedMob obj, ConfigurationNode value) throws SerializationException {
+        throw new SerializationException("SpawnedMob cannot be serialized");
     }
 
     @Nullable
     public String getBlockId(@NonNull ConfigurationNode value) {
-        ConfigurationNode blockNode = SpongeUtils.getNthParent(value, 2);
+        @Nullable ConfigurationNode blockNode = SpongeUtils.getNthParent(value, 2);
         if (blockNode == null) {
             return null;
         }
 
-        return (String) blockNode.getKey();
+        return (String) blockNode.key();
     }
 }

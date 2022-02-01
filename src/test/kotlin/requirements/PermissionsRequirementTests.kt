@@ -24,15 +24,19 @@
 package io.github.rednesto.bou.tests.requirements
 
 import io.github.rednesto.bou.requirements.PermissionsRequirement
-import io.github.rednesto.bou.tests.framework.mock.MockPlayer
+import io.github.rednesto.bou.tests.framework.BouFixture
+import io.github.rednesto.bou.tests.framework.BouTestCase
+import io.github.rednesto.bou.tests.framework.mock.MockServerPlayer
 import io.github.rednesto.bou.tests.lootProcessingContext
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import org.spongepowered.api.event.cause.Cause
-import org.spongepowered.api.event.cause.EventContext
+import org.spongepowered.api.event.Cause
+import org.spongepowered.api.event.EventContext
+import java.nio.file.Path
+import java.nio.file.Paths
 
-class PermissionsRequirementTests {
+class PermissionsRequirementTests : BouTestCase(false) {
 
     @Test
     fun `single permission`() {
@@ -51,9 +55,11 @@ class PermissionsRequirementTests {
 
     private fun doFulfills(requirementPerms: List<String>, playerPerms: List<String>): Boolean {
         val requirement = PermissionsRequirement(requirementPerms)
-        val mockPlayer = MockPlayer(playerPerms)
+        val mockPlayer = MockServerPlayer(playerPerms)
         val cause = Cause.of(EventContext.empty(), mockPlayer)
         val context = lootProcessingContext(emptyList(), Any(), cause)
         return requirement.fulfills(context)
     }
+
+    override fun createConfigDir(): Path = Paths.get("dummy_test_dir")
 }

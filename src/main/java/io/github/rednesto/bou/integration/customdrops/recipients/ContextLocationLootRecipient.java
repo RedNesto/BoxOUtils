@@ -26,16 +26,15 @@ package io.github.rednesto.bou.integration.customdrops.recipients;
 import io.github.rednesto.bou.api.customdrops.CustomLootProcessingContext;
 import io.github.rednesto.bou.api.customdrops.CustomLootRecipient;
 import io.github.rednesto.bou.api.customdrops.CustomLootRecipientProvider;
-import ninja.leaping.configurate.ConfigurationNode;
-import org.spongepowered.api.data.key.Keys;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.inventory.ItemStack;
-import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.World;
-
-import javax.annotation.Nullable;
+import org.spongepowered.api.util.Ticks;
+import org.spongepowered.api.world.server.ServerLocation;
+import org.spongepowered.configurate.ConfigurationNode;
 
 public class ContextLocationLootRecipient implements CustomLootRecipient {
 
@@ -45,19 +44,19 @@ public class ContextLocationLootRecipient implements CustomLootRecipient {
 
     @Override
     public void receive(CustomLootProcessingContext context, ItemStack stack) {
-        Location<World> targetLocation = context.getTargetLocation();
+        @Nullable ServerLocation targetLocation = context.getTargetLocation();
         if (targetLocation == null) {
-            Player targetPlayer = context.getTargetPlayer();
+            @Nullable Player targetPlayer = context.getTargetPlayer();
             if (targetPlayer != null) {
-                targetLocation = targetPlayer.getLocation();
+                targetLocation = targetPlayer.serverLocation();
             } else {
                 return;
             }
         }
 
-        Entity itemEntity = targetLocation.createEntity(EntityTypes.ITEM);
-        itemEntity.offer(Keys.REPRESENTED_ITEM, stack.createSnapshot());
-        itemEntity.offer(Keys.PICKUP_DELAY, 10);
+        Entity itemEntity = targetLocation.createEntity(EntityTypes.ITEM.get());
+        itemEntity.offer(Keys.ITEM_STACK_SNAPSHOT, stack.createSnapshot());
+        itemEntity.offer(Keys.PICKUP_DELAY, Ticks.of(10));
         targetLocation.spawnEntity(itemEntity);
     }
 

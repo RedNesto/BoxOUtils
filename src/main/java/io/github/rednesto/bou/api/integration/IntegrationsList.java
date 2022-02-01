@@ -28,24 +28,26 @@ import com.google.common.collect.ImmutableList;
 import io.github.rednesto.bou.BouUtils;
 import io.github.rednesto.bou.BoxOUtils;
 import io.github.rednesto.bou.SpongeUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.spongepowered.api.GameState;
-import org.spongepowered.api.plugin.Plugin;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.Server;
+import org.spongepowered.api.event.lifecycle.StartingEngineEvent;
 
 import java.util.*;
-
-import javax.annotation.Nullable;
+import java.util.regex.Pattern;
 
 /**
  * Contains integrations of type {@link I}.
  * <p>
- * Registered integrations are initialized and loaded during {@link GameState#SERVER_ABOUT_TO_START},
+ * Registered integrations are initialized and loaded during {@link StartingEngineEvent<Server>},
  * integrations registered after that will be initialized and loaded during their registration.
  *
  * @param <I> the type of integration this list contains
  */
 public class IntegrationsList<I extends Integration> {
+
+    public static final Pattern ID_PATTERN = Pattern.compile("^[a-z][a-z0-9-_]{1,63}$");
 
     private final Logger logger;
 
@@ -65,7 +67,7 @@ public class IntegrationsList<I extends Integration> {
 
     public IntegrationsList(String name, @Nullable String defaultNamespace) {
         this.name = name;
-        this.logger = LoggerFactory.getLogger(name);
+        this.logger = LogManager.getLogger(name);
         this.defaultNamespace = defaultNamespace;
     }
 
@@ -98,8 +100,6 @@ public class IntegrationsList<I extends Integration> {
      *         Be aware that if another integration has the same short ID none of them will have a short ID mapping.
      *
      * @return true if registration was successful, false otherwise
-     *
-     * @see Plugin#ID_PATTERN the pattern integration IDs must respect
      */
     public boolean register(I integration, boolean registerShortId) {
         String integrationId = integration.getId().toLowerCase(Locale.ROOT);
@@ -110,13 +110,13 @@ public class IntegrationsList<I extends Integration> {
         }
 
         String namespace = integrationId.substring(0, separatorIndex);
-        if (!Plugin.ID_PATTERN.matcher(namespace).matches()) {
+        if (!ID_PATTERN.matcher(namespace).matches()) {
             logger.error("Invalid integration ID namespace '{}', ignoring it.", namespace);
             return false;
         }
 
         String shortId = integrationId.substring(separatorIndex + 1);
-        if (!Plugin.ID_PATTERN.matcher(shortId).matches()) {
+        if (!ID_PATTERN.matcher(shortId).matches()) {
             logger.error("Invalid integration short ID '{}', ignoring it.", shortId);
             return false;
         }

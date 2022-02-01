@@ -25,7 +25,10 @@ package io.github.rednesto.bou.api.utils;
 
 import com.google.common.base.MoreObjects;
 import io.github.rednesto.bou.api.range.IntRange;
+import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.item.enchantment.Enchantment;
+import org.spongepowered.api.registry.RegistryTypes;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -33,16 +36,16 @@ import java.util.Map;
 
 public class EnchantmentsFilter {
 
-    private final Map<String, IntRange> neededRanges;
-    private final Map<String, IntRange> disallowedRanges;
-    private final Map<String, Boolean> wildcards;
+    private final Map<ResourceKey, IntRange> neededRanges;
+    private final Map<ResourceKey, IntRange> disallowedRanges;
+    private final Map<ResourceKey, Boolean> wildcards;
     private final long positiveWildcards;
 
-    public EnchantmentsFilter(Map<String, IntRange> neededRanges, Map<String, IntRange> disallowedRanges) {
+    public EnchantmentsFilter(Map<ResourceKey, IntRange> neededRanges, Map<ResourceKey, IntRange> disallowedRanges) {
         this(neededRanges, disallowedRanges, Collections.emptyMap());
     }
 
-    public EnchantmentsFilter(Map<String, IntRange> neededRanges, Map<String, IntRange> disallowedRanges, Map<String, Boolean> wildcards) {
+    public EnchantmentsFilter(Map<ResourceKey, IntRange> neededRanges, Map<ResourceKey, IntRange> disallowedRanges, Map<ResourceKey, Boolean> wildcards) {
         this.neededRanges = neededRanges;
         this.disallowedRanges = disallowedRanges;
         this.wildcards = wildcards;
@@ -57,7 +60,7 @@ public class EnchantmentsFilter {
         int wildcardsEncountered = 0;
         int allowedEncountered = 0;
         for (Enchantment enchantment : enchantments) {
-            String id = enchantment.getType().getId();
+            ResourceKey id = RegistryTypes.ENCHANTMENT_TYPE.keyFor(Sponge.game(), enchantment.type());
 
             Boolean wildcard = wildcards.get(id);
             if (wildcard != null) {
@@ -71,14 +74,14 @@ public class EnchantmentsFilter {
 
             IntRange disallowedRange = disallowedRanges.get(id);
             if (disallowedRange != null) {
-                if (disallowedRange.isInRange(enchantment.getLevel())) {
+                if (disallowedRange.isInRange(enchantment.level())) {
                     return false;
                 }
             }
 
             IntRange allowedRange = neededRanges.get(id);
             if (allowedRange != null) {
-                if (!allowedRange.isInRange(enchantment.getLevel())) {
+                if (!allowedRange.isInRange(enchantment.level())) {
                     return false;
                 }
 

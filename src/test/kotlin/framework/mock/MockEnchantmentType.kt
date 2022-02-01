@@ -23,36 +23,44 @@
  */
 package io.github.rednesto.bou.tests.framework.mock
 
+import net.kyori.adventure.text.Component
+import org.spongepowered.api.ResourceKey
 import org.spongepowered.api.item.enchantment.EnchantmentType
 import org.spongepowered.api.item.inventory.ItemStack
-import org.spongepowered.api.text.translation.Translation
+import org.spongepowered.api.registry.RegistryEntry
+import org.spongepowered.api.registry.RegistryReference
 
-class MockEnchantmentType(private val id: String) : EnchantmentType {
-    override fun getMinimumLevel(): Int = throw NotImplementedError("MockPlayer method not implemented")
+class MockEnchantmentType(internal val id: ResourceKey) : EnchantmentType, RegistryEntry<EnchantmentType> {
 
-    override fun getTranslation(): Translation = throw NotImplementedError("MockPlayer method not implemented")
+    constructor(id: String) : this(id(id))
 
-    override fun canBeAppliedToStack(stack: ItemStack): Boolean = throw NotImplementedError("MockPlayer method not implemented")
+    override fun asComponent(): Component = throw NotImplementedError("MockEnchantmentType method not implemented")
 
-    override fun getMinimumEnchantabilityForLevel(level: Int): Int = throw NotImplementedError("MockPlayer method not implemented")
+    override fun weight(): Int = throw NotImplementedError("MockEnchantmentType method not implemented")
 
-    override fun getName(): String = throw NotImplementedError("MockPlayer method not implemented")
+    override fun minimumLevel(): Int = throw NotImplementedError("MockEnchantmentType method not implemented")
 
-    override fun getId(): String = id
+    override fun maximumLevel(): Int = throw NotImplementedError("MockEnchantmentType method not implemented")
 
-    override fun isCompatibleWith(enchantmentType: EnchantmentType): Boolean = throw NotImplementedError("MockPlayer method not implemented")
+    override fun minimumEnchantabilityForLevel(level: Int): Int = throw NotImplementedError("MockEnchantmentType method not implemented")
 
-    override fun isTreasure(): Boolean = throw NotImplementedError("MockPlayer method not implemented")
+    override fun maximumEnchantabilityForLevel(level: Int): Int = throw NotImplementedError("MockEnchantmentType method not implemented")
 
-    override fun getMaximumEnchantabilityForLevel(level: Int): Int = throw NotImplementedError("MockPlayer method not implemented")
+    override fun canBeAppliedToStack(stack: ItemStack?): Boolean = throw NotImplementedError("MockEnchantmentType method not implemented")
 
-    override fun getMaximumLevel(): Int = throw NotImplementedError("MockPlayer method not implemented")
+    override fun canBeAppliedByTable(stack: ItemStack?): Boolean = throw NotImplementedError("MockEnchantmentType method not implemented")
 
-    override fun getWeight(): Int = throw NotImplementedError("MockPlayer method not implemented")
+    override fun isCompatibleWith(enchantmentType: EnchantmentType?): Boolean = throw NotImplementedError("MockEnchantmentType method not implemented")
 
-    override fun isCurse(): Boolean = throw NotImplementedError("MockPlayer method not implemented")
+    override fun isTreasure(): Boolean = throw NotImplementedError("MockEnchantmentType method not implemented")
 
-    override fun canBeAppliedByTable(stack: ItemStack): Boolean = throw NotImplementedError("MockPlayer method not implemented")
+    override fun isCurse(): Boolean = throw NotImplementedError("MockEnchantmentType method not implemented")
+
+    override fun key(): ResourceKey = id
+
+    override fun value(): EnchantmentType = this
+
+    override fun asReference(): RegistryReference<EnchantmentType> = throw NotImplementedError("MockEnchantmentType method not implemented")
 
     companion object {
         val SILK_TOUCH = MockEnchantmentType("minecraft:silk_touch")

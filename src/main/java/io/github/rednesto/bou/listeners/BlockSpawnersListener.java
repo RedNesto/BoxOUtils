@@ -28,14 +28,18 @@ import io.github.rednesto.bou.IdSelector;
 import io.github.rednesto.bou.SpongeConfig;
 import io.github.rednesto.bou.SpongeUtils;
 import io.github.rednesto.bou.api.blockspawners.SpawnedMob;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.block.BlockSnapshot;
+import org.spongepowered.api.block.transaction.Operations;
 import org.spongepowered.api.entity.EntityType;
-import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.filter.cause.First;
-import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.World;
+import org.spongepowered.api.registry.RegistryTypes;
+import org.spongepowered.api.world.server.ServerLocation;
 
 import java.util.List;
 import java.util.Map;
@@ -45,35 +49,38 @@ public class BlockSpawnersListener implements SpongeConfig.ReloadableListener {
     private final IdSelector.Cache idsMappingCache = new IdSelector.Cache();
 
     @Listener
-    public void onBlockBreak(ChangeBlockEvent.Break event, @First Player player) {
+    public void onBlockBreak(ChangeBlockEvent.All event, @First ServerPlayer player) {
         final Config.BlockSpawners blockSpawners = Config.getBlockSpawners();
         if (!blockSpawners.enabled) {
             return;
         }
 
         Map<String, List<SpawnedMob>> spawners = blockSpawners.spawners;
-        event.getTransactions().forEach(transaction -> {
-            List<SpawnedMob> toSpawnMobs = idsMappingCache.get(spawners, transaction.getOriginal().getState().getType().getId());
+        event.transactions(Operations.BREAK.get()).forEach(transaction -> {
+            BlockSnapshot original = transaction.original();
+            ResourceKey originalKey = original.state().type().key(RegistryTypes.BLOCK_TYPE);
+            @Nullable List<SpawnedMob> toSpawnMobs = idsMappingCache.get(spawners, originalKey.formatted());
             if (toSpawnMobs == null) {
                 return;
             }
 
-            Location<World> spawnLocation = SpongeUtils.getCenteredLocation(transaction.getOriginal(), player.getWorld());
-            toSpawnMobs.forEach(toSpawn -> {
+            ServerLocation spawnLocation = SpongeUtils.getCenteredLocation(original, player.world());
+            for (SpawnedMob toSpawn : toSpawnMobs) {
                 if (!toSpawn.shouldSpawn()) {
-                    return;
+                    continue;
                 }
 
-                EntityType entityType = Sponge.getRegistry().getType(EntityType.class, toSpawn.getId()).orElse(null);
+                @Nullable EntityType<?> entityType = Sponge.game().registry(RegistryTypes.ENTITY_TYPE)
+                        .findValue(toSpawn.getId()).orElse(null);
                 if (entityType == null) {
-                    return;
+                    continue;
                 }
 
                 int quantityToSpawn = toSpawn.getQuantity() != null ? toSpawn.getQuantity().get() : 1;
                 for (int i = 0; i < quantityToSpawn; i++) {
                     spawnLocation.spawnEntity(spawnLocation.createEntity(entityType));
                 }
-            });
+            }
         });
     }
 

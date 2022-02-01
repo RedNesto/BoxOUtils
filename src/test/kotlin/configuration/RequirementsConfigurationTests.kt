@@ -24,7 +24,6 @@
 package io.github.rednesto.bou.tests.configuration
 
 import com.google.common.base.MoreObjects
-import com.google.common.reflect.TypeToken
 import io.github.rednesto.bou.api.customdrops.CustomLootProcessingContext
 import io.github.rednesto.bou.api.requirement.AbstractRequirement
 import io.github.rednesto.bou.api.requirement.Requirement
@@ -34,15 +33,14 @@ import io.github.rednesto.bou.config.serializers.RequirementSerializer
 import io.github.rednesto.bou.config.serializers.RequirementsMapSerializer
 import io.github.rednesto.bou.tests.framework.BouFixture
 import io.github.rednesto.bou.tests.framework.ConfigurationTestCase
-import ninja.leaping.configurate.ConfigurationNode
-import ninja.leaping.configurate.objectmapping.serialize.TypeSerializerCollection
+import io.leangen.geantyref.TypeToken
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.spongepowered.api.util.TypeTokens
+import org.spongepowered.configurate.ConfigurationNode
+import org.spongepowered.configurate.serialize.TypeSerializerCollection
 import java.nio.file.Paths
 import java.util.*
-import kotlin.collections.ArrayList
 
 private val TOKEN = object : TypeToken<MutableList<MutableList<Requirement>>>() {}
 
@@ -102,14 +100,14 @@ requirements=[
         assertEquals(expected, loaded)
     }
 
-    override fun populateSerializers(serializers: TypeSerializerCollection) {
-        serializers.registerType(BouTypeTokens.REQUIREMENT, RequirementSerializer())
-                .registerType(BouTypeTokens.REQUIREMENTS_MAP, RequirementsMapSerializer())
+    override fun populateSerializers(builder: TypeSerializerCollection.Builder) {
+        builder.register(BouTypeTokens.REQUIREMENT, RequirementSerializer())
+                .register(BouTypeTokens.REQUIREMENTS_MAP, RequirementsMapSerializer())
     }
 
     override fun loadConfig(configuration: String): MutableList<MutableList<Requirement>> {
         val rootNode = configHelper.loadNode(configuration)
-        return RequirementSerializer.getRequirementGroups(rootNode.getNode("requirements"))
+        return RequirementSerializer.getRequirementGroups(rootNode.node("requirements"))
     }
 
     @BeforeEach
@@ -118,10 +116,10 @@ requirements=[
         val integrationsManager = pluginFixture.plugin.integrationsManager.requirementsProviderIntegrations
         integrationsManager.register(TestRequirement.Provider("bou-test:req1") { it.string!! }, true)
         integrationsManager.register(TestRequirement.Provider("bou-test:req2") {
-            ArrayList(it.getList(TypeTokens.STRING_TOKEN))
+            it.getList(String::class.java, emptyList())
         }, true)
         integrationsManager.register(TestRequirement.Provider("bou-test:req3") {
-            RequirementDataStruct(it.getNode("str").string!!, it.getNode("int").int)
+            RequirementDataStruct(it.node("str").string!!, it.node("int").int)
         }, true)
     }
 }

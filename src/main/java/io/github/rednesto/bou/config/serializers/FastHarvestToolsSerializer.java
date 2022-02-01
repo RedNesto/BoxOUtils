@@ -23,32 +23,31 @@
  */
 package io.github.rednesto.bou.config.serializers;
 
-import com.google.common.reflect.TypeToken;
 import io.github.rednesto.bou.api.fastharvest.FastHarvestTools;
-import ninja.leaping.configurate.ConfigurationNode;
-import ninja.leaping.configurate.objectmapping.ObjectMappingException;
-import ninja.leaping.configurate.objectmapping.serialize.TypeSerializer;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.util.TypeTokens;
+import org.spongepowered.configurate.ConfigurationNode;
+import org.spongepowered.configurate.serialize.SerializationException;
+import org.spongepowered.configurate.serialize.TypeSerializer;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class FastHarvestToolsSerializer implements TypeSerializer<FastHarvestTools> {
 
     @Override
-    public @Nullable FastHarvestTools deserialize(@NonNull TypeToken<?> type, @NonNull ConfigurationNode value) throws ObjectMappingException {
-        boolean enabled = value.getNode("enabled").getBoolean();
-        boolean damageOnUse = value.getNode("damage_on_use").getBoolean(true);
-        boolean isWhitelist = value.getNode("is_whitelist").getBoolean(true);
-        List<String> tools = new ArrayList<>(value.getNode("tools").getList(TypeTokens.STRING_TOKEN));
+    public @Nullable FastHarvestTools deserialize(Type type, ConfigurationNode value) throws SerializationException {
+        boolean enabled = value.node("enabled").getBoolean();
+        boolean damageOnUse = value.node("damage_on_use").getBoolean(true);
+        boolean isWhitelist = value.node("is_whitelist").getBoolean(true);
+        List<String> tools = new ArrayList<>(value.node("tools").getList(String.class, Collections.emptyList()));
 
         return new FastHarvestTools(enabled, damageOnUse, isWhitelist, tools);
     }
 
     @Override
-    public void serialize(@NonNull TypeToken<?> type, @Nullable FastHarvestTools obj, @NonNull ConfigurationNode value) {
-        throw new UnsupportedOperationException();
+    public void serialize(Type type, @Nullable FastHarvestTools obj, ConfigurationNode value) throws SerializationException {
+        throw new SerializationException("FastHarvestTools cannot be serialized");
     }
 }

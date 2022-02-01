@@ -27,15 +27,13 @@ import io.github.rednesto.bou.api.customdrops.*
 import io.github.rednesto.bou.api.lootReuse.LootReuse
 import io.github.rednesto.bou.api.quantity.IntQuantity
 import io.github.rednesto.bou.api.requirement.Requirement
-import io.github.rednesto.bou.integration.byteitems.ByteItemsCustomDropsProvider
 import io.github.rednesto.bou.integration.customdrops.recipients.ContextLocationLootRecipient
-import io.github.rednesto.bou.integration.fileinventories.FileInventoriesCustomDropsProvider
 import io.github.rednesto.bou.integration.vanilla.VanillaCustomDropsProvider
-import org.spongepowered.api.entity.living.player.Player
+import org.spongepowered.api.ResourceKey
+import org.spongepowered.api.entity.living.player.server.ServerPlayer
+import org.spongepowered.api.event.Cause
 import org.spongepowered.api.event.Event
-import org.spongepowered.api.event.cause.Cause
-import org.spongepowered.api.world.Location
-import org.spongepowered.api.world.World
+import org.spongepowered.api.world.server.ServerLocation
 
 fun customLoot(
         dropsProviders: List<CustomDropsProvider> = emptyList(),
@@ -51,38 +49,38 @@ fun customLoot(
 
 fun customReuse(
         multiplier: Float = 1f,
-        items: Map<String, LootReuse> = emptyMap(),
+        items: Map<ResourceKey, LootReuse> = emptyMap(),
         requirements: List<List<Requirement>> = emptyList()
 ) = CustomLoot.Reuse(multiplier, items, requirements)
 
 fun vanillaDrop(
-        id: String,
+        id: ResourceKey,
         displayname: String? = null,
         chance: Double = 0.0,
         quantity: IntQuantity? = null,
         unsafeDamage: Int? = null
 ) = VanillaCustomDropsProvider(id, displayname, chance, quantity, unsafeDamage)
 
-fun byteItemsDrop(
-        id: String,
-        displayname: String? = null,
-        chance: Double = 0.0,
-        quantity: IntQuantity? = null
-) = ByteItemsCustomDropsProvider(id, displayname, chance, quantity)
-
-fun fileInvDrop(
-        id: String,
-        displayname: String? = null,
-        chance: Double = 0.0,
-        quantity: IntQuantity? = null
-) = FileInventoriesCustomDropsProvider(id, displayname, chance, quantity)
+//fun byteItemsDrop(
+//        id: String,
+//        displayname: String? = null,
+//        chance: Double = 0.0,
+//        quantity: IntQuantity? = null
+//) = ByteItemsCustomDropsProvider(id, displayname, chance, quantity)
+//
+//fun fileInvDrop(
+//        id: String,
+//        displayname: String? = null,
+//        chance: Double = 0.0,
+//        quantity: IntQuantity? = null
+//) = FileInventoriesCustomDropsProvider(id, displayname, chance, quantity)
 
 fun lootProcessingContext(
         loots: List<CustomLoot>,
         source: Any,
         cause: Cause,
         event: Event? = null,
-        targetPlayer: Player? = null,
-        targetLocation: Location<World>? = null,
-        experienceSpawnLocation: Location<World>? = null
+        targetPlayer: ServerPlayer? = null,
+        targetLocation: ServerLocation? = null,
+        experienceSpawnLocation: ServerLocation? = null
 ) = CustomLootProcessingContext(loots, event, source, cause, targetPlayer, targetLocation, experienceSpawnLocation)

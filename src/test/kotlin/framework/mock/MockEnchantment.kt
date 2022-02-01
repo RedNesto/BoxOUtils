@@ -23,17 +23,17 @@
  */
 package io.github.rednesto.bou.tests.framework.mock
 
-import org.spongepowered.api.data.DataContainer
+import org.spongepowered.api.data.persistence.DataContainer
 import org.spongepowered.api.item.enchantment.Enchantment
 import org.spongepowered.api.item.enchantment.EnchantmentType
 
 class MockEnchantment(private val type: EnchantmentType, private val level: Int) : Enchantment {
 
-    override fun toContainer(): DataContainer = throw NotImplementedError("MockPlayer method not implemented")
+    override fun type(): EnchantmentType = type
 
-    override fun getType(): EnchantmentType = type
+    override fun level(): Int = level
 
-    override fun getLevel(): Int = level
+    override fun contentVersion(): Int = throw NotImplementedError("MockEnchantment method not implemented")
 
-    override fun getContentVersion(): Int = throw NotImplementedError("MockPlayer method not implemented")
+    override fun toContainer(): DataContainer = throw NotImplementedError("MockEnchantment method not implemented")
 }

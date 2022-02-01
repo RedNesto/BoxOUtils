@@ -23,27 +23,28 @@
  */
 package io.github.rednesto.bou.config.serializers;
 
-import com.google.common.reflect.TypeToken;
 import io.github.rednesto.bou.api.customdrops.CustomLootRecipient;
 import io.github.rednesto.bou.api.customdrops.CustomLootRecipientProvider;
 import io.github.rednesto.bou.api.customdrops.CustomLootRecipientProviderIntegrations;
-import ninja.leaping.configurate.ConfigurationNode;
-import ninja.leaping.configurate.objectmapping.serialize.TypeSerializer;
-import org.checkerframework.checker.nullness.qual.NonNull;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.spongepowered.configurate.ConfigurationNode;
+import org.spongepowered.configurate.serialize.SerializationException;
+import org.spongepowered.configurate.serialize.TypeSerializer;
+
+import java.lang.reflect.Type;
 
 public class CustomLootRecipientSerializer implements TypeSerializer<CustomLootRecipient> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(CustomLootRecipientSerializer.class);
+    private static final Logger LOGGER = LogManager.getLogger(CustomLootRecipientSerializer.class);
 
     @Override
-    public @Nullable CustomLootRecipient deserialize(@NonNull TypeToken<?> type, @NonNull ConfigurationNode value) {
-        String providerId = value.getString();
-        ConfigurationNode recipientConfigNode = null;
+    public @Nullable CustomLootRecipient deserialize(Type type, ConfigurationNode value) {
+        @Nullable String providerId = value.getString();
+        @Nullable ConfigurationNode recipientConfigNode = null;
         if (providerId == null) {
-            providerId = value.getNode("id").getString();
+            providerId = value.node("id").getString();
             recipientConfigNode = value;
             if (providerId == null) {
                 return null;
@@ -51,7 +52,7 @@ public class CustomLootRecipientSerializer implements TypeSerializer<CustomLootR
         }
 
         CustomLootRecipientProviderIntegrations recipientProviderIntegrations = CustomLootRecipientProviderIntegrations.getInstance();
-        CustomLootRecipientProvider provider = recipientProviderIntegrations.getById(providerId, true);
+        @Nullable CustomLootRecipientProvider provider = recipientProviderIntegrations.getById(providerId, true);
         if (provider == null){
             return null;
         }
@@ -65,7 +66,7 @@ public class CustomLootRecipientSerializer implements TypeSerializer<CustomLootR
     }
 
     @Override
-    public void serialize(@NonNull TypeToken<?> type, @Nullable CustomLootRecipient obj, @NonNull ConfigurationNode value) {
-        throw new UnsupportedOperationException();
+    public void serialize(Type type, @Nullable CustomLootRecipient obj, ConfigurationNode value) throws SerializationException {
+        //throw new SerializationException("CustomLootRecipient cannot be serialized");
     }
 }

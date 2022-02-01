@@ -23,27 +23,32 @@
  */
 package io.github.rednesto.bou;
 
+import io.github.rednesto.bou.api.BouEventContextKeys;
 import io.github.rednesto.bou.api.customdrops.*;
 import io.github.rednesto.bou.api.lootReuse.LootReuse;
 import io.github.rednesto.bou.api.requirement.Requirement;
 import io.github.rednesto.bou.integration.customdrops.recipients.ContextLocationLootRecipient;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.spongepowered.api.data.key.Keys;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.entity.Item;
+import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.entity.AffectEntityEvent;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
+import org.spongepowered.api.registry.RegistryTypes;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.BiConsumer;
 
 public class CustomDropsProcessor {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(CustomDropsProcessor.class);
+    private static final Logger LOGGER = LogManager.getLogger(CustomDropsProcessor.class);
 
     public static void handleDropItemEvent(AffectEntityEvent event, CustomLoot customLoot, CustomLootProcessingContext context) {
         if (customLoot.isOverwrite()) {
@@ -51,25 +56,25 @@ public class CustomDropsProcessor {
             return;
         }
 
-        CustomLoot.Reuse reuse = customLoot.getReuse();
-        if (reuse != null) {
+        CustomLoot.@Nullable Reuse reuse = customLoot.getReuse();
+        List<Entity> additionalItems = Collections.emptyList();
+        if (reuse != null && !event.context().get(BouEventContextKeys.IS_REUSE_DROPS).orElse(false)) {
             if (!fulfillsRequirements(context, reuse.getRequirements())) {
                 return;
             }
 
-            List<? extends Entity> droppedItems = event.filterEntities(test -> !(test instanceof Item));
-            if (droppedItems.isEmpty()) {
+            List<? extends Entity> spawnedEntities = event.entities();
+            if (spawnedEntities.isEmpty()) {
                 return;
             }
 
-            List<Entity> newDroppedItems = computeItemsReuse(droppedItems, reuse);
-            event.getEntities().addAll(newDroppedItems);
+            additionalItems = computeItemsReuse(spawnedEntities, reuse);
         }
 
         CustomLootRecipient recipient = customLoot.getRecipient();
         if (customLoot.isRedirectBaseDropsToRecipient() && !recipient.equals(ContextLocationLootRecipient.INSTANCE)) {
             event.filterEntities(entity -> {
-                ItemStack itemStack = entity.get(Keys.REPRESENTED_ITEM)
+                @Nullable ItemStack itemStack = entity.get(Keys.ITEM_STACK_SNAPSHOT)
                         .map(ItemStackSnapshot::createStack)
                         .orElse(null);
                 if (itemStack != null) {
@@ -78,6 +83,19 @@ public class CustomDropsProcessor {
                 }
                 return true;
             });
+            try (CauseStackManager.StackFrame stackFrame = Sponge.server().causeStackManager().pushCauseFrame()) {
+                stackFrame.addContext(BouEventContextKeys.IS_REUSE_DROPS, true);
+                for (Entity additionalItem : additionalItems) {
+                    additionalItem.get(Keys.ITEM_STACK_SNAPSHOT)
+                            .map(ItemStackSnapshot::createStack)
+                            .ifPresent(itemStack -> recipient.receive(context, itemStack));
+                }
+            }
+        } else {
+            try (CauseStackManager.StackFrame stackFrame = Sponge.server().causeStackManager().pushCauseFrame()) {
+                stackFrame.addContext(BouEventContextKeys.IS_REUSE_DROPS, true);
+                context.getTargetLocation().world().spawnEntities(additionalItems);
+            }
         }
     }
 
@@ -135,11 +153,11 @@ public class CustomDropsProcessor {
         }
     }
 
-    public static List<Entity> computeItemsReuse(List<? extends Entity> originalDroppedItems, CustomLoot.Reuse reuse) {
-        ArrayList<Entity> result = new ArrayList<>();
+    public static List<Entity> computeItemsReuse(List<? extends Entity> spawnedEntities, CustomLoot.Reuse reuse) {
+        ArrayList<Entity> additionalItems = new ArrayList<>();
         ArrayList<ItemStack> reuseResult = new ArrayList<>();
-        for (Entity itemEntity : originalDroppedItems) {
-            ItemStackSnapshot originalItem = itemEntity.get(Keys.REPRESENTED_ITEM).orElse(null);
+        for (Entity spawnedEntity : spawnedEntities) {
+            @Nullable ItemStackSnapshot originalItem = spawnedEntity.get(Keys.ITEM_STACK_SNAPSHOT).orElse(null);
             if (originalItem == null) {
                 continue;
             }
@@ -149,44 +167,44 @@ public class CustomDropsProcessor {
                 continue;
             }
 
-            if (reuseResult.size() == 1) {
-                ItemStackSnapshot itemSnapshot = reuseResult.get(0).createSnapshot();
-                itemEntity.offer(Keys.REPRESENTED_ITEM, itemSnapshot);
-                result.add(itemEntity);
-            } else {
+            ItemStackSnapshot itemSnapshot = reuseResult.get(0).createSnapshot();
+            spawnedEntity.offer(Keys.ITEM_STACK_SNAPSHOT, itemSnapshot);
+
+            if (reuseResult.size() > 1) {
+                reuseResult.remove(0);
                 reuseResult.forEach(itemStack -> {
-                    ItemStackSnapshot itemSnapshot = itemStack.createSnapshot();
-                    Entity entityCopy = ((Entity) itemEntity.copy());
-                    entityCopy.offer(Keys.REPRESENTED_ITEM, itemSnapshot);
-                    result.add(entityCopy);
+                    ItemStackSnapshot additionalItemStack = itemStack.createSnapshot();
+                    Entity entityCopy = spawnedEntity.copy();
+                    entityCopy.offer(Keys.ITEM_STACK_SNAPSHOT, additionalItemStack);
+                    additionalItems.add(entityCopy);
                 });
             }
 
             reuseResult.clear();
         }
 
-        return result;
+        return additionalItems;
     }
 
     public static void computeSingleItemReuse(CustomLoot.Reuse reuse, List<ItemStack> result, ItemStack originalItem) {
         int reuseQuantity;
-        LootReuse lootReuse = reuse.getItems().get(originalItem.getType().getId());
+        LootReuse lootReuse = reuse.getItems().get(RegistryTypes.ITEM_TYPE.keyFor(Sponge.game(), originalItem.type()));
         if (lootReuse != null) {
-            reuseQuantity = lootReuse.computeQuantity(originalItem.getQuantity());
+            reuseQuantity = lootReuse.computeQuantity(originalItem.quantity());
         } else {
-            reuseQuantity = Math.round(originalItem.getQuantity() * reuse.getMultiplier());
+            reuseQuantity = Math.round(originalItem.quantity() * reuse.getMultiplier());
         }
 
         if (reuseQuantity <= 0) {
             return;
         }
 
-        if (reuseQuantity == originalItem.getQuantity()) {
+        if (reuseQuantity == originalItem.quantity()) {
             result.add(originalItem);
             return;
         }
 
-        int maxStackQuantity = originalItem.getType().getMaxStackQuantity();
+        int maxStackQuantity = originalItem.type().maxStackQuantity();
         if (reuseQuantity <= maxStackQuantity) {
             originalItem.setQuantity(reuseQuantity);
             result.add(originalItem);

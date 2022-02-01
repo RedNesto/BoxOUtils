@@ -29,21 +29,24 @@ import io.github.rednesto.bou.api.requirement.AbstractRequirement;
 import io.github.rednesto.bou.api.requirement.Requirement;
 import io.github.rednesto.bou.api.requirement.RequirementConfigurationException;
 import io.github.rednesto.bou.api.requirement.RequirementProvider;
-import ninja.leaping.configurate.ConfigurationNode;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.Transaction;
-import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.type.Fish;
-import org.spongepowered.api.data.type.Fishes;
 import org.spongepowered.api.event.action.FishingEvent;
+import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
+import org.spongepowered.api.registry.RegistryTypes;
+import org.spongepowered.configurate.ConfigurationNode;
+import org.spongepowered.configurate.serialize.SerializationException;
 
-import java.util.Locale;
+import java.util.Objects;
 
 public class CaughtFishRequirement extends AbstractRequirement {
 
-    private final FishType fishType;
+    private final ResourceKey fishType;
 
-    public CaughtFishRequirement(FishType fishType) {
+    public CaughtFishRequirement(ResourceKey fishType) {
         super("caught-fish");
         this.fishType = fishType;
     }
@@ -55,22 +58,12 @@ public class CaughtFishRequirement extends AbstractRequirement {
 
     @Override
     public boolean fulfills(CustomLootProcessingContext context) {
-        FishingEvent.Stop event = (FishingEvent.Stop) context.getEvent();
-        for (Transaction<ItemStackSnapshot> transaction : event.getTransactions()) {
-            Fish fish = transaction.getFinal().get(Keys.FISH_TYPE).orElse(null);
-            if (fish == null) {
-                continue;
-            }
-
-            switch (this.fishType) {
-                case CLOWNFISH:
-                    return fish.equals(Fishes.CLOWNFISH);
-                case COD:
-                    return fish.equals(Fishes.COD);
-                case PUFFERFISH:
-                    return fish.equals(Fishes.PUFFERFISH);
-                case SALMON:
-                    return fish.equals(Fishes.SALMON);
+        FishingEvent.Stop event = (FishingEvent.Stop) Objects.requireNonNull(context.getEvent());
+        for (Transaction<ItemStackSnapshot> transaction : event.transactions()) {
+            ItemType itemType = transaction.finalReplacement().type();
+            ResourceKey itemTypeId = RegistryTypes.ITEM_TYPE.keyFor(Sponge.game(), itemType);
+            if (this.fishType.equals(itemTypeId)) {
+                return true;
             }
         }
         return false;
@@ -100,13 +93,6 @@ public class CaughtFishRequirement extends AbstractRequirement {
                 .toString();
     }
 
-    public enum FishType {
-        CLOWNFISH,
-        COD,
-        PUFFERFISH,
-        SALMON
-    }
-
     public static class Provider implements RequirementProvider {
 
         @Override
@@ -116,16 +102,14 @@ public class CaughtFishRequirement extends AbstractRequirement {
 
         @Override
         public Requirement provide(ConfigurationNode node) throws RequirementConfigurationException {
-            String id = node.getString();
-            if (id == null) {
-                throw new RequirementConfigurationException("Value is not a String");
-            }
-
             try {
-                FishType fishType = FishType.valueOf(id.toUpperCase(Locale.ROOT));
-                return new CaughtFishRequirement(fishType);
-            } catch (IllegalArgumentException e) {
-                throw new RequirementConfigurationException("FishType " + id + " is not valid");
+                @Nullable ResourceKey id = node.get(ResourceKey.class);
+                if (id == null) {
+                    throw new RequirementConfigurationException("Fish type must be set");
+                }
+                return new CaughtFishRequirement(id);
+            } catch (SerializationException e) {
+                throw new RequirementConfigurationException("Fish type is not valid", e);
             }
         }
     }

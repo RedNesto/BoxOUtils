@@ -29,20 +29,23 @@ import io.github.rednesto.bou.api.customdrops.CustomLoot;
 import io.github.rednesto.bou.api.customdrops.CustomLootProcessingContext;
 import io.github.rednesto.bou.api.fastharvest.FastHarvestCrop;
 import io.github.rednesto.bou.api.fastharvest.FastHarvestTools;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.mutable.item.DurabilityData;
-import org.spongepowered.api.data.type.DyeColors;
+import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.data.type.HandType;
+import org.spongepowered.api.data.type.HandTypes;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityTypes;
-import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.CauseStackManager;
+import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.block.InteractBlockEvent;
-import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
+import org.spongepowered.api.event.filter.cause.ContextValue;
 import org.spongepowered.api.event.filter.cause.First;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.ItemTypes;
@@ -50,12 +53,12 @@ import org.spongepowered.api.item.enchantment.Enchantment;
 import org.spongepowered.api.item.enchantment.EnchantmentTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
-import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.World;
+import org.spongepowered.api.registry.DefaultedRegistryReference;
+import org.spongepowered.api.registry.RegistryTypes;
+import org.spongepowered.api.util.Ticks;
+import org.spongepowered.api.world.server.ServerLocation;
 
 import java.util.*;
-
-import javax.annotation.Nullable;
 
 import static io.github.rednesto.bou.Config.FastHarvest;
 
@@ -68,7 +71,7 @@ public class FastHarvestListener implements SpongeConfig.ReloadableListener {
         DEFINITIONS.put("minecraft:carrots", new CropDefinition(7, ItemTypes.CARROT, 3, null, 0));
         DEFINITIONS.put("minecraft:potatoes", new CropDefinition(7, ItemTypes.POTATO, 3, null, 0));
         DEFINITIONS.put("minecraft:beetroots", new CropDefinition(3, ItemTypes.BEETROOT_SEEDS, 3, ItemTypes.BEETROOT, 0));
-        DEFINITIONS.put("minecraft:cocoa", new CropDefinition(2, ItemTypes.DYE, 3, null, 0));
+        DEFINITIONS.put("minecraft:cocoa", new CropDefinition(2, ItemTypes.COCOA_BEANS, 3, null, 0));
         DEFINITIONS.put("minecraft:nether_wart", new CropDefinition(3, ItemTypes.NETHER_WART, 2, null, 0));
     }
 
@@ -77,31 +80,33 @@ public class FastHarvestListener implements SpongeConfig.ReloadableListener {
     private final IdSelector.Cache productIdsMappingCache = new IdSelector.Cache();
 
     @Listener
-    public void onSecondaryClick(InteractBlockEvent.Secondary.MainHand event, @First Player player) {
+    public void onSecondaryClick(InteractBlockEvent.Secondary event, @First ServerPlayer player, @ContextValue("USED_HAND") HandType usedHand) {
         FastHarvest fastHarvest = Config.getFastHarvest();
-        if (!fastHarvest.enabled) {
+        if (!fastHarvest.enabled || usedHand != HandTypes.MAIN_HAND.get()) { // FIXME Sponge is sending the Secondary event for both hands (╯°□°）╯︵ ┻━┻
             return;
         }
 
-        BlockSnapshot targetBlock = event.getTargetBlock();
-        CropDefinition cropDefinition = DEFINITIONS.get(targetBlock.getState().getType().getId());
+        BlockSnapshot targetBlock = event.block();
+        ResourceKey blockId = RegistryTypes.BLOCK_TYPE.keyFor(Sponge.game(), targetBlock.state().type());
+        CropDefinition cropDefinition = DEFINITIONS.get(blockId.formatted());
         if (cropDefinition == null) {
             return;
         }
 
-        ItemStack itemInHand = player.getItemInHand(event.getHandType()).orElse(ItemStack.empty());
+        ItemStackSnapshot usedItem = event.context().get(EventContextKeys.USED_ITEM).orElseGet(ItemStackSnapshot::empty);
         int age = targetBlock.get(Keys.GROWTH_STAGE).orElse(0);
         int maxAge = cropDefinition.maxAge;
-        if (!Config.canHarvest(itemInHand.getType().getId()) || age != maxAge) {
+        ResourceKey usedItemId = RegistryTypes.ITEM_TYPE.keyFor(Sponge.game(), usedItem.type());
+        if (!Config.canHarvest(usedItemId.formatted()) || age != maxAge) {
             return;
         }
 
-        Location<World> entitiesSpawnLocation = SpongeUtils.getCenteredLocation(targetBlock, player.getWorld());
+        ServerLocation entitiesSpawnLocation = SpongeUtils.getCenteredLocation(targetBlock, player.world());
 
         Map<String, List<CustomLoot>> drops = Config.getBlocksDrops().drops;
-        List<CustomLoot> customLoots = blocksDropIdsMappingCache.get(drops, targetBlock.getState().getType().getId());
+        @Nullable List<CustomLoot> customLoots = blocksDropIdsMappingCache.get(drops, blockId.formatted());
         List<CustomLoot> lootsToUse = Collections.emptyList();
-        CustomLootProcessingContext processingContext = new CustomLootProcessingContext(lootsToUse, event, targetBlock, event.getCause(), player, entitiesSpawnLocation);
+        CustomLootProcessingContext processingContext = new CustomLootProcessingContext(lootsToUse, event, targetBlock, event.cause(), player, entitiesSpawnLocation);
         if (customLoots != null) {
             lootsToUse = CustomDropsProcessor.getLootsToUse(customLoots, processingContext);
         }
@@ -111,7 +116,7 @@ public class FastHarvestListener implements SpongeConfig.ReloadableListener {
             CustomDropsProcessor.dropLoot(processingContext);
         }
 
-        try (CauseStackManager.StackFrame stackFrame = Sponge.getCauseStackManager().pushCauseFrame()) {
+        try (CauseStackManager.StackFrame stackFrame = Sponge.server().causeStackManager().pushCauseFrame()) {
             if (!processingContext.getLoots().isEmpty()) {
                 stackFrame.addContext(BouEventContextKeys.CUSTOM_LOOT_PROCESSING_CONTEXT, processingContext);
             }
@@ -131,17 +136,17 @@ public class FastHarvestListener implements SpongeConfig.ReloadableListener {
             }
 
             if (!overwrite) {
-                FastHarvestCrop seedConfig;
-                FastHarvestCrop productConfig = null;
-                ItemType productType = cropDefinition.product;
+                @Nullable FastHarvestCrop seedConfig;
+                @Nullable FastHarvestCrop productConfig = null;
+                @Nullable DefaultedRegistryReference<ItemType> productType = cropDefinition.product;
                 if (cropsControl.enabled) {
-                    seedConfig = seedIdsMappingCache.get(cropsControl.crops, cropDefinition.seed.getId());
+                    seedConfig = seedIdsMappingCache.get(cropsControl.crops, cropDefinition.seed.location().formatted());
                     if (productType != null) {
-                        productConfig = productIdsMappingCache.get(cropsControl.crops, productType.getId());
+                        productConfig = productIdsMappingCache.get(cropsControl.crops, productType.location().formatted());
                     }
                 } else {
 
-                    if (cropDefinition.seed == ItemTypes.DYE) {
+                    if (cropDefinition.seed.get().isAnyOf(ItemTypes.COCOA_BEANS.get())) {
                         seedConfig = new FastHarvestCrop(-1, -1, 0, 1, 3);
                     } else {
                         seedConfig = FastHarvestCrop.createDefault(cropDefinition.seedCount);
@@ -152,11 +157,11 @@ public class FastHarvestListener implements SpongeConfig.ReloadableListener {
                     }
                 }
 
-                int fortuneLevel = event.getContext().get(EventContextKeys.USED_ITEM)
-                        .flatMap(item -> item.get(Keys.ITEM_ENCHANTMENTS))
+                int fortuneLevel = event.context().get(EventContextKeys.USED_ITEM)
+                        .flatMap(item -> item.get(Keys.APPLIED_ENCHANTMENTS))
                         .flatMap(enchantments -> enchantments.stream()
-                                .filter(enchantment -> enchantment.getType().equals(EnchantmentTypes.FORTUNE))
-                                .map(Enchantment::getLevel)
+                                .filter(enchantment -> enchantment.type().equals(EnchantmentTypes.FORTUNE.get()))
+                                .map(Enchantment::level)
                                 .findFirst())
                         .orElse(0);
 
@@ -171,24 +176,22 @@ public class FastHarvestListener implements SpongeConfig.ReloadableListener {
             }
         }
 
-        targetBlock.getLocation().ifPresent(location -> {
-            BlockState oldState = targetBlock.getState();
+        targetBlock.location().ifPresent(location -> {
+            BlockState oldState = targetBlock.state();
             BlockState newState = oldState.with(Keys.GROWTH_STAGE, 0).orElse(oldState);
             location.setBlock(newState);
         });
 
         FastHarvestTools fhTools = fastHarvest.tools;
         if (fhTools.isDamageOnUse()) {
-            itemInHand.get(DurabilityData.class).map(DurabilityData::durability).ifPresent(durability -> {
-                durability.set(durability.get() - 1);
-                itemInHand.offer(durability);
-            });
+            player.itemInHand(usedHand).transform(Keys.ITEM_DURABILITY, durability -> durability - 1);
         }
     }
 
     private static void process(int age, int maxAge, int fortuneLevel, FastHarvestCrop cropConfig,
-                                ItemType itemType, boolean decrementQuantity, boolean dropInWorld, CustomLootProcessingContext context) {
-        ItemStack itemStack = createItemStack(age, maxAge, fortuneLevel, cropConfig, itemType, decrementQuantity);
+                                DefaultedRegistryReference<ItemType> itemType, boolean decrementQuantity, boolean dropInWorld,
+                                CustomLootProcessingContext context) {
+        @Nullable ItemStack itemStack = createItemStack(age, maxAge, fortuneLevel, cropConfig, itemType, decrementQuantity);
         if (itemStack == null) {
             return;
         }
@@ -197,33 +200,37 @@ public class FastHarvestListener implements SpongeConfig.ReloadableListener {
             if (dropInWorld && context.getTargetLocation() != null) {
                 spawnItem(context.getTargetLocation(), itemStack);
             } else if (context.getTargetPlayer() != null) {
-                context.getTargetPlayer().getInventory().offer(itemStack);
+                context.getTargetPlayer().inventory().offer(itemStack);
             }
             return;
         }
 
-        for (CustomLoot loot : context.getLoots()) {
-            CustomLoot.Reuse reuse = loot.getReuse();
-            if (reuse == null) {
-                continue;
+        try (CauseStackManager.StackFrame reuseFrame = Sponge.server().causeStackManager().pushCauseFrame()) {
+            reuseFrame.addContext(BouEventContextKeys.IS_REUSE_DROPS, true);
+
+            for (CustomLoot loot : context.getLoots()) {
+                CustomLoot.@Nullable Reuse reuse = loot.getReuse();
+                if (reuse == null) {
+                    continue;
+                }
+
+                List<ItemStack> reuseResult = new ArrayList<>();
+                CustomDropsProcessor.computeSingleItemReuse(reuse, reuseResult, itemStack);
+
+                CustomLootProcessingContext reuseContext = context.withLoots(Collections.singletonList(loot));
+                reuseResult.forEach(item -> loot.getRecipient().receive(reuseContext, item));
             }
-
-            List<ItemStack> reuseResult = new ArrayList<>();
-            CustomDropsProcessor.computeSingleItemReuse(reuse, reuseResult, itemStack);
-
-            CustomLootProcessingContext reuseContext = context.withLoots(Collections.singletonList(loot));
-            reuseResult.forEach(item -> loot.getRecipient().receive(reuseContext, item));
         }
     }
 
     @Listener
     public void onFastHarvestCropsSpawn(SpawnEntityEvent.Custom event, @First BlockSnapshot blockSnapshot) {
-        boolean isFastHarvesting = event.getContext().get(BouEventContextKeys.IS_FAST_HARVESTING).orElse(false);
+        boolean isFastHarvesting = event.context().get(BouEventContextKeys.IS_FAST_HARVESTING).orElse(false);
         if (!isFastHarvesting) {
             return;
         }
 
-        CustomLootProcessingContext processingContext = event.getContext().get(BouEventContextKeys.CUSTOM_LOOT_PROCESSING_CONTEXT).orElse(null);
+        @Nullable CustomLootProcessingContext processingContext = event.context().get(BouEventContextKeys.CUSTOM_LOOT_PROCESSING_CONTEXT).orElse(null);
         if (processingContext == null) {
             return;
         }
@@ -242,7 +249,7 @@ public class FastHarvestListener implements SpongeConfig.ReloadableListener {
 
     @Nullable
     private static ItemStack createItemStack(int age, int maxAge, int fortuneLevel, FastHarvestCrop cropConfig,
-                                             ItemType itemType, boolean decrementQuantity) {
+                                             DefaultedRegistryReference<ItemType> itemType, boolean decrementQuantity) {
         CropsAlgorithm algorithm = CropsAlgorithm.ALG_19;
         if (itemType == ItemTypes.NETHER_WART) {
             algorithm = CropsAlgorithm.NETHER_WART;
@@ -254,35 +261,30 @@ public class FastHarvestListener implements SpongeConfig.ReloadableListener {
         }
 
         if (quantity > 0) {
-            final ItemStack stack = ItemStack.of(itemType, quantity);
-            if (itemType == ItemTypes.DYE) {
-                stack.offer(Keys.DYE_COLOR, DyeColors.BROWN);
-            }
-
-            return stack;
+            return ItemStack.of(itemType, quantity);
         }
 
         return null;
     }
 
-    private static void spawnItem(Location<World> spawnLocation, ItemStack itemStack) {
+    private static void spawnItem(ServerLocation spawnLocation, ItemStack itemStack) {
         ItemStackSnapshot representedItem = itemStack.createSnapshot();
-        Entity entity = spawnLocation.createEntity(EntityTypes.ITEM);
-        entity.offer(Keys.REPRESENTED_ITEM, representedItem);
-        entity.offer(Keys.PICKUP_DELAY, 10);
+        Entity entity = spawnLocation.createEntity(EntityTypes.ITEM.get());
+        entity.offer(Keys.ITEM_STACK_SNAPSHOT, representedItem);
+        entity.offer(Keys.PICKUP_DELAY, Ticks.of(10));
         spawnLocation.spawnEntity(entity);
     }
 
     private static class CropDefinition {
 
         private final int maxAge;
-        private final ItemType seed;
+        private final DefaultedRegistryReference<ItemType> seed;
         private final int seedCount;
-        @Nullable
-        private final ItemType product;
+        private final @Nullable DefaultedRegistryReference<ItemType> product;
         private final int productCount;
 
-        private CropDefinition(int maxAge, ItemType seed, int seedCount, @Nullable ItemType product, int productCount) {
+        private CropDefinition(int maxAge, DefaultedRegistryReference<ItemType> seed, int seedCount,
+                               @Nullable DefaultedRegistryReference<ItemType> product, int productCount) {
             this.maxAge = maxAge;
             this.seed = seed;
             this.seedCount = seedCount;

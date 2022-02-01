@@ -23,30 +23,28 @@
  */
 package io.github.rednesto.bou;
 
-import com.google.common.reflect.TypeToken;
-import com.typesafe.config.ConfigParseOptions;
-import io.github.rednesto.bou.config.SimpleConfigIncluderFile;
 import io.github.rednesto.bou.config.serializers.*;
 import io.github.rednesto.bou.listeners.*;
-import ninja.leaping.configurate.ConfigurationNode;
-import ninja.leaping.configurate.ConfigurationOptions;
-import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
-import ninja.leaping.configurate.objectmapping.ObjectMappingException;
-import ninja.leaping.configurate.objectmapping.serialize.TypeSerializerCollection;
-import ninja.leaping.configurate.objectmapping.serialize.TypeSerializers;
+import io.leangen.geantyref.TypeToken;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.asset.Asset;
+import org.spongepowered.configurate.ConfigurationNode;
+import org.spongepowered.configurate.ConfigurationOptions;
+import org.spongepowered.configurate.hocon.HoconConfigurationLoader;
+import org.spongepowered.configurate.serialize.SerializationException;
+import org.spongepowered.configurate.serialize.TypeSerializerCollection;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
-
-import javax.annotation.Nullable;
 
 public class SpongeConfig {
 
@@ -72,26 +70,26 @@ public class SpongeConfig {
         ConfigurationNode rootNode = loadFileSafely(plugin, feature.filename, feature.presentableConfigName);
 
         try {
-            C loadedConfig = rootNode.getValue(feature.configToken);
+            @Nullable C loadedConfig = rootNode.get(feature.configToken);
             if (loadedConfig != null) {
                 feature.configSetter.accept(plugin, loadedConfig);
             }
 
-            ListenerWrapper<L> listenerWrapper = feature.listener;
+            @Nullable ListenerWrapper<L> listenerWrapper = feature.listener;
             if (listenerWrapper != null) {
                 if (loadedConfig instanceof Config.ToggleableConfig) {
-                    L existingListener = listenerWrapper.listener;
+                    @Nullable L existingListener = listenerWrapper.listener;
                     if (((Config.ToggleableConfig) loadedConfig).isEnabled()) {
                         registerOrReloadListener(plugin, listenerWrapper);
                     } else if (existingListener != null) {
                         listenerWrapper.listener = null;
-                        Sponge.getEventManager().unregisterListeners(existingListener);
+                        Sponge.eventManager().unregisterListeners(existingListener);
                     }
                 } else {
                     registerOrReloadListener(plugin, listenerWrapper);
                 }
             }
-        } catch (ObjectMappingException e) {
+        } catch (SerializationException e) {
             plugin.getLogger().error("Unable to read " + feature.presentableConfigName + " configuration.", e);
         }
     }
@@ -101,10 +99,10 @@ public class SpongeConfig {
             return;
         }
 
-        L existingListener = wrapper.listener;
+        @Nullable L existingListener = wrapper.listener;
         if (existingListener == null) {
             L newListener = wrapper.listenerSupplier.get();
-            Sponge.getEventManager().registerListeners(plugin, newListener);
+            Sponge.eventManager().registerListeners(plugin.getContainer(), newListener);
             wrapper.listener = newListener;
         } else if (existingListener instanceof ReloadableListener) {
             ((ReloadableListener) existingListener).reload();
@@ -114,11 +112,22 @@ public class SpongeConfig {
     private static ConfigurationNode loadFileSafely(BoxOUtils plugin, String filename, String presentableConfigName) throws IOException {
         Path destFile = plugin.getConfigDir().resolve(filename);
         if (Files.notExists(destFile)) {
-            Optional<Asset> defaultConf = Sponge.getAssetManager().getAsset(plugin, "config/" + filename);
-            if (defaultConf.isPresent()) {
-                defaultConf.get().copyToFile(destFile);
-            } else {
-                plugin.getLogger().error("Cannot get default " + presentableConfigName + " configuration file.");
+            @Nullable InputStream inputStream = null;
+            try {
+                inputStream = plugin.getContainer().openResource(new URI("assets/box-o-utils/config/" + filename)).orElse(null);
+                if (inputStream != null) {
+                    Files.copy(inputStream, destFile);
+                }
+            } catch (IOException | URISyntaxException e) {
+                plugin.getLogger().error("Cannot get default " + presentableConfigName + " configuration file.", e);
+            } finally {
+                if (inputStream != null) {
+                    try {
+                        inputStream.close();
+                    } catch (IOException e) {
+                        plugin.getLogger().error("Error when closing default config resource " + presentableConfigName + ".", e);
+                    }
+                }
             }
         }
 
@@ -127,46 +136,49 @@ public class SpongeConfig {
 
     public static HoconConfigurationLoader loader(Path path) {
         HoconConfigurationLoader.Builder builder = HoconConfigurationLoader.builder()
-                .setPath(path)
-                .setDefaultOptions(ConfigurationOptions.defaults().setSerializers(createSerializersCollection()));
-        try {
-            // SpongeForge relocates the HOCON library to avoid conflicts with Forge, which uses an older version of it.
-            // See https://github.com/SpongePowered/SpongeForge/blob/007b0f5734981fc050cb79f8409e36a5ad64bbdc/build.gradle#L155
-            // It would be very hard, if not impossible, to work around this issue, so I just disable the includer on SpongeForge
-            Class.forName("configurate.typesafe.config.ConfigParseOptions");
-        } catch (ClassNotFoundException e) {
-            builder.setParseOptions(ConfigParseOptions.defaults().appendIncluder(new SimpleConfigIncluderFile(path.getParent())));
-        }
+                .path(path)
+                .defaultOptions(ConfigurationOptions.defaults().serializers(createSerializersCollection()));
+        // TODO see if we can add an includer in Configurate 4
+        //try {
+        //    // SpongeForge relocates the HOCON library to avoid conflicts with Forge, which uses an older version of it.
+        //    // See https://github.com/SpongePowered/SpongeForge/blob/007b0f5734981fc050cb79f8409e36a5ad64bbdc/build.gradle#L155
+        //    // It would be very hard, if not impossible, to work around this issue, so I just disable the includer on SpongeForge
+        //    Class.forName("configurate.typesafe.config.ConfigParseOptions");
+        //} catch (ClassNotFoundException e) {
+        //    builder.setParseOptions(ConfigParseOptions.defaults().appendIncluder(new SimpleConfigIncluderFile(path.getParent())));
+        //}
 
         return builder.build();
     }
 
     public static TypeSerializerCollection createSerializersCollection() {
-        return populatePluginSerializers(TypeSerializers.getDefaultSerializers().newChild());
+        return populatePluginSerializers(TypeSerializerCollection.defaults().childBuilder()).build();
     }
 
-    public static TypeSerializerCollection populatePluginSerializers(TypeSerializerCollection collection) {
-        return collection
+    public static TypeSerializerCollection.Builder populatePluginSerializers(TypeSerializerCollection.Builder builder) {
+        return builder
                 // MobsDrops / BlocksDrops
-                .registerType(BouTypeTokens.CUSTOM_LOOT, new CustomLootSerializer())
-                .registerType(BouTypeTokens.CUSTOM_LOOT_RECIPIENT, new CustomLootRecipientSerializer())
-                .registerType(BouTypeTokens.CUSTOM_DROPS_PROVIDER_LIST, new CustomDropsProviderListSerializer())
-                .registerType(BouTypeTokens.CUSTOM_LOOT_REUSE, new CustomLootReuseSerializer())
-                .registerType(BouTypeTokens.CUSTOM_LOOT_COMMAND, new CustomLootCommandSerializer())
-                .registerType(BouTypeTokens.REQUIREMENT, new RequirementSerializer())
-                .registerType(BouTypeTokens.REQUIREMENTS_MAP, new RequirementsMapSerializer())
-                .registerType(BouTypeTokens.MONEY_LOOT, new MoneyLootSerializer())
-                .registerType(BouTypeTokens.INT_QUANTITY, new IntQuantitySerializer())
-                .registerType(BouTypeTokens.INT_RANGE, new IntRangeSerializer())
-                .registerType(BouTypeTokens.LOOT_REUSE, new LootReuseSerializer())
-                .registerType(BouTypeTokens.ENCHANTMENTS_FILTER, new EnchantmentsFilterSerializer())
+                .register(BouTypeTokens.CUSTOM_LOOT, new CustomLootSerializer())
+                .register(BouTypeTokens.CUSTOM_LOOT_RECIPIENT, new CustomLootRecipientSerializer())
+                .register(BouTypeTokens.CUSTOM_DROPS_PROVIDER_LIST, new CustomDropsProviderListSerializer())
+                .register(BouTypeTokens.CUSTOM_LOOT_REUSE, new CustomLootReuseSerializer())
+                .register(BouTypeTokens.CUSTOM_LOOT_COMMAND, new CustomLootCommandSerializer())
+                .register(BouTypeTokens.REQUIREMENT, new RequirementSerializer())
+                .register(BouTypeTokens.REQUIREMENTS_MAP, new RequirementsMapSerializer())
+                .register(BouTypeTokens.MONEY_LOOT, new MoneyLootSerializer())
+                .register(BouTypeTokens.INT_QUANTITY, new IntQuantitySerializer())
+                .register(BouTypeTokens.INT_RANGE, new IntRangeSerializer())
+                .register(BouTypeTokens.LOOT_REUSE, new LootReuseSerializer())
+                .register(BouTypeTokens.ENCHANTMENTS_FILTER, new EnchantmentsFilterSerializer())
                 // BlockSpawners
-                .registerType(BouTypeTokens.SPAWNED_MOB, new SpawnedMobSerializer())
+                .register(BouTypeTokens.SPAWNED_MOB, new SpawnedMobSerializer())
                 // FastHarvest
-                .registerType(BouTypeTokens.FAST_HARVEST_CROP, new FastHarvestCropSerializer())
-                .registerType(BouTypeTokens.FAST_HARVEST_TOOLS, new FastHarvestToolsSerializer())
+                .register(BouTypeTokens.FAST_HARVEST_CROP, new FastHarvestCropSerializer())
+                .register(BouTypeTokens.FAST_HARVEST_TOOLS, new FastHarvestToolsSerializer())
                 // Configurations
-                .registerType(BouTypeTokens.CONFIG_BLOCK_SPAWNERS, new ConfigBlockSpawnerSerializer());
+                .register(BouTypeTokens.CONFIG_BLOCK_SPAWNERS, new ConfigBlockSpawnerSerializer())
+                // SpongeAPI types
+                .register(ResourceKey.class, new ResourceKeySerializer());
     }
 
     private static class ListenerWrapper<L> {

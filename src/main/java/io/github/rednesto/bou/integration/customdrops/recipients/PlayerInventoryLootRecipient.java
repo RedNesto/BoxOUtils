@@ -26,11 +26,11 @@ package io.github.rednesto.bou.integration.customdrops.recipients;
 import io.github.rednesto.bou.api.customdrops.CustomLootProcessingContext;
 import io.github.rednesto.bou.api.customdrops.CustomLootRecipient;
 import io.github.rednesto.bou.api.customdrops.CustomLootRecipientProvider;
-import ninja.leaping.configurate.ConfigurationNode;
+import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.inventory.ItemStack;
 
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class PlayerInventoryLootRecipient implements CustomLootRecipient {
 
@@ -40,9 +40,9 @@ public class PlayerInventoryLootRecipient implements CustomLootRecipient {
 
     @Override
     public void receive(CustomLootProcessingContext context, ItemStack stack) {
-        Player targetPlayer = context.getTargetPlayer();
+        @Nullable Player targetPlayer = context.getTargetPlayer();
         if (targetPlayer != null) {
-            targetPlayer.getInventory().offer(stack);
+            targetPlayer.inventory().offer(stack);
         } else {
             ContextLocationLootRecipient.INSTANCE.receive(context, stack);
         }

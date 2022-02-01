@@ -23,17 +23,18 @@
  */
 package io.github.rednesto.bou.tests.requirements
 
-import com.flowpowered.math.vector.Vector3d
 import io.github.rednesto.bou.requirements.WorldsRequirement
-import io.github.rednesto.bou.tests.framework.mock.MockPlayer
-import io.github.rednesto.bou.tests.framework.mock.MockWorld
+import io.github.rednesto.bou.tests.framework.mock.MockServerLocation
+import io.github.rednesto.bou.tests.framework.mock.MockServerPlayer
+import io.github.rednesto.bou.tests.framework.mock.MockServerWorld
+import io.github.rednesto.bou.tests.framework.mock.MockServerWorldProperties
 import io.github.rednesto.bou.tests.lootProcessingContext
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import org.spongepowered.api.event.cause.Cause
-import org.spongepowered.api.event.cause.EventContext
-import org.spongepowered.api.world.Location
+import org.spongepowered.api.event.Cause
+import org.spongepowered.api.event.EventContext
+import org.spongepowered.math.vector.Vector3d
 import java.util.*
 
 class WorldsRequirementTests {
@@ -83,7 +84,8 @@ class WorldsRequirementTests {
 
     private fun doFulfills(requirementIds: List<String>, worldId: UUID = UUID.randomUUID(), worldName: String = "world"): Boolean {
         val requirement = WorldsRequirement(requirementIds)
-        val mockPlayer = MockPlayer(location = Location(MockWorld(worldId, worldName), Vector3d.ZERO))
+        val worldProps = MockServerWorldProperties(worldId, worldName)
+        val mockPlayer = MockServerPlayer(location = MockServerLocation(MockServerWorld(worldProps), Vector3d.ZERO))
         val cause = Cause.of(EventContext.empty(), mockPlayer)
         val context = lootProcessingContext(emptyList(), Any(), cause)
         return requirement.fulfills(context)

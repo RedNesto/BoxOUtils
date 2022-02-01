@@ -28,13 +28,13 @@ import io.github.rednesto.bou.api.customdrops.CustomLootProcessingContext;
 import io.github.rednesto.bou.api.requirement.Requirement;
 import io.github.rednesto.bou.api.requirement.RequirementConfigurationException;
 import io.github.rednesto.bou.api.requirement.RequirementProvider;
-import ninja.leaping.configurate.ConfigurationNode;
+import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.api.data.value.ValueContainer;
 
 import java.util.*;
 import java.util.function.Function;
 
-public class DataByKeyRequirementProvider<C extends ValueContainer<C>> implements RequirementProvider {
+public class DataByKeyRequirementProvider<C extends ValueContainer> implements RequirementProvider {
 
     private final String id;
     private final Class<C> requirementType;
@@ -57,21 +57,21 @@ public class DataByKeyRequirementProvider<C extends ValueContainer<C>> implement
 
     @Override
     public Requirement provide(ConfigurationNode node) throws RequirementConfigurationException {
-        if (!node.hasMapChildren()) {
+        if (!node.isMap()) {
             throw new RequirementConfigurationException("A data requirement does not have any data keys to check");
         }
 
         Map<String, List<Object>> requiredData = new HashMap<>();
-        for (Map.Entry<Object, ? extends ConfigurationNode> pair : node.getChildrenMap().entrySet()) {
+        for (Map.Entry<Object, ? extends ConfigurationNode> pair : node.childrenMap().entrySet()) {
             String keyId = pair.getKey().toString();
             ConfigurationNode valueNode = pair.getValue();
 
             String expandedId = SpongeUtils.addSpongeImplNamespaceIfNeeded(keyId);
             List<Object> expectedValues = new ArrayList<>();
-            if (valueNode.hasListChildren()) {
-                valueNode.getChildrenList().forEach(childNode -> expectedValues.add(childNode.getValue()));
+            if (valueNode.isList()) {
+                valueNode.childrenList().forEach(childNode -> expectedValues.add(childNode.raw()));
             } else {
-                expectedValues.add(valueNode.getValue());
+                expectedValues.add(valueNode.raw());
             }
             requiredData.put(expandedId, Collections.unmodifiableList(expectedValues));
         }

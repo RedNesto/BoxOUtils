@@ -28,31 +28,30 @@ import com.google.common.base.Preconditions;
 import io.github.rednesto.bou.api.quantity.BoundedIntQuantity;
 import io.github.rednesto.bou.api.quantity.IntQuantity;
 import io.github.rednesto.bou.config.serializers.BouTypeTokens;
-import ninja.leaping.configurate.ConfigurationNode;
-import ninja.leaping.configurate.ValueType;
-import ninja.leaping.configurate.objectmapping.ObjectMappingException;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.item.ItemType;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.item.inventory.ItemStack;
-import org.spongepowered.api.text.serializer.TextSerializers;
+import org.spongepowered.api.registry.RegistryTypes;
+import org.spongepowered.configurate.ConfigurationNode;
+import org.spongepowered.configurate.serialize.SerializationException;
 
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Objects;
 
-import javax.annotation.Nullable;
-
 public abstract class BasicCustomDropsProvider implements CustomDropsProvider {
 
-    private final String itemId;
+    private final ResourceKey itemId;
     @Nullable
     private final String displayname;
     private final double chance;
     @Nullable
     private final IntQuantity quantity;
 
-    protected BasicCustomDropsProvider(String itemId, @Nullable String displayname, double chance, @Nullable IntQuantity quantity) {
+    protected BasicCustomDropsProvider(ResourceKey itemId, @Nullable String displayname, double chance, @Nullable IntQuantity quantity) {
         this.itemId = itemId;
         this.displayname = displayname;
         this.chance = chance / 100;
@@ -75,7 +74,7 @@ public abstract class BasicCustomDropsProvider implements CustomDropsProvider {
         }
 
         if (displayname != null) {
-            baseStack.offer(Keys.DISPLAY_NAME, TextSerializers.FORMATTING_CODE.deserialize(displayname));
+            baseStack.offer(Keys.DISPLAY_NAME, LegacyComponentSerializer.legacyAmpersand().deserialize(displayname));
         }
 
         ItemStack stack = Preconditions.checkNotNull(transform(context, baseStack), "#transform returned null");
@@ -87,8 +86,8 @@ public abstract class BasicCustomDropsProvider implements CustomDropsProvider {
     }
 
     @Nullable
-    protected ItemStack createStack(CustomLootProcessingContext context, String itemId) {
-        return Sponge.getRegistry().getType(ItemType.class, itemId)
+    protected ItemStack createStack(CustomLootProcessingContext context, ResourceKey itemId) {
+        return Sponge.game().registry(RegistryTypes.ITEM_TYPE).findValue(itemId)
                 .map(ItemStack::of)
                 .orElse(null);
     }
@@ -131,23 +130,27 @@ public abstract class BasicCustomDropsProvider implements CustomDropsProvider {
 
         @Override
         public final CustomDropsProvider provide(ConfigurationNode node) throws ProviderConfigurationException {
-            String itemId;
-            if (node.getValueType() == ValueType.SCALAR) {
-                itemId = node.getString();
-            } else if (node.hasMapChildren()) {
-                itemId = node.getNode("type").getString();
-            } else {
-                throw new ProviderConfigurationException("Provided value should be scalar or an object.");
+            @Nullable ResourceKey itemId;
+            try {
+                if (node.rawScalar() != null) {
+                    itemId = node.get(ResourceKey.class);
+                } else if (node.isMap()) {
+                    itemId = node.node("type").get(ResourceKey.class);
+                } else {
+                    throw new ProviderConfigurationException("Provided value should be scalar or an object.");
+                }
+            } catch (SerializationException e) {
+                throw new ProviderConfigurationException("Invalid item type", e);
             }
 
             if (itemId == null) {
                 throw new ProviderConfigurationException("Type is missing.");
             }
 
-            IntQuantity quantity;
+            @Nullable IntQuantity quantity;
             try {
-                quantity = node.getNode("quantity").getValue(BouTypeTokens.INT_QUANTITY, (IntQuantity) null);
-            } catch (ObjectMappingException e) {
+                quantity = node.node("quantity").get(BouTypeTokens.INT_QUANTITY);
+            } catch (SerializationException e) {
                 throw new ProviderConfigurationException("Invalid IntQuantity", e);
             }
 
@@ -167,20 +170,20 @@ public abstract class BasicCustomDropsProvider implements CustomDropsProvider {
             }
 
             double chance = 0;
-            ConfigurationNode chanceNode = node.getNode("chance");
-            if (!chanceNode.isVirtual()) {
+            ConfigurationNode chanceNode = node.node("chance");
+            if (!chanceNode.virtual()) {
                 chance = chanceNode.getDouble(Double.NaN);
                 if (Double.isNaN(chance)) {
-                    String errorMessage = String.format("Chance value is not a valid number (%s).", chanceNode.getValue());
+                    String errorMessage = String.format("Chance value is not a valid number (%s).", chanceNode.raw());
                     throw new ProviderConfigurationException(errorMessage);
                 }
             }
 
-            return provide(node, itemId, node.getNode("displayname").getString(), chance, quantity);
+            return provide(node, itemId, node.node("displayname").getString(), chance, quantity);
         }
 
         protected abstract BasicCustomDropsProvider provide(@Nullable ConfigurationNode node,
-                                                            String itemId,
+                                                            ResourceKey itemId,
                                                             @Nullable String displayname,
                                                             double chance,
                                                             @Nullable IntQuantity quantity);

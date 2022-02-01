@@ -29,24 +29,27 @@ import io.github.rednesto.bou.api.requirement.AbstractRequirement;
 import io.github.rednesto.bou.api.requirement.Requirement;
 import io.github.rednesto.bou.api.requirement.RequirementConfigurationException;
 import io.github.rednesto.bou.api.requirement.RequirementProvider;
-import ninja.leaping.configurate.ConfigurationNode;
-import ninja.leaping.configurate.objectmapping.ObjectMappingException;
-import org.slf4j.Marker;
-import org.slf4j.MarkerFactory;
-import org.spongepowered.api.data.LocatableSnapshot;
-import org.spongepowered.api.util.TypeTokens;
+import org.apache.logging.log4j.Marker;
+import org.apache.logging.log4j.MarkerManager;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
+import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.world.Locatable;
+import org.spongepowered.api.world.LocatableSnapshot;
 import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.biome.BiomeType;
+import org.spongepowered.api.world.biome.Biome;
+import org.spongepowered.configurate.ConfigurationNode;
+import org.spongepowered.configurate.serialize.SerializationException;
 
 import java.util.Collection;
+import java.util.Collections;
 
 public class BiomesRequirement extends AbstractRequirement {
 
-    private static final Marker logMarker = MarkerFactory.getMarker("BiomesRequirement");
-    private final Collection<String> acceptedBiomes;
+    private static final Marker logMarker = MarkerManager.getMarker("BiomesRequirement");
+    private final Collection<ResourceKey> acceptedBiomes;
 
-    public BiomesRequirement(Collection<String> acceptedBiomes) {
+    public BiomesRequirement(Collection<ResourceKey> acceptedBiomes) {
         super("biomes");
         this.acceptedBiomes = acceptedBiomes;
     }
@@ -54,22 +57,29 @@ public class BiomesRequirement extends AbstractRequirement {
     @Override
     public boolean fulfills(CustomLootProcessingContext context) {
         Object source = context.getSource();
-        BiomeType biome;
+        @MonotonicNonNull Location<?, ?> location;
         if (source instanceof LocatableSnapshot) {
-            biome = ((LocatableSnapshot<?>) source).getLocation().map(Location::getBiome).orElse(null);
+            location = ((LocatableSnapshot<?>) source).location().orElse(null);
         } else if (source instanceof Locatable) {
-            biome = ((Locatable) source).getLocation().getBiome();
+            location = ((Locatable) source).location();
         } else {
             BoxOUtils.getInstance().getLogger().warn(logMarker, "Invalid source passed to fulfills: {}.", source);
             return true;
         }
 
+        if (location == null) {
+            BoxOUtils.getInstance().getLogger().debug(logMarker, "Could not find location for source {}.", source);
+            return true;
+        }
+
+        Biome biome = location.biome();
         if (biome == null) {
             BoxOUtils.getInstance().getLogger().debug(logMarker, "Could not find biome for source {}.", source);
             return true;
         }
 
-        return acceptedBiomes.contains(biome.getId());
+        ResourceKey biomeKey = RegistryTypes.BIOME.keyFor(location.world(), biome);
+        return acceptedBiomes.contains(biomeKey);
     }
 
     @Override
@@ -82,8 +92,8 @@ public class BiomesRequirement extends AbstractRequirement {
         @Override
         public Requirement provide(ConfigurationNode node) throws RequirementConfigurationException {
             try {
-                return new BiomesRequirement(node.getList(TypeTokens.STRING_TOKEN));
-            } catch (ObjectMappingException e) {
+                return new BiomesRequirement(node.getList(ResourceKey.class, Collections.emptyList()));
+            } catch (SerializationException e) {
                 throw new RequirementConfigurationException("Could not read list of biomes IDs", e);
             }
         }

@@ -24,16 +24,21 @@
 package io.github.rednesto.bou.integration.customdrops;
 
 import com.google.common.base.MoreObjects;
+import io.github.rednesto.bou.BoxOUtils;
 import io.github.rednesto.bou.CustomDropsProcessor;
 import io.github.rednesto.bou.api.customdrops.*;
 import io.github.rednesto.bou.config.serializers.BouTypeTokens;
-import ninja.leaping.configurate.ConfigurationNode;
-import ninja.leaping.configurate.objectmapping.ObjectMappingException;
+import net.kyori.adventure.audience.Audience;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.command.exception.CommandException;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
+import org.spongepowered.api.service.permission.Subject;
+import org.spongepowered.configurate.ConfigurationNode;
+import org.spongepowered.configurate.serialize.SerializationException;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -47,7 +52,7 @@ public class CommandLootComponent implements CustomLootComponent {
 
     @Override
     public void processLoot(CustomLootProcessingContext processingContext) {
-        Player targetPlayer = processingContext.getTargetPlayer();
+        @Nullable ServerPlayer targetPlayer = processingContext.getTargetPlayer();
         if (targetPlayer == null) {
             return;
         }
@@ -58,19 +63,28 @@ public class CommandLootComponent implements CustomLootComponent {
             }
 
             String commandToSend = command.getRawCommand()
-                    .replace("{player.name}", targetPlayer.getName())
-                    .replace("{player.uuid}", targetPlayer.getUniqueId().toString());
-            CommandSource commandSource = null;
+                    .replace("{player.name}", targetPlayer.name())
+                    .replace("{player.uuid}", targetPlayer.uniqueId().toString());
+            Subject subject;
+            Audience audience;
             switch (command.getSenderMode()) {
                 case SERVER:
-                    commandSource = Sponge.getServer().getConsole();
+                    subject = Sponge.systemSubject();
+                    audience = Sponge.server();
                     break;
                 case PLAYER:
-                    commandSource = targetPlayer;
+                    subject = targetPlayer;
+                    audience = targetPlayer;
                     break;
+                default:
+                    return;
             }
 
-            Sponge.getCommandManager().process(commandSource, commandToSend);
+            try {
+                Sponge.server().commandManager().process(subject, audience, commandToSend);
+            } catch (CommandException e) {
+                BoxOUtils.getInstance().getLogger().error("An error occured when executing the loot command {}", commandToSend, e);
+            }
         });
     }
 
@@ -99,10 +113,10 @@ public class CommandLootComponent implements CustomLootComponent {
         @Override
         public CustomLootComponent provide(ConfigurationNode node) throws CustomLootComponentConfigurationException {
             try {
-                List<CustomLootCommand> commands = new ArrayList<>(node.getList(BouTypeTokens.CUSTOM_LOOT_COMMAND));
+                List<CustomLootCommand> commands = new ArrayList<>(node.getList(BouTypeTokens.CUSTOM_LOOT_COMMAND, Collections.emptyList()));
                 commands.removeIf(Objects::isNull);
                 return new CommandLootComponent(commands);
-            } catch (ObjectMappingException e) {
+            } catch (SerializationException e) {
                 throw new CustomLootComponentConfigurationException(e);
             }
         }

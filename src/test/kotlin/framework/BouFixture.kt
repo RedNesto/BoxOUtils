@@ -26,7 +26,9 @@ package io.github.rednesto.bou.tests.framework
 import io.github.rednesto.bou.BouUtils
 import io.github.rednesto.bou.BoxOUtils
 import io.github.rednesto.bou.IntegrationsManager
-import org.slf4j.LoggerFactory
+import io.github.rednesto.bou.tests.framework.mock.MockGame
+import io.github.rednesto.bou.tests.framework.mock.MockPluginContainer
+import org.spongepowered.api.Sponge
 import java.nio.file.Path
 
 class BouFixture(private val configDirProvider: () -> Path, val loadBuiltinIntegrations: Boolean = true) {
@@ -35,7 +37,12 @@ class BouFixture(private val configDirProvider: () -> Path, val loadBuiltinInteg
         private set
 
     fun setUp() {
-        plugin = BoxOUtils(LoggerFactory.getLogger(BoxOUtils::class.java), configDirProvider(), IntegrationsManager())
+        with(Sponge::class.java.getDeclaredField("game")) {
+            isAccessible = true
+            set(null, MockGame())
+            isAccessible = false
+        }
+        plugin = BoxOUtils(MockPluginContainer(), configDirProvider(), IntegrationsManager())
         BoxOUtils.setInstance(plugin)
         if (loadBuiltinIntegrations) {
             val integrationsManager = plugin.integrationsManager

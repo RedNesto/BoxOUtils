@@ -27,12 +27,12 @@ import de.randombyte.byteitems.api.ByteItemsService;
 import io.github.rednesto.bou.api.customdrops.BasicCustomDropsProvider;
 import io.github.rednesto.bou.api.customdrops.CustomLootProcessingContext;
 import io.github.rednesto.bou.api.quantity.IntQuantity;
-import ninja.leaping.configurate.ConfigurationNode;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
-
-import javax.annotation.Nullable;
+import org.spongepowered.configurate.ConfigurationNode;
 
 public class ByteItemsCustomDropsProvider extends BasicCustomDropsProvider {
 
@@ -45,7 +45,7 @@ public class ByteItemsCustomDropsProvider extends BasicCustomDropsProvider {
 
     @Nullable
     @Override
-    protected ItemStack createStack(CustomLootProcessingContext context, String itemId) {
+    protected ItemStack createStack(CustomLootProcessingContext context, ResourceKey itemId) {
         return Sponge.getServiceManager().provide(ByteItemsService.class)
                 .flatMap(service -> service.get(itemId))
                 .map(ItemStackSnapshot::createStack)

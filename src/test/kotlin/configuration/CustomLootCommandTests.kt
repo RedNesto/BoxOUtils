@@ -28,13 +28,12 @@ import io.github.rednesto.bou.config.serializers.BouTypeTokens
 import io.github.rednesto.bou.config.serializers.CustomLootCommandSerializer
 import io.github.rednesto.bou.config.serializers.RequirementSerializer
 import io.github.rednesto.bou.config.serializers.RequirementsMapSerializer
-import io.github.rednesto.bou.integration.griefprevention.GriefPreventionRegionRequirement
 import io.github.rednesto.bou.tests.framework.BouFixture
 import io.github.rednesto.bou.tests.framework.ConfigurationTestCase
-import ninja.leaping.configurate.objectmapping.serialize.TypeSerializerCollection
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.spongepowered.configurate.serialize.TypeSerializerCollection
 import java.nio.file.Paths
 
 class CustomLootCommandTests : ConfigurationTestCase<CustomLootCommand>("commands", BouTypeTokens.CUSTOM_LOOT_COMMAND) {
@@ -98,23 +97,23 @@ commands=[
     as=PLAYER
     chance=50
   }
-  {
-    command="command 2"
-    requirements {
-      griefprevention {
-        list-type=WHITELIST
-        regions=[
-          "test region"
-        ]
-      }
-    }
-  }
+  //{
+  //  command="command 2"
+  //  requirements {
+  //    griefprevention {
+  //      list-type=WHITELIST
+  //      regions=[
+  //        "test region"
+  //      ]
+  //    }
+  //  }
+  //}
   "command 3"
 ]
 """
         val expected = listOf(
                 CustomLootCommand("command 1", CustomLootCommand.SenderMode.PLAYER, 50.0, listOf()),
-                CustomLootCommand("command 2", CustomLootCommand.SenderMode.SERVER, 0.0, listOf(listOf(GriefPreventionRegionRequirement(listOf("test region"), true)))),
+                //CustomLootCommand("command 2", CustomLootCommand.SenderMode.SERVER, 0.0, listOf(listOf(GriefPreventionRegionRequirement(listOf("test region"), true)))),
                 CustomLootCommand("command 3", CustomLootCommand.SenderMode.SERVER, 0.0, listOf())
         )
         assertEquals(expected, loadConfigList(config))
@@ -125,9 +124,9 @@ commands=[
         pluginFixture.setUp()
     }
 
-    override fun populateSerializers(serializers: TypeSerializerCollection) {
-        serializers.registerType(BouTypeTokens.CUSTOM_LOOT_COMMAND, CustomLootCommandSerializer())
-                .registerType(BouTypeTokens.REQUIREMENT, RequirementSerializer())
-                .registerType(BouTypeTokens.REQUIREMENTS_MAP, RequirementsMapSerializer())
+    override fun populateSerializers(builder: TypeSerializerCollection.Builder) {
+        builder.register(BouTypeTokens.CUSTOM_LOOT_COMMAND, CustomLootCommandSerializer())
+                .register(BouTypeTokens.REQUIREMENT, RequirementSerializer())
+                .register(BouTypeTokens.REQUIREMENTS_MAP, RequirementsMapSerializer())
     }
 }

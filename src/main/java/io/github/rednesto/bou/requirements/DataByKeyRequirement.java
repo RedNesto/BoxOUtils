@@ -27,21 +27,27 @@ import com.google.common.base.MoreObjects;
 import io.github.rednesto.bou.BoxOUtils;
 import io.github.rednesto.bou.api.customdrops.CustomLootProcessingContext;
 import io.github.rednesto.bou.api.requirement.AbstractRequirement;
-import org.spongepowered.api.CatalogType;
-import org.spongepowered.api.Sponge;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.block.BlockSnapshot;
-import org.spongepowered.api.data.key.Key;
+import org.spongepowered.api.data.Key;
+import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.World;
+import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.entity.EntitySnapshot;
+import org.spongepowered.api.registry.RegistryKey;
+import org.spongepowered.api.world.server.ServerLocation;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 
-public class DataByKeyRequirement<C extends ValueContainer<C>> extends AbstractRequirement {
+public class DataByKeyRequirement<C extends ValueContainer> extends AbstractRequirement {
 
     private final Class<C> applicableType;
     private final Map<String, List<Object>> requiredData;
@@ -64,49 +70,88 @@ public class DataByKeyRequirement<C extends ValueContainer<C>> extends AbstractR
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public boolean fulfills(CustomLootProcessingContext context) {
         for (Map.Entry<String, List<Object>> entry : this.requiredData.entrySet()) {
             String keyId = entry.getKey();
+            ResourceKey resKeyId = ResourceKey.resolve(keyId);
             List<Object> expectedValues = entry.getValue();
 
-            //noinspection rawtypes
-            Optional<Key> maybeDataKey = Sponge.getRegistry().getType(Key.class, keyId);
-            if (!maybeDataKey.isPresent()) {
-                BoxOUtils.getInstance().getLogger().warn("Could not find a data key for id '{}'", keyId);
+            C source = (C) this.containerSelector.apply(context);
+
+            @Nullable Key<Value<Object>> dataKey = null;
+            try {
+                dataKey = searchForKey(resKeyId, source);
+            } catch (IllegalStateException ignore) {
+                // ValueContainer.getKeys() might fail due to multiple data sources being registered for the same key
+                // So let's try a bit harder whenever that happens
+                if (source instanceof EntitySnapshot) {
+                    Optional<Entity> restoredEntity = ((EntitySnapshot) source).restore();
+                    if (restoredEntity.isPresent()) {
+                        dataKey = searchForKey(resKeyId, restoredEntity.get());
+                    }
+                }
+            }
+
+            if (dataKey == null) {
+                // Fallback in case we can't use getKeys() for some reason
+                // Far from perfect but oh well ¯\_(ツ)_/¯
+                String fieldName = resKeyId.value().toUpperCase(Locale.ROOT);
+                try {
+                    dataKey = (Key<Value<Object>>) Keys.class.getField(fieldName).get(null);
+                } catch (IllegalAccessException | NoSuchFieldException ignored) {
+                }
+            }
+
+            if (dataKey == null) {
+                BoxOUtils.getInstance().getLogger().warn("Could not find key '{}' in source {}", keyId, source);
                 continue;
             }
 
             // We use raw types because we have no idea what type the compared values are
-            //noinspection rawtypes
-            Key dataKey = maybeDataKey.get();
-            Object dataValue = null;
-            //noinspection unchecked
-            C source = (C) this.containerSelector.apply(context);
+            @Nullable Object dataValue = null;
             if (source.supports(dataKey)) {
-                //noinspection unchecked
                 dataValue = source.getOrNull(dataKey);
             } else if (source instanceof BlockSnapshot) {
                 // Workaround to access BlockState data. Unfortunately, it is too late to query TileEntity data.
-                Location<World> location = ((BlockSnapshot) source).getLocation().orElse(null);
+                @Nullable ServerLocation location = ((BlockSnapshot) source).location().orElse(null);
                 if (location != null && location.supports(dataKey)) {
-                    //noinspection unchecked
                     dataValue = location.getOrNull(dataKey);
+                }
+            } else if (source instanceof EntitySnapshot) {
+                // Workaround to access Entity data.
+                @Nullable Entity entity = ((EntitySnapshot) source).restore().orElse(null);
+                if (entity != null && entity.supports(dataKey)) {
+                    dataValue = entity.getOrNull(dataKey);
                 }
             } else {
                 BoxOUtils.getInstance().getLogger().warn("Data container does not support '{}'", keyId);
                 continue;
             }
 
-            if (dataValue instanceof CatalogType) {
-                return expectedValues.contains(((CatalogType) dataValue).getId());
-            } else if (dataValue instanceof Text) {
-                return expectedValues.contains(((Text) dataValue).toPlain());
+            if (dataValue instanceof ResourceKey) {
+                return expectedValues.contains(((ResourceKey) dataValue).formatted());
+            } else if (dataValue instanceof RegistryKey) {
+                return expectedValues.contains(((RegistryKey<?>) dataKey).location().formatted());
+            } else if (dataValue instanceof Component) {
+                return expectedValues.contains(PlainTextComponentSerializer.plainText().serialize((Component) dataValue));
             } else {
                 return expectedValues.contains(dataValue);
             }
         }
 
         return true;
+    }
+
+    @Nullable
+    @SuppressWarnings("unchecked")
+    private Key<Value<Object>> searchForKey(ResourceKey resKeyId, ValueContainer source) {
+        for (Key<?> key : source.getKeys()) {
+            if (key.key().equals(resKeyId)) {
+                return (Key<Value<Object>>) key;
+            }
+        }
+        return null;
     }
 
     @Override

@@ -23,29 +23,29 @@
  */
 package io.github.rednesto.bou.config.serializers;
 
-import com.google.common.reflect.TypeToken;
 import io.github.rednesto.bou.api.lootReuse.LootReuse;
 import io.github.rednesto.bou.api.lootReuse.MultiplyLootReuse;
 import io.github.rednesto.bou.api.lootReuse.SimpleLootReuse;
 import io.github.rednesto.bou.api.quantity.IntQuantity;
-import ninja.leaping.configurate.ConfigurationNode;
-import ninja.leaping.configurate.objectmapping.ObjectMappingException;
-import ninja.leaping.configurate.objectmapping.serialize.TypeSerializer;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.configurate.ConfigurationNode;
+import org.spongepowered.configurate.serialize.SerializationException;
+import org.spongepowered.configurate.serialize.TypeSerializer;
+
+import java.lang.reflect.Type;
 
 public class LootReuseSerializer implements TypeSerializer<LootReuse> {
 
     @Override
-    public @Nullable LootReuse deserialize(@NonNull TypeToken<?> type, @NonNull ConfigurationNode value) throws ObjectMappingException {
-        ConfigurationNode multiplierNode = value.getNode("multiplier");
-        if (!multiplierNode.isVirtual()) {
+    public @Nullable LootReuse deserialize(Type type, ConfigurationNode value) throws SerializationException {
+        ConfigurationNode multiplierNode = value.node("multiplier");
+        if (!multiplierNode.virtual()) {
             return new MultiplyLootReuse(multiplierNode.getFloat());
         }
 
-        ConfigurationNode quantityNode = value.getNode("quantity");
-        if (!quantityNode.isVirtual()) {
-            IntQuantity quantity = quantityNode.getValue(BouTypeTokens.INT_QUANTITY);
+        ConfigurationNode quantityNode = value.node("quantity");
+        if (!quantityNode.virtual()) {
+            @Nullable IntQuantity quantity = quantityNode.get(BouTypeTokens.INT_QUANTITY);
             if (quantity == null) {
                 return null;
             }
@@ -57,7 +57,7 @@ public class LootReuseSerializer implements TypeSerializer<LootReuse> {
     }
 
     @Override
-    public void serialize(@NonNull TypeToken<?> type, @Nullable LootReuse obj, @NonNull ConfigurationNode value) {
-        throw new UnsupportedOperationException();
+    public void serialize(Type type, @Nullable LootReuse obj, ConfigurationNode value) throws SerializationException {
+        throw new SerializationException("LootReuse cannot be serialized");
     }
 }

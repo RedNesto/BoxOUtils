@@ -23,16 +23,15 @@
  */
 package io.github.rednesto.bou.config.serializers;
 
-import com.google.common.reflect.TypeToken;
 import io.github.rednesto.bou.Config;
 import io.github.rednesto.bou.api.blockspawners.SpawnedMob;
-import ninja.leaping.configurate.ConfigurationNode;
-import ninja.leaping.configurate.objectmapping.ObjectMappingException;
-import ninja.leaping.configurate.objectmapping.serialize.TypeSerializer;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.configurate.ConfigurationNode;
+import org.spongepowered.configurate.serialize.SerializationException;
+import org.spongepowered.configurate.serialize.TypeSerializer;
 
-import java.util.ArrayList;
+import java.lang.reflect.Type;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,12 +39,12 @@ import java.util.Map;
 public class ConfigBlockSpawnerSerializer implements TypeSerializer<Config.BlockSpawners> {
 
     @Override
-    public Config.@Nullable BlockSpawners deserialize(@NonNull TypeToken<?> type, @NonNull ConfigurationNode value) throws ObjectMappingException {
+    public Config.@Nullable BlockSpawners deserialize(Type type, ConfigurationNode value) throws SerializationException {
         Map<String, List<SpawnedMob>> spawners = new HashMap<>();
-        boolean enabled = value.getNode("enabled").getBoolean(false);
-        for (Map.Entry<Object, ? extends ConfigurationNode> child : value.getNode("blocks").getChildrenMap().entrySet()) {
+        boolean enabled = value.node("enabled").getBoolean(false);
+        for (Map.Entry<Object, ? extends ConfigurationNode> child : value.node("blocks").childrenMap().entrySet()) {
             ConfigurationNode node = child.getValue();
-            List<SpawnedMob> spawnedMobs = new ArrayList<>(node.getNode("spawns").getList(BouTypeTokens.SPAWNED_MOB));
+            List<SpawnedMob> spawnedMobs = node.node("spawns").getList(BouTypeTokens.SPAWNED_MOB, Collections.emptyList());
             spawners.put((String) child.getKey(), spawnedMobs);
         }
 
@@ -53,7 +52,7 @@ public class ConfigBlockSpawnerSerializer implements TypeSerializer<Config.Block
     }
 
     @Override
-    public void serialize(@NonNull TypeToken<?> type, Config.@Nullable BlockSpawners obj, @NonNull ConfigurationNode value) {
+    public void serialize(Type type, Config.@Nullable BlockSpawners obj, ConfigurationNode value) {
         throw new UnsupportedOperationException();
     }
 }

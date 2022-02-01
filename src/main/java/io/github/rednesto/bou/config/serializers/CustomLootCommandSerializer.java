@@ -23,43 +23,42 @@
  */
 package io.github.rednesto.bou.config.serializers;
 
-import com.google.common.reflect.TypeToken;
 import io.github.rednesto.bou.api.customdrops.CustomLootCommand;
 import io.github.rednesto.bou.api.requirement.Requirement;
-import ninja.leaping.configurate.ConfigurationNode;
-import ninja.leaping.configurate.objectmapping.ObjectMappingException;
-import ninja.leaping.configurate.objectmapping.serialize.TypeSerializer;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.configurate.ConfigurationNode;
+import org.spongepowered.configurate.serialize.SerializationException;
+import org.spongepowered.configurate.serialize.TypeSerializer;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
 public class CustomLootCommandSerializer implements TypeSerializer<CustomLootCommand> {
 
     @Override
-    public @Nullable CustomLootCommand deserialize(@NonNull TypeToken<?> type, @NonNull ConfigurationNode value) throws ObjectMappingException {
-        String rawCommand;
+    public @Nullable CustomLootCommand deserialize(Type type, ConfigurationNode value) throws SerializationException {
+        @Nullable String rawCommand;
         CustomLootCommand.SenderMode senderMode = CustomLootCommand.SenderMode.SERVER;
         double chance = 0;
         List<List<Requirement>> requirements;
-        if (value.hasMapChildren()) {
-            rawCommand = value.getNode("command").getString();
+        if (value.isMap()) {
+            rawCommand = value.node("command").getString();
 
-            ConfigurationNode senderModeNode = value.getNode("as");
-            if (!senderModeNode.isVirtual()) {
+            ConfigurationNode senderModeNode = value.node("as");
+            if (!senderModeNode.virtual()) {
                 String senderModeName = senderModeNode.getString("SENDER");
                 try {
                     senderMode = CustomLootCommand.SenderMode.valueOf(senderModeName);
                 } catch (IllegalArgumentException e) {
                     String errorMessage = String.format("Sender mode '%s' is invalid. Possible values: SENDER, PLAYER.", senderModeName);
-                    throw new ObjectMappingException(errorMessage);
+                    throw new SerializationException(errorMessage);
                 }
             }
 
-            chance = value.getNode("chance").getDouble(0);
+            chance = value.node("chance").getDouble(0);
 
-            ConfigurationNode requirementsNode = value.getNode("requirements");
+            ConfigurationNode requirementsNode = value.node("requirements");
             requirements = RequirementSerializer.getRequirementGroups(requirementsNode);
         } else {
             rawCommand = value.getString();
@@ -67,14 +66,14 @@ public class CustomLootCommandSerializer implements TypeSerializer<CustomLootCom
         }
 
         if (rawCommand == null) {
-            throw new ObjectMappingException("A command must be specified.");
+            throw new SerializationException("A command must be specified.");
         }
 
         return new CustomLootCommand(rawCommand, senderMode, chance, requirements);
     }
 
     @Override
-    public void serialize(@NonNull TypeToken<?> type, @Nullable CustomLootCommand obj, @NonNull ConfigurationNode value) {
-        throw new UnsupportedOperationException();
+    public void serialize(Type type, @Nullable CustomLootCommand obj, ConfigurationNode value) throws SerializationException {
+        throw new SerializationException("CustomLootCommand cannot be serialized");
     }
 }

@@ -23,14 +23,14 @@
  */
 package io.github.rednesto.bou.tests.framework
 
-import com.google.common.reflect.TypeToken
-import ninja.leaping.configurate.objectmapping.serialize.TypeSerializerCollection
+import io.leangen.geantyref.TypeToken
+import org.spongepowered.configurate.serialize.TypeSerializerCollection
 
 abstract class ConfigurationTestCase<T>(val rootNodeKey: String, val typeToken: TypeToken<T>) {
 
     protected val configHelper: ConfigHelper = ConfigHelper.create(::populateSerializers)
 
-    protected abstract fun populateSerializers(serializers: TypeSerializerCollection)
+    protected abstract fun populateSerializers(builder: TypeSerializerCollection.Builder)
 
     protected open fun loadConfig(configuration: String): T = configHelper.loadConfig(configuration, rootNodeKey, typeToken)
 

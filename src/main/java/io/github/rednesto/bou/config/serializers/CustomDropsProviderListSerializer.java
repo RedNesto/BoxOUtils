@@ -23,19 +23,19 @@
  */
 package io.github.rednesto.bou.config.serializers;
 
-import com.google.common.reflect.TypeToken;
 import io.github.rednesto.bou.BoxOUtils;
 import io.github.rednesto.bou.api.customdrops.CustomDropsProvider;
 import io.github.rednesto.bou.api.customdrops.CustomDropsProviderFactory;
 import io.github.rednesto.bou.api.customdrops.CustomDropsProviderFactoryIntegrations;
 import io.github.rednesto.bou.api.customdrops.ProviderConfigurationException;
 import io.github.rednesto.bou.integration.vanilla.VanillaCustomDropsProvider;
-import ninja.leaping.configurate.ConfigurationNode;
-import ninja.leaping.configurate.ValueType;
-import ninja.leaping.configurate.objectmapping.serialize.TypeSerializer;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.configurate.ConfigurationNode;
+import org.spongepowered.configurate.serialize.SerializationException;
+import org.spongepowered.configurate.serialize.TypeSerializer;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -45,29 +45,29 @@ public class CustomDropsProviderListSerializer implements TypeSerializer<List<Cu
 
     @Nullable
     @Override
-    public List<CustomDropsProvider> deserialize(@NonNull TypeToken<?> type, @NonNull ConfigurationNode value) {
+    public List<CustomDropsProvider> deserialize(Type type, ConfigurationNode value) {
         List<@NonNull CustomDropsProvider> providers = new ArrayList<>();
-        if (value.getValueType() == ValueType.SCALAR) {
+        if (value.rawScalar() != null) {
             configureProvider(providers, value, VanillaCustomDropsProvider.Factory.ID);
-        } else if (value.hasListChildren()) {
-            for (ConfigurationNode dropNode : value.getChildrenList()) {
-                if (dropNode.hasListChildren()) {
+        } else if (value.isList()) {
+            for (ConfigurationNode dropNode : value.childrenList()) {
+                if (dropNode.isList()) {
                     BoxOUtils.getInstance().getLogger().error("Drop values cannot be lists, they will be ignored.");
-                } else if (dropNode.hasMapChildren()) {
-                    String providerId = dropNode.getNode("provider").getString(VanillaCustomDropsProvider.Factory.ID);
+                } else if (dropNode.isMap()) {
+                    String providerId = dropNode.node("provider").getString(VanillaCustomDropsProvider.Factory.ID);
                     configureProvider(providers, dropNode, providerId);
                 } else {
                     configureProvider(providers, dropNode, VanillaCustomDropsProvider.Factory.ID);
                 }
             }
-        } else if (value.hasMapChildren()) {
-            if (!value.getNode("type").isVirtual()) {
+        } else if (value.isMap()) {
+            if (!value.node("type").virtual()) {
                 // The value can be an object configuring a single provider
                 // 'type' is unlikely to be used as an ID (even in short form), so we assume this is the expected behaviour
-                String providerId = value.getNode("provider").getString(VanillaCustomDropsProvider.Factory.ID);
+                String providerId = value.node("provider").getString(VanillaCustomDropsProvider.Factory.ID);
                 configureProvider(providers, value, providerId);
             } else {
-                for (Map.Entry<Object, ? extends ConfigurationNode> entry : value.getChildrenMap().entrySet()) {
+                for (Map.Entry<Object, ? extends ConfigurationNode> entry : value.childrenMap().entrySet()) {
                     Object key = entry.getKey();
                     if (!(key instanceof String)) {
                         BoxOUtils.getInstance().getLogger().error("Drops keys must be non-null strings (got {}).", key);
@@ -75,8 +75,8 @@ public class CustomDropsProviderListSerializer implements TypeSerializer<List<Cu
                         String providerId = ((String) key);
 
                         ConfigurationNode providerRootNode = entry.getValue();
-                        if (providerRootNode.hasListChildren()){
-                            for (ConfigurationNode dropNode : providerRootNode.getChildrenList()) {
+                        if (providerRootNode.isList()){
+                            for (ConfigurationNode dropNode : providerRootNode.childrenList()) {
                                 configureProvider(providers, dropNode, providerId);
                             }
                         } else {
@@ -90,12 +90,11 @@ public class CustomDropsProviderListSerializer implements TypeSerializer<List<Cu
     }
 
     @Override
-    public void serialize(@NonNull TypeToken<?> type, @Nullable List<CustomDropsProvider> obj, @NonNull ConfigurationNode value) {
-        throw new UnsupportedOperationException();
+    public void serialize(Type type, @Nullable List<CustomDropsProvider> obj, ConfigurationNode value) throws SerializationException {
     }
 
     private static void configureProvider(Collection<@NonNull CustomDropsProvider> providers, ConfigurationNode dropNode, String providerId) {
-        CustomDropsProviderFactory factory = CustomDropsProviderFactoryIntegrations.getInstance().getById(providerId, true);
+        @Nullable CustomDropsProviderFactory factory = CustomDropsProviderFactoryIntegrations.getInstance().getById(providerId, true);
         if (factory == null) {
             BoxOUtils.getInstance().getLogger().error("Could not find CustomDropsProviderFactory for ID '{}', it will be ignored.", providerId);
             return;

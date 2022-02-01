@@ -1,5 +1,5 @@
 version = '0.0'
-archivesBaseName = 'BoxOUtils-Integration-Example'
+base.archivesName = 'BoxOUtils-Integration-Example'
 
 dependencies {
     compileOnly "org.spongepowered:spongeapi:${spongeApiVersion}"
@@ -7,12 +7,11 @@ dependencies {
     compileOnly rootProject
 }
 
-compileJava.dependsOn rootProject.shadowJar
-
 processResources {
-    def props = [version: project.version, spongeApiVersion: spongeApiVersion]
+    def props = [version: version, spongeApiVersion: spongeApiVersion]
     inputs.properties(props)
-    filesMatching('mcmod.info') {
+    // Do not try to expand service files, they may contain a dollar sign to mark inner classes
+    filesNotMatching('META-INF/services/*') {
         expand(props)
     }
 }

@@ -30,17 +30,18 @@ import io.github.rednesto.bou.CustomDropsProcessor;
 import io.github.rednesto.bou.SpongeUtils;
 import io.github.rednesto.bou.api.customdrops.CustomLoot;
 import io.github.rednesto.bou.api.customdrops.CustomLootProcessingContext;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.ExperienceOrb;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.action.FishingEvent;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.event.filter.cause.First;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
-import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.World;
+import org.spongepowered.api.world.server.ServerLocation;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -53,7 +54,7 @@ public class CustomFishingDropsListener {
 
     @Listener
     public void onFishingDrop(FishingEvent.Stop event) {
-        List<Transaction<ItemStackSnapshot>> transactions = event.getTransactions();
+        List<Transaction<ItemStackSnapshot>> transactions = event.transactions();
         if (transactions.isEmpty()) {
             return;
         }
@@ -63,10 +64,10 @@ public class CustomFishingDropsListener {
             return;
         }
 
-        Player player = event.getCause().first(Player.class).orElse(null);
-        Location<World> location = event.getFishHook().getLocation();
-        Location<World> experienceSpawnLocation = SpongeUtils.center(player != null ? player.getLocation() : location);
-        CustomLootProcessingContext context = new CustomLootProcessingContext(Collections.emptyList(), event, event.getFishHook(), event.getCause(), player, location, experienceSpawnLocation);
+        @Nullable ServerPlayer player = event.cause().first(ServerPlayer.class).orElse(null);
+        ServerLocation location = event.fishHook().serverLocation();
+        ServerLocation experienceSpawnLocation = SpongeUtils.center(player != null ? player.serverLocation() : location);
+        CustomLootProcessingContext context = new CustomLootProcessingContext(Collections.emptyList(), event, event.fishHook(), event.cause(), player, location, experienceSpawnLocation);
         List<CustomLoot> loots = CustomDropsProcessor.getLootsToUse(fishingDrops.loots, context);
         if (loots.isEmpty()) {
             return;
@@ -74,7 +75,7 @@ public class CustomFishingDropsListener {
 
         context = context.withLoots(loots);
         if (player != null) {
-            requirementResultsTracker.put(player.getUniqueId(), loots);
+            requirementResultsTracker.put(player.uniqueId(), loots);
         }
 
         boolean overwritten = processOverwrite(transactions, loots);
@@ -82,7 +83,7 @@ public class CustomFishingDropsListener {
             processReuse(transactions, loots);
         }
 
-        CustomDropsProcessor.processLoots(context, (loot, itemStack) -> transactions.add(new Transaction<>(ItemStackSnapshot.NONE, itemStack.createSnapshot())));
+        CustomDropsProcessor.processLoots(context, (loot, itemStack) -> transactions.add(new Transaction<>(ItemStackSnapshot.empty(), itemStack.createSnapshot())));
     }
 
     private boolean processOverwrite(List<Transaction<ItemStackSnapshot>> transactions, List<CustomLoot> loots) {
@@ -99,7 +100,7 @@ public class CustomFishingDropsListener {
 
     private static void processReuse(List<Transaction<ItemStackSnapshot>> transactions, List<CustomLoot> loots) {
         for (CustomLoot loot : loots) {
-            CustomLoot.Reuse reuse = loot.getReuse();
+            CustomLoot.@Nullable Reuse reuse = loot.getReuse();
             if (reuse == null) {
                 continue;
             }
@@ -108,11 +109,11 @@ public class CustomFishingDropsListener {
             while (transactionsIterator.hasNext()) {
                 Transaction<ItemStackSnapshot> transaction = transactionsIterator.next();
                 List<ItemStack> itemsResult = new ArrayList<>();
-                CustomDropsProcessor.computeSingleItemReuse(reuse, itemsResult, transaction.getFinal().createStack());
+                CustomDropsProcessor.computeSingleItemReuse(reuse, itemsResult, transaction.finalReplacement().createStack());
                 if (!itemsResult.isEmpty()) {
                     Iterator<ItemStack> reuseResultIterator = itemsResult.iterator();
                     transaction.setCustom(reuseResultIterator.next().createSnapshot());
-                    reuseResultIterator.forEachRemaining(stack -> transactionsIterator.add(new Transaction<>(transaction.getFinal(), stack.createSnapshot())));
+                    reuseResultIterator.forEachRemaining(stack -> transactionsIterator.add(new Transaction<>(transaction.finalReplacement(), stack.createSnapshot())));
                 }
             }
         }
@@ -124,7 +125,7 @@ public class CustomFishingDropsListener {
             return;
         }
 
-        List<CustomLoot> loots = requirementResultsTracker.getIfPresent(player.getUniqueId());
+        @Nullable List<CustomLoot> loots = requirementResultsTracker.getIfPresent(player.uniqueId());
         if (loots != null) {
             for (CustomLoot loot : loots) {
                 if (loot.isExpOverwrite()) {

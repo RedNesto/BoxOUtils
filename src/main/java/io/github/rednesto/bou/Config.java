@@ -27,8 +27,8 @@ import io.github.rednesto.bou.api.blockspawners.SpawnedMob;
 import io.github.rednesto.bou.api.customdrops.CustomLoot;
 import io.github.rednesto.bou.api.fastharvest.FastHarvestCrop;
 import io.github.rednesto.bou.api.fastharvest.FastHarvestTools;
-import ninja.leaping.configurate.objectmapping.Setting;
-import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
+import org.spongepowered.configurate.objectmapping.ConfigSerializable;
+import org.spongepowered.configurate.objectmapping.meta.Setting;
 
 import java.util.ArrayList;
 import java.util.HashMap;

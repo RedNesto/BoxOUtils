@@ -2,7 +2,7 @@ rootProject.name = 'BoxOUtils'
 
 include 'example'
 
-def includedIntegration = gradle.ext.alwaysIncludedIntegrations = ['griefprevention', 'byte-items', 'file-inventories', 'griefdefender']
+def includedIntegration = properties.alwaysIncludedIntegrations
 for (integration in file('integrations').listFiles()) {
     if (!integration.isDirectory()) {
         continue
@@ -10,7 +10,8 @@ for (integration in file('integrations').listFiles()) {
 
     def integrationName = integration.name
     if (integrationName in includedIntegration || existsAndNonEmpty(new File(integration, "libs"))) {
-        include 'integrations:' + integrationName
+        // We have no integration for API 8 yet
+//        include 'integrations:' + integrationName
     }
 }
 

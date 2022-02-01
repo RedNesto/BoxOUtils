@@ -24,9 +24,9 @@
 package io.github.rednesto.bou.api.customdrops;
 
 import io.github.rednesto.bou.api.integration.Integration;
-import ninja.leaping.configurate.ConfigurationNode;
+import org.spongepowered.configurate.ConfigurationNode;
 
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 public interface CustomLootRecipientProvider extends Integration {
 

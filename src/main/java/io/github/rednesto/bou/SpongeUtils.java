@@ -23,18 +23,21 @@
  */
 package io.github.rednesto.bou;
 
-import ninja.leaping.configurate.ConfigurationNode;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Platform;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
-import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityTypes;
-import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.World;
-import org.spongepowered.api.world.extent.Extent;
+import org.spongepowered.api.scheduler.Task;
+import org.spongepowered.api.util.Ticks;
+import org.spongepowered.api.world.server.ServerLocation;
+import org.spongepowered.api.world.server.ServerWorld;
+import org.spongepowered.configurate.ConfigurationNode;
 
-import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.List;
 
 public class SpongeUtils {
 
@@ -44,7 +47,7 @@ public class SpongeUtils {
     static {
         String spongeImplId;
         try {
-            spongeImplId = Sponge.getPlatform().getContainer(Platform.Component.IMPLEMENTATION).getId();
+            spongeImplId = Sponge.platform().container(Platform.Component.IMPLEMENTATION).metadata().id();
         } catch (IllegalStateException e) {
             // ISE is thrown if Sponge is not initialized, like when unit-testing.
             // But bou.is_testing is also set for integration tests,
@@ -86,35 +89,43 @@ public class SpongeUtils {
 
     @Nullable
     public static ConfigurationNode getNthParent(ConfigurationNode node, int nth) {
-        ConfigurationNode parent = node.getParent();
+        @Nullable ConfigurationNode parent = node.parent();
         for (int i = 1; i < nth; i++) {
             if (parent == null) {
                 return null;
             }
 
-            parent = parent.getParent();
+            parent = parent.parent();
         }
 
         return parent;
     }
 
-    public static Location<World> getCenteredLocation(BlockSnapshot snapshot, World world) {
-        return center(snapshot.getLocation().orElseGet(() -> new Location<>(world, snapshot.getPosition())));
+    public static ServerLocation getCenteredLocation(BlockSnapshot snapshot, ServerWorld world) {
+        return center(snapshot.location().orElseGet(() -> world.location(snapshot.position())));
     }
 
-    public static <E extends Extent> Location<E> center(Location<E> location) {
+    public static ServerLocation center(ServerLocation location) {
         return location.add(0.5, 0.5, 0.5);
     }
 
-    public static void spawnExpOrbs(Location<World> location, int amount) {
+    public static void spawnExpOrbs(ServerLocation location, int amount) {
+        List<Entity> orbs = new ArrayList<>();
         int remaining = amount;
         while (remaining > 0) {
             int split = getXPSplit(remaining);
             remaining -= split;
-            Entity orb = location.createEntity(EntityTypes.EXPERIENCE_ORB);
-            orb.offer(Keys.CONTAINED_EXPERIENCE, split);
-            location.spawnEntity(orb);
+            Entity orb = location.createEntity(EntityTypes.EXPERIENCE_ORB.get());
+            orb.offer(Keys.EXPERIENCE, split);
+            orbs.add(orb);
         }
+
+        Task spawnOrbsTask = Task.builder()
+                .delay(Ticks.of(1))
+                .execute(() -> location.spawnEntities(orbs))
+                .plugin(BoxOUtils.getInstance().getContainer())
+                .build();
+        Sponge.server().scheduler().submit(spawnOrbsTask, "Spawn experience orbs @" + location.position() + " in " + location.worldKey().formatted());
     }
 
     public static int getXPSplit(int expValue) {

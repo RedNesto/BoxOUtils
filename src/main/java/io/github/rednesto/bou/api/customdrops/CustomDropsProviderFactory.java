@@ -24,7 +24,7 @@
 package io.github.rednesto.bou.api.customdrops;
 
 import io.github.rednesto.bou.api.integration.Integration;
-import ninja.leaping.configurate.ConfigurationNode;
+import org.spongepowered.configurate.ConfigurationNode;
 
 public interface CustomDropsProviderFactory extends Integration {
 

@@ -31,12 +31,13 @@ import io.github.rednesto.bou.api.requirement.RequirementConfigurationException;
 import io.github.rednesto.bou.api.requirement.RequirementProvider;
 import io.github.rednesto.bou.api.utils.EnchantmentsFilter;
 import io.github.rednesto.bou.config.serializers.BouTypeTokens;
-import ninja.leaping.configurate.ConfigurationNode;
-import ninja.leaping.configurate.objectmapping.ObjectMappingException;
-import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.event.cause.EventContextKeys;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.item.enchantment.Enchantment;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
+import org.spongepowered.configurate.ConfigurationNode;
+import org.spongepowered.configurate.serialize.SerializationException;
 
 import java.util.List;
 
@@ -51,12 +52,12 @@ public class EnchantmentsRequirement extends AbstractRequirement {
 
     @Override
     public boolean fulfills(CustomLootProcessingContext context) {
-        ItemStackSnapshot usedItem = context.getCause().getContext().get(EventContextKeys.USED_ITEM).orElse(null);
+        @Nullable ItemStackSnapshot usedItem = context.getCause().context().get(EventContextKeys.USED_ITEM).orElse(null);
         if (usedItem == null) {
             return true;
         }
 
-        List<Enchantment> itemEnchantments = usedItem.get(Keys.ITEM_ENCHANTMENTS).orElse(null);
+        @Nullable List<Enchantment> itemEnchantments = usedItem.get(Keys.APPLIED_ENCHANTMENTS).orElse(null);
         if (itemEnchantments == null) {
             return true;
         }
@@ -97,13 +98,13 @@ public class EnchantmentsRequirement extends AbstractRequirement {
         @Override
         public Requirement provide(ConfigurationNode node) throws RequirementConfigurationException {
             try {
-                EnchantmentsFilter filter = node.getValue(BouTypeTokens.ENCHANTMENTS_FILTER);
+                @Nullable EnchantmentsFilter filter = node.get(BouTypeTokens.ENCHANTMENTS_FILTER);
                 if (filter != null) {
                     return new EnchantmentsRequirement(filter);
                 }
 
                 throw new RequirementConfigurationException("Enchantment requirement is empty.");
-            } catch (ObjectMappingException e) {
+            } catch (SerializationException e) {
                 throw new RequirementConfigurationException(e);
             }
         }

@@ -27,19 +27,19 @@ import io.github.rednesto.bou.BoxOUtils;
 import io.github.rednesto.bou.api.customdrops.BasicCustomDropsProvider;
 import io.github.rednesto.bou.api.customdrops.CustomLootProcessingContext;
 import io.github.rednesto.bou.api.quantity.IntQuantity;
-import ninja.leaping.configurate.ConfigurationNode;
-import org.spongepowered.api.data.key.Keys;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.item.enchantment.Enchantment;
 import org.spongepowered.api.item.enchantment.EnchantmentTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.configurate.ConfigurationNode;
 
 import java.util.Collections;
 
-import javax.annotation.Nullable;
-
 public class EnchantCustomDropsProvider extends BasicCustomDropsProvider {
 
-    public EnchantCustomDropsProvider(String itemId,
+    public EnchantCustomDropsProvider(ResourceKey itemId,
                                       @Nullable String displayname,
                                       double chance,
                                       @Nullable IntQuantity quantity) {
@@ -49,7 +49,7 @@ public class EnchantCustomDropsProvider extends BasicCustomDropsProvider {
     @Override
     protected ItemStack transform(CustomLootProcessingContext context, ItemStack stack) {
         Enchantment enchant = Enchantment.of(EnchantmentTypes.KNOCKBACK, 1);
-        stack.offer(Keys.ITEM_ENCHANTMENTS, Collections.singletonList(enchant));
+        stack.offer(Keys.APPLIED_ENCHANTMENTS, Collections.singletonList(enchant));
         return stack;
     }
 
@@ -63,7 +63,7 @@ public class EnchantCustomDropsProvider extends BasicCustomDropsProvider {
 
         @Override
         protected BasicCustomDropsProvider provide(@Nullable ConfigurationNode node,
-                                                   String itemId,
+                                                   ResourceKey itemId,
                                                    @Nullable String displayname,
                                                    double chance,
                                                    @Nullable IntQuantity quantity) {

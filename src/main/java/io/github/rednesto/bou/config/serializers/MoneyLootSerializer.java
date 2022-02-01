@@ -23,31 +23,32 @@
  */
 package io.github.rednesto.bou.config.serializers;
 
-import com.google.common.reflect.TypeToken;
 import io.github.rednesto.bou.api.customdrops.MoneyLoot;
 import io.github.rednesto.bou.api.quantity.BoundedIntQuantity;
 import io.github.rednesto.bou.api.quantity.IntQuantity;
-import ninja.leaping.configurate.ConfigurationNode;
-import ninja.leaping.configurate.objectmapping.ObjectMappingException;
-import ninja.leaping.configurate.objectmapping.serialize.TypeSerializer;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.ResourceKey;
+import org.spongepowered.configurate.ConfigurationNode;
+import org.spongepowered.configurate.serialize.SerializationException;
+import org.spongepowered.configurate.serialize.TypeSerializer;
+
+import java.lang.reflect.Type;
 
 public class MoneyLootSerializer implements TypeSerializer<MoneyLoot> {
 
     @Override
-    public @Nullable MoneyLoot deserialize(@NonNull TypeToken<?> type, @NonNull ConfigurationNode value) throws ObjectMappingException {
-        if (value.isVirtual()) {
+    public @Nullable MoneyLoot deserialize(Type type, ConfigurationNode value) throws SerializationException {
+        if (value.virtual()) {
             return null;
         }
 
-        ConfigurationNode amountNode = value.getNode("amount");
-        if (amountNode.isVirtual()) {
-            String message = String.format("No money amount set for '%s'. No money will be given for this CustomDrop.", value.getPath()[1]);
-            throw new ObjectMappingException(message);
+        ConfigurationNode amountNode = value.node("amount");
+        if (amountNode.virtual()) {
+            String message = String.format("No money amount set for '%s'. No money will be given for this CustomDrop.", value.parent().key());
+            throw new SerializationException(value.parent(), MoneyLoot.class, message);
         }
 
-        IntQuantity quantity = amountNode.getValue(BouTypeTokens.INT_QUANTITY);
+        @Nullable IntQuantity quantity = amountNode.get(BouTypeTokens.INT_QUANTITY);
         if (quantity == null) {
             return null;
         }
@@ -56,35 +57,35 @@ public class MoneyLootSerializer implements TypeSerializer<MoneyLoot> {
             BoundedIntQuantity boundedQuantity = (BoundedIntQuantity) quantity;
             if (boundedQuantity.getFrom() < 0) {
                 String message = String.format("The money amount lower bound (%s) for '%s' is negative. This drop will not be loaded.",
-                        boundedQuantity.getFrom(), value.getPath()[1]);
-                throw new ObjectMappingException(message);
+                        boundedQuantity.getFrom(), value.parent().key());
+                throw new SerializationException(amountNode, BoundedIntQuantity.class, message);
             }
 
             if (boundedQuantity.getTo() < boundedQuantity.getFrom()) {
                 String message = String.format("The quantity upper bound (%s) for '%s' is less than its lower bound (%s). This drop will not be loaded.",
-                        boundedQuantity.getTo(), value.getPath()[1], boundedQuantity.getFrom());
-                throw new ObjectMappingException(message);
+                        boundedQuantity.getTo(), value.parent().key(), boundedQuantity.getFrom());
+                throw new SerializationException(amountNode, BoundedIntQuantity.class, message);
             }
         }
 
         double chance = 0;
-        ConfigurationNode chanceNode = value.getNode("chance");
-        if (!chanceNode.isVirtual()) {
+        ConfigurationNode chanceNode = value.node("chance");
+        if (!chanceNode.virtual()) {
             chance = chanceNode.getDouble(Double.NaN);
             if (Double.isNaN(chance)) {
                 String message = String.format("The money reward chance of CustomDrop block '%s' is not a valid number ('%s'). This spawn will not be loaded.",
-                        value.getPath()[1], chanceNode.getValue());
-                throw new ObjectMappingException(message);
+                        value.parent().key(), chanceNode.raw());
+                throw new SerializationException(chanceNode, double.class, message);
             }
         }
 
-        String currency = value.getNode("currency").getString();
-        String message = value.getNode("message").getString();
+        @Nullable ResourceKey currency = value.node("currency").get(ResourceKey.class);
+        @Nullable String message = value.node("message").getString();
         return new MoneyLoot(quantity, currency, chance, message);
     }
 
     @Override
-    public void serialize(@NonNull TypeToken<?> type, @Nullable MoneyLoot obj, @NonNull ConfigurationNode value) {
-        throw new UnsupportedOperationException();
+    public void serialize(Type type, @Nullable MoneyLoot obj, ConfigurationNode value) throws SerializationException {
+        throw new SerializationException("MoneyLoot cannot be serialized");
     }
 }

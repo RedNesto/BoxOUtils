@@ -23,83 +23,79 @@
  */
 package io.github.rednesto.bou.commands;
 
+import net.kyori.adventure.text.Component;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.command.CommandCallable;
+import org.spongepowered.api.command.Command;
+import org.spongepowered.api.command.CommandExecutor;
 import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.command.args.CommandContext;
-import org.spongepowered.api.command.spec.CommandExecutor;
-import org.spongepowered.api.command.spec.CommandSpec;
-import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.DataQuery;
+import org.spongepowered.api.command.exception.CommandException;
+import org.spongepowered.api.command.parameter.CommandContext;
+import org.spongepowered.api.command.parameter.Parameter;
+import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.data.persistence.DataQuery;
 import org.spongepowered.api.data.type.HandTypes;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.inventory.ItemStack;
-import org.spongepowered.api.service.pagination.PaginationService;
-import org.spongepowered.api.text.Text;
 
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static org.spongepowered.api.command.args.GenericArguments.enumValue;
-
 public class BouInspectItemCommand implements CommandExecutor {
 
-    private static Map<DataType, Function<ItemStack, Iterable<Text>>> DATA_COLLECTORS;
+    private static final Map<DataType, Function<ItemStack, Iterable<Component>>> DATA_COLLECTORS;
 
     static {
-        EnumMap<DataType, Function<ItemStack, Iterable<Text>>> collectors = new EnumMap<>(DataType.class);
+        EnumMap<DataType, Function<ItemStack, Iterable<Component>>> collectors = new EnumMap<>(DataType.class);
         collectors.put(DataType.UNSAFE, BouInspectItemCommand::collectUnsafeData);
         collectors.put(DataType.SPONGE, BouInspectItemCommand::collectSpongeData);
         DATA_COLLECTORS = Collections.unmodifiableMap(collectors);
     }
 
+    private static final Parameter.Key<DataType> DATA_TYPE = Parameter.key("data type", DataType.class);
+
     @Override
-    public CommandResult execute(CommandSource src, CommandContext args) {
-        if (!(src instanceof Player)) {
-            src.sendMessage(Text.of("This command must be executed by a player"));
-            return CommandResult.empty();
+    public CommandResult execute(CommandContext context) throws CommandException {
+        Player src = context.cause().first(Player.class)
+                .orElseThrow(() -> new CommandException(Component.text("This command must be executed by a player")));
+        ItemStack stack = src.itemInHand(HandTypes.MAIN_HAND);
+        if (stack.isEmpty()) {
+            throw new CommandException(Component.text("You must hold an item"));
         }
 
-        ItemStack stack = ((Player) src).getItemInHand(HandTypes.MAIN_HAND).orElse(null);
-        if (stack == null) {
-            src.sendMessage(Text.of("You have nothing in your main hand"));
-            return CommandResult.empty();
-        }
-
-        Function<ItemStack, Iterable<Text>> dataCollector = DATA_COLLECTORS.get(args.<DataType>requireOne("data type"));
-        Sponge.getServiceManager().provideUnchecked(PaginationService.class).builder()
-                .title(Text.of("Item in main hand"))
+        Function<ItemStack, Iterable<Component>> dataCollector = DATA_COLLECTORS.get(context.requireOne(DATA_TYPE));
+        Sponge.serviceProvider().paginationService().builder()
+                .title(Component.text("Item in main hand"))
                 .contents(dataCollector.apply(stack))
                 .sendTo(src);
 
         return CommandResult.success();
     }
 
-    private static Iterable<Text> collectUnsafeData(ItemStack stack) {
+    private static Iterable<Component> collectUnsafeData(ItemStack stack) {
         DataContainer dataContainer = stack.toContainer();
-        List<Text> lines = new ArrayList<>();
-        for (Map.Entry<DataQuery, Object> entry : dataContainer.getValues(true).entrySet()) {
+        List<Component> lines = new ArrayList<>();
+        for (Map.Entry<DataQuery, Object> entry : dataContainer.values(true).entrySet()) {
             Object value = entry.getValue();
             if (!(value instanceof Map)) {
                 // Filter out parents, only display leaf nodes
-                lines.add(Text.of(entry.getKey().asString('.'), " = ", value));
+                lines.add(Component.text(entry.getKey().asString('.') + " = " + value));
             }
         }
         return lines;
     }
 
-    private static Iterable<Text> collectSpongeData(ItemStack stack) {
+    private static Iterable<Component> collectSpongeData(ItemStack stack) {
         return stack.getValues().stream()
-                .map(value -> Text.of(value.getKey().getId(), " = ", value.get()))
+                .map(value -> Component.text(value.key().key().value() + " = " + value.get()))
                 .collect(Collectors.toList());
     }
 
-    public static CommandCallable create() {
-        return CommandSpec.builder()
+    public static Command.Parameterized create() {
+        Parameter.Value<DataType> dataTypeParam = Parameter.enumValue(DataType.class).key("data type").build();
+        return Command.builder()
                 .permission("boxoutils.inspect.item")
-                .arguments(enumValue(Text.of("data type"), DataType.class))
+                .addParameter(dataTypeParam)
                 .executor(new BouInspectItemCommand())
                 .build();
     }

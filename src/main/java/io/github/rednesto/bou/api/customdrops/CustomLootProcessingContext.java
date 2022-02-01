@@ -24,17 +24,15 @@
 package io.github.rednesto.bou.api.customdrops;
 
 import com.google.common.base.MoreObjects;
-import org.spongepowered.api.entity.living.player.Player;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
+import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.Event;
-import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.World;
+import org.spongepowered.api.world.server.ServerLocation;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-
-import javax.annotation.Nullable;
 
 public class CustomLootProcessingContext {
 
@@ -44,20 +42,20 @@ public class CustomLootProcessingContext {
     private final Object source;
     private final Cause cause;
     @Nullable
-    private final Player targetPlayer;
+    private final ServerPlayer targetPlayer;
     @Nullable
-    private final Location<World> targetLocation;
+    private final ServerLocation targetLocation;
     @Nullable
-    private final Location<World> experienceSpawnLocation;
+    private final ServerLocation experienceSpawnLocation;
 
     public CustomLootProcessingContext(List<CustomLoot> loots, @Nullable Event event, Object source, Cause cause,
-                                       @Nullable Player targetPlayer, @Nullable Location<World> targetLocation) {
+                                       @Nullable ServerPlayer targetPlayer, @Nullable ServerLocation targetLocation) {
         this(loots, event, source, cause, targetPlayer, targetLocation, targetLocation);
     }
 
     public CustomLootProcessingContext(List<CustomLoot> loots, @Nullable Event event, Object source, Cause cause,
-                                       @Nullable Player targetPlayer, @Nullable Location<World> targetLocation,
-                                       @Nullable Location<World> experienceSpawnLocation) {
+                                       @Nullable ServerPlayer targetPlayer, @Nullable ServerLocation targetLocation,
+                                       @Nullable ServerLocation experienceSpawnLocation) {
         this.loots = Collections.unmodifiableList(loots);
         this.event = event;
         this.source = source;
@@ -85,17 +83,17 @@ public class CustomLootProcessingContext {
     }
 
     @Nullable
-    public Player getTargetPlayer() {
+    public ServerPlayer getTargetPlayer() {
         return targetPlayer;
     }
 
     @Nullable
-    public Location<World> getTargetLocation() {
+    public ServerLocation getTargetLocation() {
         return targetLocation;
     }
 
     @Nullable
-    public Location<World> getExperienceSpawnLocation() {
+    public ServerLocation getExperienceSpawnLocation() {
         return experienceSpawnLocation;
     }
 

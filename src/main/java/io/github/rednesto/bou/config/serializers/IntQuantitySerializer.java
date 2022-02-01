@@ -23,23 +23,23 @@
  */
 package io.github.rednesto.bou.config.serializers;
 
-import com.google.common.reflect.TypeToken;
 import io.github.rednesto.bou.api.quantity.BoundedIntQuantity;
 import io.github.rednesto.bou.api.quantity.FixedIntQuantity;
 import io.github.rednesto.bou.api.quantity.IntQuantity;
-import ninja.leaping.configurate.ConfigurationNode;
-import ninja.leaping.configurate.objectmapping.ObjectMappingException;
-import ninja.leaping.configurate.objectmapping.serialize.TypeSerializer;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.configurate.ConfigurationNode;
+import org.spongepowered.configurate.serialize.SerializationException;
+import org.spongepowered.configurate.serialize.TypeSerializer;
+
+import java.lang.reflect.Type;
 
 public class IntQuantitySerializer implements TypeSerializer<IntQuantity> {
 
     @Override
-    public @Nullable IntQuantity deserialize(@NonNull TypeToken<?> type, @NonNull ConfigurationNode value) throws ObjectMappingException {
-        String stringValue = value.getString();
+    public @Nullable IntQuantity deserialize(Type type, ConfigurationNode value) throws SerializationException {
+        @Nullable String stringValue = value.getString();
         if (stringValue == null) {
-            throw new ObjectMappingException("Could not read value");
+            throw new SerializationException(value, String.class, "Could not read value");
         }
 
         try {
@@ -51,12 +51,12 @@ public class IntQuantitySerializer implements TypeSerializer<IntQuantity> {
         try {
             return BoundedIntQuantity.parse(stringValue);
         } catch (IllegalArgumentException e) {
-            throw new ObjectMappingException("Invalid amount.", e);
+            throw new SerializationException(value, String.class, "Invalid amount.", e);
         }
     }
 
     @Override
-    public void serialize(@NonNull TypeToken<?> type, @Nullable IntQuantity obj, @NonNull ConfigurationNode value) {
-        throw new UnsupportedOperationException();
+    public void serialize(Type type, @Nullable IntQuantity obj, ConfigurationNode value) throws SerializationException {
+        throw new SerializationException("IntQuantity cannot be serialized");
     }
 }

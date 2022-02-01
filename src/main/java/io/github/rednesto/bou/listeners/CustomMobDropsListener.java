@@ -31,27 +31,28 @@ import io.github.rednesto.bou.IdSelector;
 import io.github.rednesto.bou.SpongeConfig;
 import io.github.rednesto.bou.api.customdrops.CustomLoot;
 import io.github.rednesto.bou.api.customdrops.CustomLootProcessingContext;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.ExperienceOrb;
 import org.spongepowered.api.entity.living.Living;
-import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.entity.projectile.Projectile;
-import org.spongepowered.api.entity.projectile.source.ProjectileSource;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.cause.entity.damage.source.EntityDamageSource;
 import org.spongepowered.api.event.cause.entity.damage.source.IndirectEntityDamageSource;
 import org.spongepowered.api.event.entity.DestructEntityEvent;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.event.filter.cause.First;
-import org.spongepowered.api.event.item.inventory.DropItemEvent;
-import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.World;
+import org.spongepowered.api.projectile.source.ProjectileSource;
+import org.spongepowered.api.registry.RegistryTypes;
+import org.spongepowered.api.world.server.ServerLocation;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
-
-import javax.annotation.Nullable;
 
 public class CustomMobDropsListener implements SpongeConfig.ReloadableListener {
 
@@ -62,38 +63,39 @@ public class CustomMobDropsListener implements SpongeConfig.ReloadableListener {
 
     @Listener
     public void onMobDeath(DestructEntityEvent.Death event) {
-        Living targetEntity = event.getTargetEntity();
+        Living targetEntity = event.entity();
         Config.MobsDrops mobsDrops = Config.getMobsDrops();
         if (!mobsDrops.enabled) {
             return;
         }
 
         Map<String, List<CustomLoot>> drops = mobsDrops.drops;
-        List<CustomLoot> loots = idsMappingCache.get(drops, targetEntity.getType().getId());
+        ResourceKey originalKey = RegistryTypes.ENTITY_TYPE.keyFor(Sponge.game(), targetEntity.type());
+        @Nullable List<CustomLoot> loots = idsMappingCache.get(drops, originalKey.formatted());
         if (loots == null) {
             return;
         }
 
-        @Nullable Player player = event.getCause().first(Player.class).orElseGet(() -> {
-            Optional<IndirectEntityDamageSource> maybeIndirectSource = event.getCause().first(IndirectEntityDamageSource.class);
+        @Nullable ServerPlayer player = event.cause().first(ServerPlayer.class).orElseGet(() -> {
+            Optional<IndirectEntityDamageSource> maybeIndirectSource = event.cause().first(IndirectEntityDamageSource.class);
             if (maybeIndirectSource.isPresent()) {
-                Entity indirectSource = maybeIndirectSource.get().getIndirectSource();
-                if (indirectSource instanceof Player) {
-                    return (Player) indirectSource;
+                Entity indirectSource = maybeIndirectSource.get().indirectSource();
+                if (indirectSource instanceof ServerPlayer) {
+                    return (ServerPlayer) indirectSource;
                 }
             }
 
-            Optional<EntityDamageSource> maybeEntitySource = event.getCause().first(EntityDamageSource.class);
+            Optional<EntityDamageSource> maybeEntitySource = event.cause().first(EntityDamageSource.class);
             if (maybeEntitySource.isPresent()) {
-                Entity source = maybeEntitySource.get().getSource();
-                if (source instanceof Player) {
-                    return (Player) source;
+                Entity source = maybeEntitySource.get().source();
+                if (source instanceof ServerPlayer) {
+                    return (ServerPlayer) source;
                 }
 
                 if (source instanceof Projectile) {
-                    ProjectileSource shooter = ((Projectile) source).getShooter();
-                    if (shooter instanceof Player) {
-                        return (Player) shooter;
+                    @Nullable ProjectileSource shooter = ((Projectile) source).shooter().map(Value::get).orElse(null);
+                    if (shooter instanceof ServerPlayer) {
+                        return (ServerPlayer) shooter;
                     }
                 }
             }
@@ -102,29 +104,29 @@ public class CustomMobDropsListener implements SpongeConfig.ReloadableListener {
         });
 
         EntitySnapshot targetEntitySnapshot = targetEntity.createSnapshot();
-        Location<World> targetLocation = targetEntity.getLocation();
-        CustomLootProcessingContext processingContext = new CustomLootProcessingContext(Collections.emptyList(), event, targetEntitySnapshot, event.getCause(), player, targetLocation);
+        ServerLocation targetLocation = targetEntity.serverLocation();
+        CustomLootProcessingContext processingContext = new CustomLootProcessingContext(Collections.emptyList(), event, targetEntitySnapshot, event.cause(), player, targetLocation);
         List<CustomLoot> lootsToUse = CustomDropsProcessor.getLootsToUse(loots, processingContext);
         if (lootsToUse.isEmpty()) {
             return;
         }
 
-        requirementResultsTracker.put(targetEntity.getUniqueId(), lootsToUse);
+        requirementResultsTracker.put(targetEntity.uniqueId(), lootsToUse);
         CustomDropsProcessor.dropLoot(processingContext.withLoots(lootsToUse));
     }
 
     @Listener
-    public void onItemDrop(DropItemEvent.Destruct event, @First Entity entity) {
+    public void onItemDrop(SpawnEntityEvent.Pre event, @First Entity entity) {
         if (!Config.getMobsDrops().enabled) {
             return;
         }
 
-        UUID entityId = entity.getUniqueId();
-        List<CustomLoot> customLoots = requirementResultsTracker.getIfPresent(entityId);
+        UUID entityId = entity.uniqueId();
+        @Nullable List<CustomLoot> customLoots = requirementResultsTracker.getIfPresent(entityId);
         if (customLoots != null) {
             customLoots.forEach(loot -> {
-                Player targetPlayer = event.getCause().first(Player.class).orElse(null);
-                CustomLootProcessingContext context = new CustomLootProcessingContext(Collections.singletonList(loot), event, entity.createSnapshot(), event.getCause(), targetPlayer, entity.getLocation());
+                @Nullable ServerPlayer targetPlayer = event.cause().first(ServerPlayer.class).orElse(null);
+                CustomLootProcessingContext context = new CustomLootProcessingContext(Collections.singletonList(loot), event, entity.createSnapshot(), event.cause(), targetPlayer, entity.serverLocation());
                 CustomDropsProcessor.handleDropItemEvent(event, loot, context);
             });
         }
@@ -137,7 +139,7 @@ public class CustomMobDropsListener implements SpongeConfig.ReloadableListener {
             return;
         }
 
-        List<CustomLoot> customLoot = requirementResultsTracker.getIfPresent(killedEntity.getUniqueId());
+        @Nullable List<CustomLoot> customLoot = requirementResultsTracker.getIfPresent(killedEntity.uniqueId());
         if (customLoot != null) {
             for (CustomLoot loot : customLoot) {
                 if (loot.isExpOverwrite()) {

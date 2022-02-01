@@ -28,8 +28,8 @@ import io.github.rednesto.bou.tests.lootProcessingContext
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import org.spongepowered.api.event.cause.Cause
-import org.spongepowered.api.event.cause.EventContext
+import org.spongepowered.api.event.Cause
+import org.spongepowered.api.event.EventContext
 
 class RequirementsProcessorTests {
 
