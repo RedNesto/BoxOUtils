@@ -8,7 +8,7 @@ plugins {
     id("org.spongepowered.gradle.plugin") version "2.0.1"
     id("org.cadixdev.licenser") version "0.6.1"
 
-    id("org.jetbrains.kotlin.jvm") version "1.5.10"
+    id("org.jetbrains.kotlin.jvm") version "1.6.10"
 }
 
 allprojects {
